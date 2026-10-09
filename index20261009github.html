@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yanqing An</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #111111;
+    --muted: #888888;
+    --link: #111111;
+    --line: #e5e5e5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    transition: border-color 0.15s ease;
+  }
+
+  a:hover {
+    border-bottom-color: var(--text);
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px 100px;
+  }
+
+  /* ===== Header ===== */
+  header {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    margin-bottom: 56px;
+  }
+
+  .avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+  }
+
+  .avatar:hover {
+    filter: grayscale(0%);
+  }
+
+  .intro h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .intro .role {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .intro .bio {
+    font-size: 14.5px;
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13.5px;
+  }
+
+  /* ===== Sections ===== */
+  section {
+    margin-bottom: 52px;
+  }
+
+  section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  /* ===== Publications ===== */
+  .pub-list {
+    list-style: none;
+  }
+
+  .pub-list li {
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .pub-list li:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pub-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+    margin-bottom: 4px;
+    border-bottom: none;
+  }
+
+  .pub-title:hover {
+    border-bottom: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .pub-authors {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .pub-authors .me {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .pub-venue {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ===== Projects ===== */
+  .project-list {
+    list-style: none;
+  }
+
+  .project-item {
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .project-item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .project-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .project-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    border-bottom: none;
+  }
+
+  .project-name:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    border-bottom: none;
+  }
+
+  .project-meta {
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .project-desc {
+    font-size: 13.5px;
+    color: #444;
+    margin-bottom: 6px;
+  }
+
+  .project-tags {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .project-tags span::after {
+    content: " · ";
+    color: #ccc;
+  }
+
+  .project-tags span:last-child::after {
+    content: "";
+  }
+
+  /* ===== Education ===== */
+  .edu-list {
+    list-style: none;
+  }
+
+  .edu-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  .edu-item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .edu-school {
+    color: var(--text);
+  }
+
+  .edu-year {
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    margin-top: 64px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 560px) {
+    .container { padding: 48px 20px 72px; }
+    header { flex-direction: column; gap: 20px; }
+    .avatar { width: 80px; height: 80px; }
+    .intro h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ==================== Header ==================== -->
+  <header>
+    <img class="avatar"
+         src="img.png"
+         alt="San Zhang">
+
+    <div class="intro">
+      <h1>Yanqing An</h1>
+      <p class="role">PhD Student · Computer Science · University of Science and Technology of China</p>
+      <p class="bio">
+        Research interests: Legal intelligence, user profiling, data mining. Currently working on long-context
+        modeling and inference efficiency.
+      </p>
+      <div class="links">
+        <a href="anyq AT mail.ustc.edu.cn">Email</a>
+        <a href="https://scholar.google.com/citations?user=gjj3AZ4AAAAJ&hl=zh-CN&oi=ao" target="_blank" rel="noopener">Scholar</a>
+        <a href="https://github.com/BounceDude?tab=repositories" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://x.com/goonandcasual" target="_blank" rel="noopener">Twitter</a>
+        <a href="javascript:;" target="_blank" rel="noopener">CV</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== Publications ==================== -->
+  <section id="publications">
+    <h2>Selected Publications</h2>
+    <ul class="pub-list">
+
+      <li>
+        <a class="pub-title"
+           href="https://dl.acm.org/doi/abs/10.1145/3447548.3467218"
+           target="_blank" rel="noopener">
+          LawyerPAN: A Proficiency Assessment Network for Trial Lawyers
+        </a>
+        <p class="pub-authors">
+          <span class="me">Yanqing An</span>, Qi Liu, Han Wu, Kai Zhang, Linan Yue, Mingyue Cheng, Hongke Zhao, Enhong Chen
+        </p>
+        <p class="pub-venue">SIGKDD 2021</p>
+      </li>
+
+      <li>
+        <a class="pub-title"
+           href="https://link.springer.com/chapter/10.1007/978-981-97-5779-4_34"
+           target="_blank" rel="noopener">
+          Post-hoc Facts augmented Legal Judgment Prediction
+        </a>
+        <p class="pub-authors">
+          <span class="me">Yanqing An</span>, Linan Yue, Weibo Gao, Kai Zhang, Qi Liu
+        </p>
+        <p class="pub-venue">DASFAA 2024</p>
+      </li>
+
+      <li>
+        <a class="pub-title"
+           href="https://cicai.caai.cn/"
+           target="_blank" rel="noopener">
+          MCTS4LawyerRec: Lawyer Recommendation Using Monte Carlo Tree Search via Litigation Simulation
+        </a>
+        <p class="pub-authors">
+          <span class="me">Yanqing An</span>, et al.
+        </p>
+        <p class="pub-venue">CICAI 2026</p>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- ==================== Projects ==================== -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <ul class="project-list">
+
+      <li class="project-item">
+        <div class="project-header">
+          <a class="project-name"
+             href="https://github.com/BounceDude/LegalAssistant"
+             target="_blank" rel="noopener">
+            LegalAssistant
+          </a>
+          <span class="project-meta">⭐ 0k</span>
+        </div>
+        <p class="project-desc">
+          Legal assistant tools, including functions such as lawyer recommendation, judgment prediction, and similar case search.
+Help consider legal and moral hazard factors at the early stage of starting a business or an idea.
+        </p>
+        <p class="project-tags">
+          <span>PyTorch</span><span>NLP</span><span>Open Source</span>
+        </p>
+      </li>
+
+      <li class="project-item">
+        <div class="project-header">
+          <a class="project-name"
+             href="https://github.com/BounceDude/PBGen"
+             target="_blank" rel="noopener">
+            PBGen
+          </a>
+          <span class="project-meta">⭐ 0</span>
+        </div>
+        <p class="project-desc">
+          AI toolkit for paper generation, with built-in paper structure and writing prompt words.
+        </p>
+        <p class="project-tags">
+          <span>Python</span><span>PLM</span><span>Generation</span>
+        </p>
+      </li>
+
+      <li class="project-item">
+        <div class="project-header">
+          <a class="project-name"
+             href="https://github.com/BounceDude/ProtoSYS"
+             target="_blank" rel="noopener">
+            ProtoSYS
+          </a>
+          <span class="project-meta">⭐ 0</span>
+        </div>
+        <p class="project-desc">
+          Prototype system implementation based on Flask
+It is used for the future implementation and demonstration of scientific research achievements.
+        </p>
+        <p class="project-tags">
+          <span>Flask</span><span>HTML</span><span>Demonstration</span>
+        </p>
+      </li>
+
+      <li class="project-item">
+        <div class="project-header">
+          <a class="project-name"
+             href="https://bouncedude.github.io/test/"
+             target="_blank" rel="noopener">
+            Personal Homepage
+          </a>
+          <span class="project-meta">0+ posts</span>
+        </div>
+        <p class="project-desc">
+
+        </p>
+        <p class="project-tags">
+          <span>Blog</span><span>Writing</span><span>Tutorials</span>
+        </p>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- ==================== Footer ==================== -->
+  <footer>
+    © 2026 Yanqing An · Last updated October 2026
+  </footer>
+
+</div>
+
+</body>
+</html>
