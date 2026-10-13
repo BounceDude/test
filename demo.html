@@ -1,0 +1,1361 @@
+<head>
+    <meta charset="utf-8">
+    <script src="https://code.hcharts.cn/highcharts/highcharts.js"></script>
+    <script src="https://code.hcharts.cn/highcharts/highcharts-more.js"></script>
+    <script src="https://code.hcharts.cn/highcharts/modules/exporting.js"></script>
+    <script src="https://code.hcharts.cn/plugins/zh_cn.js"></script>
+    </head>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --primary: #1e40af;
+    --primary-hover: #1e3a8a;
+    --accent: #7c3aed;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --tag-bg: #eff6ff;
+    --tag-text: #1e40af;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ===== 头部 ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .header .logo::before {
+    content: "⚖️";
+    font-size: 20px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* ===== 输入卡片 ===== */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+
+  .input-card label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: vertical;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+    background: #fff;
+  }
+
+  .input-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    font-size: 14.5px;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: #f3f4f6;
+    color: var(--text);
+  }
+
+  .examples {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .examples span {
+    display: inline-block;
+    margin-right: 12px;
+    cursor: pointer;
+    color: var(--primary);
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.15s ease;
+  }
+
+  .examples span:hover {
+    border-bottom-color: var(--primary);
+  }
+
+  /* ===== 结果区 ===== */
+  .results {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .results.show { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+
+  .result-card h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .result-card h2 .icon {
+    font-size: 18px;
+  }
+
+  /* 概览网格 */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .stat {
+    padding: 16px;
+    background: #fafbfc;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-label {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-value.blue { color: var(--primary); }
+  .stat-value.purple { color: var(--accent); }
+  .stat-value.green { color: var(--success); }
+
+  /* 案由标签 */
+  .charge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .charge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--tag-text);
+    background: var(--tag-bg);
+    border-radius: 20px;
+    border: 1px solid #dbeafe;
+  }
+
+  .charge-tag .num {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ===== 律师卡片 ===== */
+  .lawyer-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .lawyer {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.15s ease;
+  }
+
+  .lawyer:hover {
+    border-color: #c7d2fe;
+    background: #fafbff;
+  }
+
+  .lawyer-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .lawyer-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lawyer-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .lawyer-meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .lawyer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .lawyer-tag {
+    font-size: 12px;
+    padding: 2px 10px;
+    background: #f3f4f6;
+    color: #4b5563;
+    border-radius: 12px;
+  }
+
+  /* 图表容器：必须有高度 */
+  .lawyer-chart {
+    width: 100%;
+    height: 270px;
+    margin-top: 4px;
+  }
+
+  .lawyer-match {
+    font-size: 12.5px;
+    color: var(--success);
+    font-weight: 600;
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+
+  /* ===== 判决 ===== */
+  .verdict {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+    border-left: 4px solid var(--warning);
+    border-radius: 8px;
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  .verdict strong {
+    color: #92400e;
+  }
+
+  .verdict .prob {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    background: #fde68a;
+    color: #92400e;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+
+  /* ===== 相似案件 ===== */
+  .similar-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .similar-case {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.15s ease;
+  }
+
+  .similar-case:hover {
+    border-color: var(--primary);
+    background: #fafbff;
+    transform: translateX(2px);
+  }
+
+  .similar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .similar-title {
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+
+  .similar-sim {
+    font-size: 12px;
+    padding: 2px 8px;
+    background: #ecfdf5;
+    color: var(--success);
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .similar-desc {
+    font-size: 13.5px;
+    color: #4b5563;
+    line-height: 1.6;
+  }
+
+  .similar-meta {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ===== 总结 ===== */
+  .summary {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: #374151;
+  }
+
+  .summary p { margin-bottom: 12px; }
+  .summary p:last-child { margin-bottom: 0; }
+  .summary strong { color: var(--text); font-weight: 600; }
+
+  /* ===== 免责声明 ===== */
+  .disclaimer {
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.65;
+  }
+
+  .disclaimer strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #78350f;
+  }
+
+  /* ===== 加载 ===== */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .loading.show { display: block; }
+
+  .spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e5e7eb;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 600px) {
+    .page { padding: 28px 16px 60px; }
+    .header h1 { font-size: 24px; }
+    .result-card { padding: 18px; }
+    .lawyer { flex-direction: column; }
+    .lawyer-avatar { width: 44px; height: 244px; font-size: 17px; }
+    .overview-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+<div class="page">
+
+  <!-- ==================== 头部 ==================== -->
+  <div class="header">
+    <div class="logo">LEGAL ETHICS ASSISTANT</div>
+    <h1>法律伦理助手</h1>
+    <p>输入案件事实，自动分析当事人、案由、律师推荐与判决预测</p>
+  </div>
+
+  <!-- ==================== 输入 ==================== -->
+  <div class="input-card">
+    <label for="facts">案件事实描述</label>
+    <textarea id="facts" placeholder="例如：张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物……"></textarea>
+
+    <div class="input-actions">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">开始分析</button>
+      <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+    </div>
+
+    <div class="examples">
+      示例：
+      <span onclick="loadExample(0)">婚外情纠纷</span>
+      <span onclick="loadExample(1)">民间借贷</span>
+      <span onclick="loadExample(2)">劳动争议</span>
+    </div>
+  </div>
+
+  <!-- ==================== 加载 ==================== -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>正在分析案件事实…</div>
+  </div>
+
+  <!-- ==================== 结果 ==================== -->
+  <div class="results" id="results">
+
+    <!-- 概览 -->
+    <div class="result-card">
+      <h2><span class="icon">📋</span>案件概览</h2>
+      <div class="overview-grid">
+        <div class="stat">
+          <div class="stat-label">原告人数</div>
+          <div class="stat-value blue" id="plaintiffCount">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">被告人数</div>
+          <div class="stat-value purple" id="defendantCount">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">案由数量</div>
+          <div class="stat-value green" id="chargeCount">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">案件类型</div>
+          <div class="stat-value" id="caseType" style="font-size:16px;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 案由 -->
+    <div class="result-card">
+      <h2><span class="icon">⚖️</span>案由</h2>
+      <div class="charge-list" id="chargeList"></div>
+    </div>
+
+    <!-- 律师推荐（含 Highcharts） -->
+    <div class="result-card">
+      <h2><span class="icon">👨‍⚖️</span>推荐律师</h2>
+      <div class="lawyer-list" id="lawyerList"></div>
+    </div>
+
+    <!-- 判决 -->
+    <div class="result-card">
+      <h2><span class="icon">📊</span>可能判决结果</h2>
+      <div class="verdict" id="verdictBox"></div>
+    </div>
+
+    <!-- 相似案件 -->
+    <div class="result-card">
+      <h2><span class="icon">🔍</span>相似案件</h2>
+      <div class="similar-list" id="similarList"></div>
+    </div>
+
+    <!-- 总结 -->
+    <div class="result-card">
+      <h2><span class="icon">📝</span>案件总结</h2>
+      <div class="summary" id="summaryBox"></div>
+    </div>
+
+    <!-- 免责声明 -->
+    <div class="disclaimer">
+      <strong>⚠️ 免责声明</strong>
+      本页面为前端演示原型，所有分析结果均由模拟逻辑生成，<strong>不构成任何法律意见</strong>。真实案件请咨询执业律师，并以法院判决为准。
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   模拟知识库
+   ============================================================ */
+
+const CHARGE_KB = [
+  {
+    keywords: ['已婚', '婚外情', '亲密关系', '出轨', '第三者', '同居'],
+    charge: '婚姻家庭纠纷',
+    caseType: '民事',
+    plaintiff: ['配偶（无过错方）'],
+    defendant: ['过错方', '第三者'],
+  },
+  {
+    keywords: ['赠与', '礼物', '转账', '财物'],
+    charge: '赠与合同纠纷',
+    caseType: '民事',
+    plaintiff: ['赠与人', '配偶'],
+    defendant: ['受赠人'],
+  },
+  {
+    keywords: ['借款', '欠款', '借钱', '利息', '还款'],
+    charge: '民间借贷纠纷',
+    caseType: '民事',
+    plaintiff: ['出借人'],
+    defendant: ['借款人'],
+  },
+  {
+    keywords: ['劳动', '辞退', '加班', '工资', '社保', '工伤'],
+    charge: '劳动争议',
+    caseType: '民事',
+    plaintiff: ['劳动者'],
+    defendant: ['用人单位'],
+  },
+  {
+    keywords: ['诈骗', '欺骗', '虚构', '非法占有'],
+    charge: '诈骗罪',
+    caseType: '刑事',
+    plaintiff: ['公诉机关'],
+    defendant: ['被告人'],
+  },
+  {
+    keywords: ['重婚', '登记结婚', '以夫妻名义'],
+    charge: '重婚罪',
+    caseType: '刑事',
+    plaintiff: ['自诉人', '公诉机关'],
+    defendant: ['被告人'],
+  },
+  {
+    keywords: ['名誉', '诽谤', '侮辱', '造谣'],
+    charge: '名誉权纠纷',
+    caseType: '民事',
+    plaintiff: ['被侵权人'],
+    defendant: ['侵权人'],
+  },
+  {
+    keywords: ['合同', '违约', '协议'],
+    charge: '合同纠纷',
+    caseType: '民事',
+    plaintiff: ['守约方'],
+    defendant: ['违约方'],
+  },
+];
+
+const LAWYER_KB = [
+  {
+    id: 'L1',
+    name: '王志明',
+    firm: '北京中衡律师事务所',
+    years: 15,
+    tags: ['婚姻家庭', '赠与纠纷', '财产分割'],
+    matchCharges: ['婚姻家庭纠纷', '赠与合同纠纷'],
+    matchScore: 96,
+  },
+  {
+    id: 'L2',
+    name: '李静怡',
+    firm: '上海弘正律师事务所',
+    years: 12,
+    tags: ['婚姻家事', '妇女权益', '损害赔偿'],
+    matchCharges: ['婚姻家庭纠纷', '名誉权纠纷'],
+    matchScore: 92,
+  },
+  {
+    id: 'L3',
+    name: '陈国栋',
+    firm: '广州明理律师事务所',
+    years: 18,
+    tags: ['刑事辩护', '重婚罪', '诈骗罪'],
+    matchCharges: ['重婚罪', '诈骗罪'],
+    matchScore: 88,
+  },
+  {
+    id: 'L4',
+    name: '赵慧敏',
+    firm: '深圳恒信律师事务所',
+    years: 10,
+    tags: ['劳动争议', '合同纠纷'],
+    matchCharges: ['劳动争议', '合同纠纷'],
+    matchScore: 85,
+  },
+];
+
+const SIMILAR_CASE_KB = [
+  {
+    title: '张某诉李某、王某赠与合同纠纷案',
+    desc: '丈夫婚内与第三者保持关系，并多次赠与财物。妻子起诉要求确认赠与无效并返还财产。',
+    court: '北京市朝阳区人民法院',
+    year: 2022,
+    result: '判决赠与行为无效，第三者返还财产',
+    charges: ['婚姻家庭纠纷', '赠与合同纠纷'],
+    similarity: 94,
+  },
+  {
+    title: '刘某诉陈某离婚损害赔偿案',
+    desc: '配偶一方婚内与他人同居，无过错方起诉离婚并主张损害赔偿。',
+    court: '上海市浦东新区人民法院',
+    year: 2021,
+    result: '准予离婚，过错方支付损害赔偿金',
+    charges: ['婚姻家庭纠纷'],
+    similarity: 89,
+  },
+  {
+    title: '王某重婚罪自诉案',
+    desc: '被告人在已婚情况下与他人以夫妻名义共同生活，被自诉人起诉重婚罪。',
+    court: '广东省深圳市南山区人民法院',
+    year: 2020,
+    result: '判处有期徒刑一年，缓刑一年',
+    charges: ['重婚罪'],
+    similarity: 82,
+  },
+  {
+    title: '李某诉张某民间借贷纠纷案',
+    desc: '出借人向借款人出借款项，到期后借款人拒不归还。',
+    court: '浙江省杭州市西湖区人民法院',
+    year: 2023,
+    result: '判决借款人偿还本金及利息',
+    charges: ['民间借贷纠纷'],
+    similarity: 45,
+  },
+];
+
+/* ============================================================
+   分析入口
+   ============================================================ */
+function analyze() {
+  const text = document.getElementById('facts').value.trim();
+  if (!text) {
+    alert('请先输入案件事实描述');
+    return;
+  }
+
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('analyzeBtn').disabled = true;
+
+  setTimeout(() => {
+    const result = infer(text);
+
+    // 1. 先渲染 HTML（此时 results 仍隐藏）
+    render(result);
+
+    // 2. 再显示结果区
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('results').classList.add('show');
+
+    // 3. 等浏览器完成布局后，初始化 Highcharts
+    //    用 setTimeout 50ms 比 requestAnimationFrame 更保险
+    setTimeout(() => {
+      initCharts(result.lawyers);
+    }, 50);
+
+    document.getElementById('analyzeBtn').disabled = false;
+  }, 800);
+}
+
+/* ============================================================
+   推理
+   ============================================================ */
+function infer(text) {
+  const matchedCharges = [];
+  const plaintiffSet = new Set();
+  const defendantSet = new Set();
+  let caseType = '民事';
+
+  CHARGE_KB.forEach(item => {
+    const hit = item.keywords.some(kw => text.includes(kw));
+    if (hit) {
+      matchedCharges.push(item.charge);
+      item.plaintiff.forEach(p => plaintiffSet.add(p));
+      item.defendant.forEach(d => defendantSet.add(d));
+      if (item.caseType === '刑事') caseType = '刑事';
+    }
+  });
+
+  if (matchedCharges.length === 0) {
+    matchedCharges.push('其他民事纠纷');
+    plaintiffSet.add('原告');
+    defendantSet.add('被告');
+  }
+
+  const lawyers = LAWYER_KB
+    .map(l => {
+      const overlap = l.matchCharges.filter(c => matchedCharges.includes(c)).length;
+      return {
+        ...l,
+        score: overlap > 0 ? l.matchScore : Math.max(40, l.matchScore - 40),
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  const similarCases = SIMILAR_CASE_KB
+    .map(c => {
+      const overlap = c.charges.filter(ch => matchedCharges.includes(ch)).length;
+      return {
+        ...c,
+        sim: overlap > 0 ? c.similarity : Math.max(20, c.similarity - 50),
+      };
+    })
+    .sort((a, b) => b.sim - a.sim)
+    .slice(0, 3);
+
+  const verdict = predictVerdict(matchedCharges, caseType);
+
+  const summary = generateSummary({
+    matchedCharges, caseType,
+    plaintiffs: [...plaintiffSet],
+    defendants: [...defendantSet],
+    verdict, similarCases,
+  });
+
+  return {
+    plaintiffCount: plaintiffSet.size,
+    defendantCount: defendantSet.size,
+    charges: matchedCharges,
+    caseType,
+    lawyers,
+    verdict,
+    similarCases,
+    summary,
+  };
+}
+
+function predictVerdict(charges, caseType) {
+  const hasMarriage = charges.includes('婚姻家庭纠纷');
+  const hasGift = charges.includes('赠与合同纠纷');
+  const hasBigamy = charges.includes('重婚罪');
+  const hasFraud = charges.includes('诈骗罪');
+  const hasLabor = charges.includes('劳动争议');
+
+  if (hasBigamy) {
+    return {
+      text: '<strong>可能构成重婚罪。</strong>若被告人在已婚情况下与他人以夫妻名义共同生活，可能被判处二年以下有期徒刑或拘役。实践中，若取得自诉人谅解、认罪认罚，可能适用缓刑。',
+      prob: '刑期预测：拘役 ~ 2 年',
+    };
+  }
+  if (hasFraud) {
+    return {
+      text: '<strong>可能构成诈骗罪。</strong>需结合涉案金额判断量刑档次。数额较大的，处三年以下有期徒刑；数额巨大的，处三年以上十年以下有期徒刑。',
+      prob: '刑期预测：视金额而定',
+    };
+  }
+  if (hasMarriage && hasGift) {
+    return {
+      text: '<strong>赠与行为可能被认定无效。</strong>夫妻一方在婚姻存续期间，未经配偶同意，将共同财产赠与第三者，配偶有权请求确认赠与无效并返还财产。同时，无过错方可主张离婚损害赔偿。',
+      prob: '支持返还概率：较高',
+    };
+  }
+  if (hasMarriage) {
+    return {
+      text: '<strong>可能支持离婚及损害赔偿。</strong>若一方婚内与他人同居，无过错方起诉离婚的，法院一般准予离婚，并可支持精神损害赔偿。',
+      prob: '支持离婚概率：较高',
+    };
+  }
+  if (hasLabor) {
+    return {
+      text: '<strong>劳动争议需先经仲裁。</strong>若用人单位违法解除劳动合同，劳动者可主张继续履行或要求支付赔偿金（2N）。',
+      prob: '支持赔偿概率：中等',
+    };
+  }
+  return {
+    text: '<strong>案件结果取决于具体证据。</strong>建议补充合同、转账记录、聊天记录等关键证据，由律师评估胜诉可能性。',
+    prob: '需进一步评估',
+  };
+}
+
+function generateSummary(ctx) {
+  const { matchedCharges, caseType, plaintiffs, defendants, verdict, similarCases } = ctx;
+  const chargeStr = matchedCharges.join('、');
+  const plaintiffStr = plaintiffs.join('、') || '原告';
+  const defendantStr = defendants.join('、') || '被告';
+
+  return `
+    <p>本案属于<strong>${caseType}案件</strong>，涉及案由 <strong>${chargeStr}</strong>（共 ${matchedCharges.length} 项）。</p>
+    <p>根据事实描述，可能的<strong>原告方</strong>为：${plaintiffStr}；可能的<strong>被告方</strong>为：${defendantStr}。</p>
+    <p><strong>判决倾向：</strong>${verdict.text.replace(/<[^>]+>/g, '')}</p>
+    <p><strong>参考依据：</strong>与本案相似度最高的案件为「${similarCases[0]?.title || '—'}」，该案判决结果为：${similarCases[0]?.result || '—'}。</p>
+    <p><strong>建议：</strong>建议当事人尽快固定证据（聊天记录、转账凭证、证人证言等），并咨询专业律师评估诉讼策略。</p>
+  `;
+}
+
+/* ============================================================
+   渲染（只负责 HTML，不初始化图表）
+   ============================================================ */
+function render(r) {
+  document.getElementById('plaintiffCount').textContent = r.plaintiffCount + ' 人';
+  document.getElementById('defendantCount').textContent = r.defendantCount + ' 人';
+  document.getElementById('chargeCount').textContent = r.charges.length + ' 项';
+  document.getElementById('caseType').textContent = r.caseType;
+
+  document.getElementById('chargeList').innerHTML = r.charges.map((c, i) =>
+    `<span class="charge-tag">${c}<span class="num">#${i + 1}</span></span>`
+  ).join('');
+
+  // 律师卡片（含图表容器）
+  document.getElementById('lawyerList').innerHTML = r.lawyers.map(l => `
+    <div class="lawyer">
+      <div class="lawyer-avatar">${l.name[0]}</div>
+      <div class="lawyer-body">
+        <div class="lawyer-name">${l.name}</div>
+        <div class="lawyer-meta">${l.firm} · 执业 ${l.years} 年</div>
+        <div class="lawyer-tags">
+          ${l.tags.map(t => `<span class="lawyer-tag">${t}</span>`).join('')}
+        </div>
+        <div class="lawyer-chart" id="chart-${l.id}"></div>
+      </div>
+      <div class="lawyer-match">匹配度 ${l.score}%</div>
+    </div>
+  `).join('');
+
+  document.getElementById('verdictBox').innerHTML = `
+    ${r.verdict.text}
+    <span class="prob">${r.verdict.prob}</span>
+  `;
+
+  document.getElementById('similarList').innerHTML = r.similarCases.map(c => `
+    <div class="similar-case">
+      <div class="similar-header">
+        <span class="similar-title">${c.title}</span>
+        <span class="similar-sim">相似度 ${c.sim}%</span>
+      </div>
+      <div class="similar-desc">${c.desc}</div>
+      <div class="similar-meta">${c.court} · ${c.year} · 判决：${c.result}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('summaryBox').innerHTML = r.summary;
+}
+
+/* ============================================================
+   初始化 Highcharts（在结果区显示之后调用）
+   ============================================================ */
+function initCharts(lawyers) {
+  lawyers.forEach(l => {
+    const containerId = `chart-${l.id}`;
+    const container = document.getElementById(containerId);
+
+    if (!container) {
+      console.warn('找不到容器:', containerId);
+      return;
+    }
+
+    // 避免重复初始化
+    if (container.dataset.chartInit === '1') return;
+    container.dataset.chartInit = '1';
+
+    console.log(`${containerId} 高度: ${container.offsetHeight}`);
+
+    var chart = Highcharts.chart(container, {
+        chart: {
+            polar: true,
+            type: 'line',
+            height: 200
+        },
+        title: {
+            text: '',
+            x: -80
+        },
+        pane: {
+            size: '80%'
+        },
+        xAxis: {
+            categories: ['12px', '12px','12px'],
+            tickmarkPlacement: 'on',
+            lineWidth: 0,
+            labels: {
+                formatter: function () {
+                    return this.value
+                },
+                style: {
+                    color: '#000',
+                    fontSize: '12px',
+                    fontWeight: 'normal',//字体加粗样式 normal bold
+                    fontFamily: '微软雅黑'
+                }
+            },
+        },
+        yAxis: {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0
+        },
+        tooltip: {
+            shared: true,
+            pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.4f}</b><br/>'
+        },
+        legend: {
+            align: 'right',
+            verticalAlign: 'top',
+            y: 70,
+            layout: 'vertical'
+        },
+        series: [{
+            name: '能力值',
+            data: [0.3, 0.4, 0.3],
+            pointPlacement: 'on'
+        }],
+        exporting: {
+            enabled: false
+        },
+        credits: {
+            enabled: false
+        },
+    });
+    {#Highcharts.chart(container, {#}
+    {#  chart: {#}
+    {#    type: 'bar',#}
+    {#    height: 70,#}
+    {#    backgroundColor: 'transparent',#}
+    {#    margin: [4, 4, 4, 4],#}
+    {#    spacing: [0, 0, 0, 0],#}
+    {#  },#}
+    {#  title: { text: null },#}
+    {#  xAxis: {#}
+    {#    categories: ['匹配度'],#}
+    {#    visible: false,#}
+    {#  },#}
+    {#  yAxis: {#}
+    {#    max: 100,#}
+    {#    visible: false,#}
+    {#  },#}
+    {#  legend: { enabled: false },#}
+    {#  credits: { enabled: false },#}
+    {#  tooltip: { enabled: false },#}
+    {#  plotOptions: {#}
+    {#    bar: {#}
+    {#      borderRadius: 4,#}
+    {#      dataLabels: {#}
+    {#        enabled: true,#}
+    {#        format: '{y}%',#}
+    {#        style: { fontSize: '11px', fontWeight: '600', color: '#1e40af' },#}
+    {#      },#}
+    {#    },#}
+    {#  },#}
+    {#  series: [{#}
+    {#    data: [l.score],#}
+    {#    color: '#1e40af',#}
+    {#  }],#}
+    {#});#}
+  });
+}
+
+/* ============================================================
+   辅助功能
+   ============================================================ */
+const EXAMPLES = [
+  '张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物。李四的配偶王五发现后，要求张三返还全部赠与财物，并主张离婚损害赔偿。',
+  '2023年3月，甲向乙借款50万元，约定一年后归还，月息1%。到期后乙多次催讨，甲拒不归还，仅支付了部分利息。',
+  '某公司以"业绩不达标"为由辞退员工张某，未支付任何经济补偿。张某认为公司违法解除劳动合同，要求支付赔偿金。',
+];
+
+function loadExample(i) {
+  document.getElementById('facts').value = EXAMPLES[i];
+}
+
+function clearAll() {
+  document.getElementById('facts').value = '';
+  document.getElementById('results').classList.remove('show');
+}
+</script>
+    
+        <blockquote class="layui-elem-quote">
+
+        <b>【相关技术】</b><br>
+        <hr>
+
+
+<canvas id="cas" width="1200" height="600">浏览器不支持canvas，请更新浏览器后再浏览</canvas>
+                    <div style="width:50px;margin:10px auto">
+                        <button id="controlBtn">停止</button>
+                    </div>
+    <style>
+    #cas {
+      display: block;
+      border: 1px solid;
+      margin: auto;
+        background-color: #F2F2F2;
+    }
+  </style>
+    <script>
+  var canvas = document.getElementById("cas"),
+      ctx = canvas.getContext("2d"),
+      vpx = canvas.width / 2,
+      vpy = canvas.height / 2,
+      Radius = 150,
+      balls = [],
+      angleX = Math.PI / 100,
+      angleY = Math.PI / 100;
+ctx.save();
+
+
+  window.addEventListener("mousemove", function(event) {
+    var x = event.clientX - canvas.offsetLeft - vpx - document.body.scrollLeft - document.documentElement.scrollLeft;
+    var y = event.clientY - canvas.offsetTop - vpy - document.body.scrollTop - document.documentElement.scrollTop;
+    angleY = -x * 0.0001;
+    angleX = -y * 0.0001;
+  });
+
+  var Animation = function() {
+    this.init();
+  };
+  Animation.prototype = {
+    isrunning: false,
+    init: function() {
+      balls = [];
+      papers = ["LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP"];
+        relations = [[1], [], [], [], [1], [], [], [], [1,2, 3], [], [], [], [1], [], [], [], [2]];
+      var num = 500;
+      for (var i = 0; i <= num; i++) {
+        var k = -1 + (2 * (i + 1) - 1) / num;
+        var a = Math.acos(k);
+        var b = a * Math.sqrt(num * Math.PI);
+        var x = Radius * Math.sin(a) * Math.cos(b);
+        var y = Radius * Math.sin(a) * Math.sin(b);
+        var z = Radius * Math.cos(a);
+        if (i < papers.length){
+            var t = papers[i];
+        var ref = relations[i];
+        }
+        else {
+            var t = " ";
+        var ref = null;
+        }
+        var b = new ball(x, y, z, 1.5, t, ref);
+        balls.push(b);
+        b.paint();
+      }
+    },
+    start: function() {
+      this.isrunning = true;
+      animate();
+    },
+    stop: function() {
+      this.isrunning = false;
+    }
+  }
+
+  function drawArrow(ctx, fromX, fromY, toX, toY, theta, headlen, width, color) {
+  theta = typeof theta != 'undefined' ? theta : 30;
+  headlen = typeof headlen != 'undefined' ? headlen : 10;
+  width = typeof width != 'undefined' ? width : 1;
+  color = typeof color != 'undefined' ? color : '#000';
+
+  const angle = Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI;
+  const angle1 = (angle + theta) * Math.PI / 180;
+  const angle2 = (angle - theta) * Math.PI / 180;
+  const topX = headlen * Math.cos(angle1);
+  const topY = headlen * Math.sin(angle1);
+  const botX = headlen * Math.cos(angle2);
+  const botY = headlen * Math.sin(angle2);
+
+  ctx.save();
+  ctx.beginPath();
+
+  // 画直线
+  ctx.moveTo(fromX, fromY);
+  ctx.lineTo(toX, toY);
+    // 画箭头头部
+  ctx.moveTo(toX + topX, toY + topY);
+  ctx.lineTo(toX, toY);
+  ctx.lineTo(toX + botX, toY + botY);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+  ctx.restore();
+}
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    rotateX();
+    rotateY();
+    balls.sort(function(a, b) {
+      return b.z - a.z;
+    })
+    for (var i = 0; i < balls.length; i++) {
+      balls[i].paint();
+    }
+
+
+
+
+// 使用
+ctx.beginPath();
+drawArrow(ctx, 50, 510, 50, 330, 30, 20, 5, '#8b8b8b');
+ctx.stroke();
+ctx.beginPath();
+drawArrow(ctx, 50, 270, 50, 90, 30, 20, 5, '#8b8b8b');
+ctx.stroke();
+ctx.strokeStyle = '#000000';ctx.lineWidth = 1
+    ctx.strokeRect(10, 30, 100, 50);
+    ctx.fillStyle = 'black'
+ctx.fillText("研究目标", 20, 60);
+ctx.strokeStyle = '#000000';ctx.lineWidth = 1
+    ctx.strokeRect(10, 270, 100, 50);
+    ctx.fillStyle = 'black'
+ctx.fillText("理论方法", 20, 300);
+ctx.strokeStyle = '#000000';ctx.lineWidth = 1
+    ctx.strokeRect(10, 510, 100, 50);
+    ctx.fillStyle = 'black'
+ctx.fillText("研究主题", 20, 540);
+              ctx.fillStyle = '#FFE699'
+ctx.fillRect(200, 10, 800, 50)
+ctx.font = '20px Arial';
+ctx.fillStyle = 'black'
+ctx.fillText("科技向善，推动社会发展，维护社会长治久安", 450, 50);
+ctx.fillStyle = '#B4C7E7'
+ctx.fillRect(150, 170, 200, 50)
+        ctx.fillStyle = 'black'
+ctx.fillText("律师属性表示", 200, 200);
+
+
+ctx.fillStyle = '#B4C7E7'
+ctx.fillRect(850, 170, 200, 50)
+
+ctx.fillStyle = '#B4C7E7'
+ctx.fillRect(150, 370, 200, 50)
+        ctx.fillStyle = 'black'
+ctx.fillText("表示学习方法", 900, 200);
+
+ctx.fillStyle = '#B4C7E7'
+ctx.fillRect(850, 370, 200, 50)
+        ctx.fillStyle = 'black'
+ctx.fillText("关联关系", 900, 400);
+ctx.fillStyle = 'red'
+ctx.fillRect(250, 510, 700, 50)
+ctx.fillStyle = 'black'
+ctx.fillText("面向司法智能服务的用户建模方法研究与应用", 400, 550);        ctx.fillStyle = 'black'
+ctx.fillText("案件属性表示", 200, 400);
+ctx.restore();
+    if (animation.isrunning) {
+      if ("requestAnimationFrame" in window) {
+        requestAnimationFrame(animate);
+      }
+      else if ("webkitRequestAnimationFrame" in window) {
+        webkitRequestAnimationFrame(animate);
+      }
+      else if ("msRequestAnimationFrame" in window) {
+        msRequestAnimationFrame(animate);
+      }
+      else if ("mozRequestAnimationFrame" in window) {
+        mozRequestAnimationFrame(animate);
+      }
+    }
+  }
+
+  function rotateX() {
+    var cos = Math.cos(angleX);
+    var sin = Math.sin(angleX);
+    for (var i = 0; i < balls.length; i++) {
+      var y1 = balls[i].y * cos - balls[i].z * sin;
+      var z1 = balls[i].z * cos + balls[i].y * sin;
+      balls[i].y = y1;
+      balls[i].z = z1;
+    }
+  }
+
+  function rotateY() {
+    var cos = Math.cos(angleY);
+    var sin = Math.sin(angleY);
+    for (var i = 0; i < balls.length; i++) {
+      var x1 = balls[i].x * cos - balls[i].z * sin;
+      var z1 = balls[i].z * cos + balls[i].x * sin;
+      balls[i].x = x1;
+      balls[i].z = z1;
+    }
+  }
+
+  var ball = function(x, y, z, r, text, ref) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.r = r;
+    this.width = 2 * r;
+    this.t = text;
+    this.ref = ref;
+  }
+
+  ball.prototype = {
+    paint: function() {
+      var fl = 450 //焦距
+      ctx.save();
+      ctx.beginPath();
+      var scale = fl / (fl - this.z);
+      var alpha = (this.z + Radius) / (2 * Radius);
+      ctx.arc(vpx + this.x, vpy + this.y, this.r * scale, 0, 2 * Math.PI, true);
+      ctx.fillStyle = "rgba(190, 46, 202," + (alpha + 0.5) + ")"
+
+      ctx.fill();
+      ctx.restore();
+      ctx.font = '16px Arial';
+ctx.fillStyle = 'black'
+        ctx.fillText(this.t, vpx + this.x, vpy + this.y);
+if(this.t!==" "){
+{#alert(this.ref)#}
+    if (this.ref.includes(1)){
+ctx.beginPath();          // 开启新路径
+ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
+ctx.lineTo(200, 200);     // 终点
+                    ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 0.2;
+ctx.stroke();             // 描边
+        };
+    if (this.ref.includes(2)){
+ctx.beginPath();          // 开启新路径
+ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
+ctx.lineTo(200, 400);     // 终点
+                    ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 0.2;
+ctx.stroke();             // 描边
+        };if (this.ref.includes(3)){
+ctx.beginPath();          // 开启新路径
+ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
+ctx.lineTo(900, 200);     // 终点
+                    ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 0.2;
+ctx.stroke();             // 描边
+        };if (this.ref.includes(4)){
+ctx.beginPath();          // 开启新路径
+ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
+ctx.lineTo(900, 400);     // 终点
+                    ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 0.2;
+ctx.stroke();             // 描边
+        };
+}
+        ctx.restore();
+
+
+    }
+  }
+
+  var animation = new Animation();
+  animation.start();
+
+  document.getElementById("controlBtn").onclick = function() {
+    this.innerText === "开始" ? this.innerText = "停止" : this.innerText = "开始";
+    this.innerText === "开始" ? animation.stop() : animation.start();
+    ;
+  }
+</script>
+</blockquote>
