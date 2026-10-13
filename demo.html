@@ -1,10 +1,10 @@
+<html>
 <head>
     <meta charset="utf-8">
     <script src="https://code.hcharts.cn/highcharts/highcharts.js"></script>
     <script src="https://code.hcharts.cn/highcharts/highcharts-more.js"></script>
     <script src="https://code.hcharts.cn/highcharts/modules/exporting.js"></script>
     <script src="https://code.hcharts.cn/plugins/zh_cn.js"></script>
-    </head>
 <style>
   :root {
     --bg: #f6f7f9;
@@ -497,6 +497,8 @@
     .overview-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
+</head>
+<body>
 <div class="page">
 
   <!-- ==================== 头部 ==================== -->
@@ -1021,41 +1023,7 @@ function initCharts(lawyers) {
             enabled: false
         },
     });
-    {#Highcharts.chart(container, {#}
-    {#  chart: {#}
-    {#    type: 'bar',#}
-    {#    height: 70,#}
-    {#    backgroundColor: 'transparent',#}
-    {#    margin: [4, 4, 4, 4],#}
-    {#    spacing: [0, 0, 0, 0],#}
-    {#  },#}
-    {#  title: { text: null },#}
-    {#  xAxis: {#}
-    {#    categories: ['匹配度'],#}
-    {#    visible: false,#}
-    {#  },#}
-    {#  yAxis: {#}
-    {#    max: 100,#}
-    {#    visible: false,#}
-    {#  },#}
-    {#  legend: { enabled: false },#}
-    {#  credits: { enabled: false },#}
-    {#  tooltip: { enabled: false },#}
-    {#  plotOptions: {#}
-    {#    bar: {#}
-    {#      borderRadius: 4,#}
-    {#      dataLabels: {#}
-    {#        enabled: true,#}
-    {#        format: '{y}%',#}
-    {#        style: { fontSize: '11px', fontWeight: '600', color: '#1e40af' },#}
-    {#      },#}
-    {#    },#}
-    {#  },#}
-    {#  series: [{#}
-    {#    data: [l.score],#}
-    {#    color: '#1e40af',#}
-    {#  }],#}
-    {#});#}
+
   });
 }
 
@@ -1359,3 +1327,5 @@ ctx.stroke();             // 描边
   }
 </script>
 </blockquote>
+</body>
+</html>
