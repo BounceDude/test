@@ -1,0 +1,345 @@
+<br><h1>辩护律师</h1>
+    <hr>
+    <blockquote class="layui-elem-quote">
+        <b>【温馨提示】</b><br>
+        <hr>
+        背景故事：这是一个温馨和谐的小镇，一天一位律师来到了这个小镇，小镇开始热闹起来。 然而，热心肠的律师却为这个小镇带来了大麻烦……<br>
+        玩家作为律师受理诉讼官司，为当事人胜诉。<br>
+
+        {#    法官大模型prompt：#}
+        {#    <i>你是一位正直且通情达理的法官。现在发生了一桩案件，{fact}。#}
+        {#    现在，你需要宣布开庭，并描述案件，然后有请原告发言。当原告发言完毕后，再请被告发言。#}
+        {#    被告发言完毕后，再询问原告是否要发言，依次类推，直到原告和被告都发言完毕，你需要根据案件事实和原告与被告的发言内容做出判决，并宣布庭审结束。#}
+        {#    如果有不清楚的问题可以随时询问原告或被告。#}
+        {#    如果案件已经可以明确地得到判决结果，你需要及时做出判决，并宣布庭审结束。</i>#}
+        {#    律师prompt：#}
+        {#    <i>你是一位对你的当事人十分负责的律师。你需要作为{原告/被告}为你的代理人辩护，并回答法官的问题。#}
+        {#    在法官要求你发言之后开始发言。</i>#}
+
+        '案发当日，一名黑衣男子经过河边，水上发现漂浮的酒瓶。。。'
+        '据了解案发前夜你经过了此地，你看到了什么？'
+        '没有什么，只是那晚的月亮格外的圆。'
+        '我该怎么做？'
+        <dd><a href="https://www.lawsdata.com/"><span style="color: #0000FF; ">把手案例</span></a></dd>
+    </blockquote>
+    <form class="layui-form" action="/dialogue/" method="post">
+        <div class="layui-form-item layui-form-text">
+            <input type="text" name="fact" value="{{ data.fact }}">
+            <input type="text" name="plaintiff" value="{{ data.plaintiff }}">
+            <input type="text" name="defendant" value="{{ data.defendant }}">
+            <input type="text" name="judge" value="{{ data.judge }}">
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit lay-filter="demo1" lay-on="test-msg-dark">立即提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+    <script src="/static/jquery-3.7.1.js"></script>
+    <canvas id="canvas_main" width="600" height="400"></canvas>
+    <style type="text/css">
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+    <script>
+        var canvas = document.getElementById('canvas_main');
+        var ctx = canvas.getContext('2d');
+
+
+        function draw_main()
+        {
+            // 添加图片元素
+            const image1 = new Image();
+            image1.src = './main_left.png';
+            image1.onload = function () {
+                ctx.drawImage(image1, 0, 0, 172, 323);
+            };
+
+            // 添加图片元素
+            const image2 = new Image();
+            image2.src = './main_right.png';
+            image2.onload = function () {
+                ctx.drawImage(image2, 450, 0, 148, 323);
+            };
+
+            // 添加文字元素
+            ctx.font = '48px serif';
+            ctx.fillStyle = 'blue';
+            ctx.fillText('辩护律师', 200, 100);
+
+            // 添加图片元素
+            const image_button1 = new Image();
+            image_button1.src = '/static/user_profile_system/development/main_button_click.png';
+            image_button1.onload = function () {
+                ctx.drawImage(image_button1, 200, 150, 200, 50);
+
+                ctx.font = '24px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText('故事模式', 200, 180);
+            };
+
+            const image_button2 = new Image();
+            image_button2.src = '/static/user_profile_system/development/main_button.png';
+            image_button2.onload = function () {
+                ctx.drawImage(image_button2, 200, 200, 200, 50);
+
+                ctx.font = '24px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText('在线模式', 200, 230);
+            };
+
+            const image_button3 = new Image();
+            image_button3.src = '/static/user_profile_system/development/main_button.png';
+            image_button3.onload = function () {
+                ctx.drawImage(image_button3, 200, 250, 200, 50);
+
+                ctx.font = '24px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText('自定义模式', 200, 280);
+            };
+
+            const image_button4 = new Image();
+            image_button4.src = '/static/user_profile_system/development/main_button.png';
+            image_button4.onload = function () {
+                ctx.drawImage(image_button4, 200, 300, 200, 50);
+
+                ctx.font = '24px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText('挑战模式', 200, 330);
+            };
+        };
+
+        function draw_map() {
+            ctx.font = '12px serif';
+            ctx.fillStyle = 'blue';
+            ctx.fillText('返回', 0, 400);
+
+            ctx.beginPath();
+            ctx.arc(100, 75, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+        };
+
+        function draw_game() {
+            ctx.font = '12px serif';
+            ctx.fillStyle = 'blue';
+            ctx.fillText('返回', 0, 400);
+            ctx.fillText('继续', 300, 400);
+
+            ctx.beginPath();
+            ctx.arc(100, 75, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+
+            // 添加图片元素
+            const image1 = new Image();
+            image1.src = './main_left.png';
+            image1.onload = function () {
+                ctx.drawImage(image1, 0, 0, 172, 323);
+            };
+
+            // 添加图片元素
+            const image2 = new Image();
+            image2.src = './main_right.png';
+            image2.onload = function () {
+                ctx.drawImage(image2, 450, 0, 148, 323);
+            };
+
+            // 添加图片元素
+            const image3 = new Image();
+            image3.src = '/static/user_profile_system/development/dialogue_judge.png';
+            image3.onload = function () {
+                ctx.drawImage(image3, 200, 50, 200, 50);
+
+                ctx.font = '12px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText(document.getElementsByName("fact")[0].value, 200, 80);
+            };
+
+            const image4 = new Image();
+            image4.src = '/static/user_profile_system/development/dialogue_plaintiff.png';
+            image4.onload = function () {
+                ctx.drawImage(image4, 200, 150, 200, 50);
+
+                ctx.font = '12px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText(document.getElementsByName("plaintiff")[0].value, 200, 180);
+            };
+
+            const image5 = new Image();
+            image5.src = '/static/user_profile_system/development/dialogue_defendant.png';
+            image5.onload = function () {
+                ctx.drawImage(image5, 200, 200, 200, 50);
+
+                ctx.font = '12px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText(document.getElementsByName("defendant")[0].value, 200, 230);
+            };
+
+            const image6 = new Image();
+            image6.src = '/static/user_profile_system/development/dialogue_player.png';
+            image6.onload = function () {
+                ctx.drawImage(image6, 200, 300, 200, 50);
+
+                ctx.font = '12px serif';
+                ctx.fillStyle = 'black';
+                ctx.fillText(document.getElementsByName("judge")[0].value, 200, 330);
+            };
+        };
+
+        function draw_game_next() {
+            ctx.font = '12px serif';
+            ctx.fillStyle = 'blue';
+            ctx.fillText('返回', 0, 400);
+            ctx.fillText('继续', 300, 400);
+
+            ctx.beginPath();
+            ctx.arc(100, 75, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+
+            // 添加图片元素
+            const image1 = new Image();
+            image1.src = './main_left.png';
+            image1.onload = function () {
+                ctx.drawImage(image1, 0, 0, 172, 323);
+            };
+
+            // 添加图片元素
+            const image2 = new Image();
+            image2.src = './main_right.png';
+            image2.onload = function () {
+                ctx.drawImage(image2, 450, 0, 148, 323);
+            };
+
+
+            $.post('/dialogue_json/', {
+                "fact": document.getElementsByName("fact")[0].value,
+                "plaintiff": document.getElementsByName("plaintiff")[0].value,
+                "defendant": document.getElementsByName("defendant")[0].value,
+                "judge": document.getElementsByName("judge")[0].value,
+            }, function(data) {
+
+
+                document.getElementsByName("fact")[0].value = data.fact
+                document.getElementsByName("plaintiff")[0].value = data.plaintiff
+                document.getElementsByName("defendant")[0].value = data.defendant
+                document.getElementsByName("judge")[0].value = data.judge
+
+
+                // 添加图片元素
+                const image3 = new Image();
+                image3.src = '/static/user_profile_system/development/dialogue_judge.png';
+                image3.onload = function () {
+                    ctx.drawImage(image3, 200, 50, 200, 50);
+
+                    ctx.font = '12px serif';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(document.getElementsByName("fact")[0].value, 200, 80);
+                };
+
+                const image4 = new Image();
+                image4.src = '/static/user_profile_system/development/dialogue_plaintiff.png';
+                image4.onload = function () {
+                    ctx.drawImage(image4, 200, 150, 200, 50);
+
+                    ctx.font = '12px serif';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(document.getElementsByName("plaintiff")[0].value, 200, 180);
+                };
+
+                const image5 = new Image();
+                image5.src = '/static/user_profile_system/development/dialogue_defendant.png';
+                image5.onload = function () {
+                    ctx.drawImage(image5, 200, 200, 200, 50);
+
+                    ctx.font = '12px serif';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(document.getElementsByName("defendant")[0].value, 200, 230);
+                };
+
+                const image6 = new Image();
+                image6.src = '/static/user_profile_system/development/dialogue_player.png';
+                image6.onload = function () {
+                    ctx.drawImage(image6, 200, 300, 200, 50);
+
+                    ctx.font = '12px serif';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(document.getElementsByName("judge")[0].value, 200, 330);
+                };
+            }, 'json');
+        };
+
+        // 监听Canvas的点击事件
+        canvas.addEventListener('click', function (event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left; // 将点击位置的坐标转换为相对于Canvas的坐标
+            const y = event.clientY - rect.top;
+            if (x >= 200 && x <= 350 && y >= 150 && y <= 200) {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                // 在这里处理点击事件，例如高亮显示圆形或执行其他操作
+                draw_map();
+            }
+        });
+
+        canvas.addEventListener('click', function (event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left; // 将点击位置的坐标转换为相对于Canvas的坐标
+            const y = event.clientY - rect.top;
+            if (x >= 0 && x <= 24 && y >= 388 && y <= 400) {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                // 在这里处理点击事件，例如高亮显示圆形或执行其他操作
+                draw_main();
+            }
+        });
+
+        canvas.addEventListener('click', function (event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left; // 将点击位置的坐标转换为相对于Canvas的坐标
+            const y = event.clientY - rect.top;
+            if (x >= 50 && x <= 150 && y >= 25 && y <= 125) {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                // 在这里处理点击事件，例如高亮显示圆形或执行其他操作
+                draw_game();
+            }
+        });
+
+        canvas.addEventListener('click', function (event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left; // 将点击位置的坐标转换为相对于Canvas的坐标
+            const y = event.clientY - rect.top;
+            if (x >= 300 && x <= 324 && y >= 388 && y <= 400) {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                // 在这里处理点击事件，例如高亮显示圆形或执行其他操作
+                draw_game_next();
+            }
+        });
+
+        draw_main();
+
+
+
+    </script>
+   
+    <br><h3>开始</h3>
+    <hr>
+    故事模式 新的开始 存档
+    在线模式
+    自定义模式
+    挑战模式
+    <br><h3>地图</h3>
+    <hr>
+    1.小镇
+    2.法庭
+    3.案发-正义的维护者
+    4.被告
+    <br><h3>游戏</h3>
+    <hr>
+    案情
+    原告
+    被告
+    法官
+    结束
