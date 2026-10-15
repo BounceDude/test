@@ -1,67 +1,1311 @@
-{% extends "discussion/navigator_discussion.html" %}
-{% block content %}
-    <br><h1>Swarm Intelligence based Legal Information Retriever</h1>
-    <hr>
-    <blockquote class="layui-elem-quote">
-        这里是Siblir区，分享提供一些记录相关供大家参考~<br>
-
-        <dd><a href="https://baike.baidu.com/item/%E8%84%9A%E6%9C%AC/1697005"><span style="color: #0000FF; ">类案检索</span></a></dd>
-    </blockquote>
-<br><h3>关键字检索</h3>
-    <hr>
-    <form class="layui-form" action="/Siblir/" method="post">
-        <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label"><i class="layui-icon layui-icon-search"></i></label>
-            <div class="layui-input-block">
-                <textarea placeholder="请输入内容" class="layui-textarea" name="query"></textarea>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <title>Data Mining Visualization Platform</title>
+        <link rel="stylesheet" href="/static/layui/css/layui.css">
+    </head>
+    <body class="layui-layout-body">
+        <div class="loading" style="position: fixed;width: 100%;height: 100%;">Loading</div>
+        <div class="layui-layout layui-layout-admin">
+            <div class="layui-header">
+                <div class="layui-logo">
+                    <a href="/">planet</a>
+                </div>
+                <ul class="layui-nav layui-layout-left">
+                    <!-- 移动端显示 -->
+                    <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
+                        <i class="layui-icon layui-icon-spread-left"></i>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/random_outside/">The Outside</a>
+                        <dl class="layui-nav-child"></dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">Forward</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">异世界の大门</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="/user_profile_system/home/">用户画像与个性化推荐系统</a>
+                            </dd>
+                            <dd>
+                                <a href="/server_management_system/overview/">服务器运维系统</a>
+                            </dd>
+                            <dd>
+                                <a href="/data/">系统备用接口1</a>
+                            </dd>
+                            <dd>
+                                <a href="/cyber_system/overview/">CyberSys</a>
+                            </dd>
+                            <dd>
+                                <a href="/discussion/">Open Review</a>
+                            </dd>
+                            <dd>
+                                <a href="/feedback/">Blind Review</a>
+                            </dd>
+                            <dd>
+                                <a href="/roles/overview/">Roles</a>
+                            </dd>
+                            <dd>
+                                <a href="/weapon/overview/">weapon</a>
+                            </dd>
+                            <dd>
+                                <a href="/world_wide_web/overview/">互联网</a>
+                            </dd>
+                            <dd>
+                                <a href="/_anyq/">http://home.ustc.edu.cn/~anyq/</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">fusion</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="/fusion/">融合区</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/re_/">re-</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/ex-/">ex-</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/co-/">co-</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/information/">信息区</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/breath/">备忘录</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/proto/">原型区</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="/Siblir/">Siblir</a>
+                    </li>
+                </ul>
+                <ul class="layui-nav layui-layout-right">
+                    <li class="layui-nav-item layui-hide layui-show-sm-inline-block">
+                        <a href="javascript:;">
+                            <img src="/static/index/icon-v2.png" class="layui-nav-img">Guest
+                
+                        </a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="/profile/">Profile</a>
+                            </dd>
+                            <dd>
+                                <a href="/settings/">Settings</a>
+                            </dd>
+                            <dd>
+                                <a href="javascript:;">Logout</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
+                        <a href="javascript:;">
+                            <i class="layui-icon layui-icon-more-vertical"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-input-block">
-                <button type="submit" class="layui-btn" lay-submit lay-filter="demo1" lay-on="test-msg-dark">搜索</button>
+            <div class="layui-side layui-bg-cyan">
+                <div class="layui-side-scroll">
+                    <ul class="layui-nav layui-nav-tree">
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/discussion/">讨论区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/life/">生活区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/retrieval/">检索区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/share/">共享区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/terminal/">交互区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/git/">项目区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fortune/">卦象区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/market/">运营区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/weekly/">周报区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/edit/">编辑区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/demonstration/">展示区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/exclusion/">隔离区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/label/">标注区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/meeting/">会议区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/code/">代码区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/check_in/">打卡区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/note/">笔记区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/desktop/">桌面区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/panel/">面板区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/form/">表格区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/comparison/">对比区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/notice/">公告区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/calculation/">计算区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/vision/">视觉区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/language/">语言区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/voice/">语音区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/path/">路径区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_compile/">编译区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/parse/">解析区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/writing/">写作区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/penetration/">渗透区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/large_language_models/">大模型区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/design/">设计区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/schedule/">日程区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/scheme/">进度区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/broadcast/">广电区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/to_do_list/">待办区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/game/">游戏区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/mail/">邮件区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/office/">办公区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/authority/">权限区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fold/">归档区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/inference/">推理区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/homepage/">主页区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/template/">模板区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/review/">评审区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/idea/">想法区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/paper/">文献区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/entrance/">门禁区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/vehicle/">出行区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/person/">个人区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_data/">数据区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/music/">音乐区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/update/">更新区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/suggestion/">建议区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/tips/">提示区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/versus/">竞技区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/decision/">决策区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/poet/">圣贤区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/manuscript/">手稿区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_index/">索引区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/sort/">排序区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/economy/">投资区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/speech/">演讲区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/requirement/">招聘区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/reading/">阅读区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/typing/">打字区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/drawing/">作图区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/separation/">茧房区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/choice/">选配区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/appliance/">家电区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/agent/">代理区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_simulation/">模拟区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/sports/">运动区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/environment/">环境区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/social/">社交区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/secret/">涉密区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/area/">区域区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/community/">社区区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/generation/">生成区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/adaption/">自适应区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/forbiddance/">禁止区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_filter/">过滤区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/contact/">联络区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/connection/">过渡区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/recognition/">认知区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/ability/">能力区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/erase/">擦除区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/press/">压缩区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/emergency/">警报区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/appearance/">外貌区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/knowledge/">知识区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/loop/">循环区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/shooting/">射击区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/innovation/">创新区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/medical/">医疗区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/software/">软件区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/dream/">梦境区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cartoon/">二次元区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/anniversary/">周年区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/discrimination/">辨识区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/rest/">休息区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/psychology/">心理区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/consultant/">咨询区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/death/">死亡区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/expertise/">领域区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/example/">示例区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/party/">组织区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fog/">迷雾区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/eternity/">永恒区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/vocabulary/">词汇区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/time/">时间区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/checkpoint/">检查点</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/hardware/">硬件区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/partner/">伴侣区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/prison/">牢笼区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/home/">家区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/model/">模型区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/god/">古神区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/war/">战争区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/porn/">色情区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/password/">加密区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/punishment/">惩罚区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/violence/">暴力区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/representation/">表示区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/horizon/">视野区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/video/">视频区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/excretion/">排泄区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/plan/">计划区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/test/">测试区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/system/">系统区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/version/">版本区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/confidence/">信任区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/interest/">兴趣区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/chat/">聊天区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/verify/">校对区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/modify/">修订区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/continuous/">持续区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cover/">封面区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/dynamics/">动力区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/network/">网络区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/seal/">封印区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/transfer/">转型区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/drugs/">毒品区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/memorial/">纪念区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/significance/">意义区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/training/">培养区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_research/">科研区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/conflict/">冲突区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/reality/">现实区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/error/">错误区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/adjustment/">调整区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/conference/">会议区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_assistant/">帮助区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/pick_up/">领取区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/novel/">小说区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/rush/">冲刺区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/have_fun/">顺利区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/abroad/">国外区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fuzzy/">模糊区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/scale/">规模区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/storage/">存储区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_question/">问题区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/inner/">内部区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/warm/">暖区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/blank/">空白区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/feeling/">心情区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/auto/">自动区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/organize/">筹办区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/opposite/">反面区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/argue/">争吵区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/debug/">调试区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/regret/">忏悔区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/direction/">方向区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/search/">搜索区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/buffer/">缓冲区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/vagrancy/">流浪区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/function/">功能区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_exit/">退出区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/repeat/">重复区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/definition/">定义区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/book/">书籍区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/waiting/">等待区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/things/">意象区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/gambling/">赌博区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/extension/">延伸区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/carnival/">嘉年华区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/emotion/">情感区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/framework/">框架区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/context/">情境区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/scenery/">风景区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/hyper/">终极区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/explanation/">解释区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_profile/">头像区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/circumstance/">情况区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/communication/">交流区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/evolution/">进化区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/goods/">商品区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/exchange/">兑换区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/politics/">政治区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/public/">公共区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/recycle/">回收区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/pour/">树洞区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/suicide/">自杀区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/change/">改变区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/order/">秩序区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fusion/">融合区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/nn_fusion/">升级神经网络融合区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/learning/">学习区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/offset/">抵消区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/space/">空间区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/technology/">技术区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/culture/">文化区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/forget/">遗忘区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/name/">姓名区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/difficulty/">难度区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/production/">产出区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/document/">文档区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/hell/">地狱区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/netherworld/">阴间区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/shock/">离谱区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/factor/">因素区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/comprehensive/">综合区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/food/">食品区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/sealevel/">海平面区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my/">我的区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/mark/">标记区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/contract/">协议区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/style/">风格区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_query/">查询区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/pirate/">盗版区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/strange/">陌生区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/couple/">一对区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/object/">对象区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/preparation/">准备区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/perspective/">视角区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/library/">库区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/tools/">工具区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/development/">开发区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/domain/">域区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/configuration/">配置区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cloud/">云区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/nexus/">纽带区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/disaster/">天灾区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/unit/">单位区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/structure/">结构区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/close/">亲密区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/story/">故事区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/interesting/">有趣区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/float/">漂浮区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/artificial_intelligence/">人工智能区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/reason/">原因区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/brain/">脑区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/repository/">仓库区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/application/">应用区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/animate/">动画区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/open_source/">开源区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_login/">登录区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/tweet/">推文区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/remote/">远程区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cooking/">烹饪区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/belongings/">归属区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_split/">分割区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/signal/">标志区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/my_verify/">验证区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/organization/">组织区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/banning/">封印区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/prompt/">提示区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/phenomenon/">现象区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/tower/">塔区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/level/">层级区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/run/">运行区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/shift/">快捷区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/ball/">球区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/wall/">墙区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/switch/">开关区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cross/">穿透区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/topology/">拓扑区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/clean/">清理区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/defendant/">防护区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cooperation/">合作区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cyber/">网络区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/civil/">文明区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cong/">葱区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/faith/">信仰区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/center_mind/">至高意志</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/inovation/">创新区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/chess/">棋区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/qian/">下下签</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/sweedze/">骂人区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/whisper/">轻声细语区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/thoughts/">感悟区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/times/">时代区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/nature/">自然</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/history/">历史区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cycle/">循环区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/latest/">新区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/reverse/">反转区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/backup/">备注区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/light/">光</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/copy/">复制区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/university/">宇宙区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/universe/">大学区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/citation/">引用区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/toys/">玩具区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/management/">管理区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/subject/">子系统区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/self-nexus/">自连接区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/shapes/">形状区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/geometry/">几何区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/priority/">优先级区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/festival/">节日</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/courtesy/">爱心区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/zuzong/">祖宗区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/shit/">屎区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/hobby/">爱好区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/bound/">界</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/bond/">bond</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/reopen/">解封区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/animals/">动物区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/doing/">做事区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/qugan/">驱赶区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/cat/">猫区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/position/">位置区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/insignificant/">意义区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/element/">元素区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/task/">任务区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/leave/">回避区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/portable/">便携区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/play/">玩区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/roles/ball/">球</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/delete/">删除区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/place/">地方区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/painting/">漫画区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/game1/">游戏一区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/roles/feelings/">感觉区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/roles/break/">破区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/random/">随机区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/random_outside/">随机区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/skip/">跳转区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/copyrights/">软著区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/fecit/">创作临时区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/maintain/">承担区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/poster/">海报区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/text/">备忘录</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/watermark/">水印区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/chaos/">混乱区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/launch/">运行区</a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a href="/qingqing.cn/">qingqing.cn</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </form>
+            <div class="layui-body">
+                <div id="status" style="padding: 15px;">
+                    <br>
+                    <h1>Swarm Intelligence based Legal Information Retriever</h1>
+                    <hr>
+                    <blockquote class="layui-elem-quote">
+                        这里是Siblir区，分享提供一些记录相关供大家参考~<br>
+                        <dd>
+                            <a href="https://baike.baidu.com/item/%E8%84%9A%E6%9C%AC/1697005">
+                                <span style="color: #0000FF; ">类案检索</span>
+                            </a>
+                        </dd>
+                    </blockquote>
+                    <br>
+                    <h3>关键字检索</h3>
+                    <hr>
+                    <form class="layui-form" action="/Siblir/" method="post">
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">
+                                <i class="layui-icon layui-icon-search"></i>
+                            </label>
+                            <div class="layui-input-block">
+                                <textarea placeholder="请输入内容" class="layui-textarea" name="query"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button type="submit" class="layui-btn" lay-submit lay-filter="demo1" lay-on="test-msg-dark">搜索</button>
+                            </div>
+                        </div>
+                    </form>
+                    <ul id="retrieval_data_list"></ul>
+                    <div id="demo7"></div>
+                    <script src="/static/layui/layui.js" charset="utf-8"></script>
+                    <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
+                    <script>
+                        layui.use(['laypage', 'layer'], function() {
+                            var laypage = layui.laypage
+                              , layer = layui.layer;
 
-    <ul id="retrieval_data_list"></ul>
-    <div id="demo7"></div>
+                            var data = [
+                            '<table><tr><td style="background-color: ' +
+                            '#b723f0' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=cf"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=cf"><span style="font-style: italic;">/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=cf</span></a><br>' + '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=cf"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">cf</span></a><br>' +
+                            '原告计多涛。委托代理人徐进夫，湖北晋梅律师事务所律师。代理权限：代为承认、变更、放弃诉讼请求，参加诉讼，调解，签收法律文书，代为领取标的款。委托代理人张理，湖北晋梅律师事务所律师。代理权限同上。被告陶超兵。委托代理人王仕洲，黄梅镇法律服务所法律工作者。代理权限：参加诉讼，调解，签收法律文书。被告黄梅县昌达汽车运输有限责任公司。负责人：程彩娥，该公司经理。委托代理人石成，黄梅镇法律服务所法律工作者。代理权限：一般代理。原告计多涛诉被告陶超兵、被告黄梅县昌达汽车运输有限公司机动车交通事故责任纠纷一案，本院立案受理后依法组成合议庭公开开庭进行了审理，原、被告双方及委托代理人均到庭参加了诉讼，本案现已审理终结。原告计多涛诉称：2014年6月12日18时许，被告陶超兵驾驶鄂J×××××中型自卸货车由四祖往大河（由北往南）方向行驶，在大河镇义丰村十二组急转弯路段，同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告计多涛负次要责任。因鄂J×××××中型自卸货车所有人为被告黄梅县昌达汽车运输有限公司，故诉诸法律，要求判决上述被告共同赔偿原告住院治疗费、后期治疗费、误工费、护理费、住院伙食补助费、营养费、伤残赔偿金、鉴定费、交通费、精神抚慰金，共计142727.68元（不含诉前垫付），并比照交强险优先赔偿。原告为支持其诉讼主张，向本院提交如下证据：1、原告身份证，拟证明原告身份情况。2、道路交通事故责任认定书，拟证明事故发生的经过及责任划分。3、中国人民解放军第171医院出院小结、诊断证明、医疗费发票、用药清单、病危通知书，拟证明其受伤诊疗情况及医疗费金额。4、住宿费票据，金额710元，拟证明其在九江住院治疗期间产生的住宿费用。5、交通费票据，金额675元。6、原告叔父计道立经营许可证，拟证明其同计道立二人在大河镇共同经营一品轩卤菜店多年。7、被告陶超兵身份证、驾驶证、行车证复印件，拟证明被告陶超兵具有合法驾驶资格及鄂J×××××中型自卸货车所有人为被告黄梅县昌达汽车运输有限公司。8、黄冈博林司法鉴定所意见书及鉴定费发票，拟证明原告构成（9）级伤残，赔偿指数22%。被告陶超兵辩称，对本案的事实无异议，我愿意在法律规定的责任范围内承担相应的责任，原告诉求过高，法庭应依法核实确认，我诉前已为原告垫付了医疗费7万元，我与被告昌达公司系挂靠关系，昌达公司应依法承担连带赔偿责任。被告陶超兵为支持其抗辩主张，向法庭提交如下证据：1、陶超兵驾驶证、行车证，拟证明其具有合法驾驶资格。2、机动车辆保险证，拟证明鄂J×××××中型自卸货车曾投保，但本次事故发生时保险期限已过。被告黄梅县昌达汽车运输有限公司辩称，1、对本案的事实无异议，法庭依法处理。2、原告诉讼请求过高，法庭应依法核实确认，其要求按城镇居民标准赔偿证据不足。3、被告陶超兵与被告黄梅县昌达汽车运输有限责任公司双方系挂靠关系，真正的实际车主是被告陶超兵，我公司曾多次要求被告陶超兵购买保险，但陶超兵都没有履行义务，故原告损失应全部由被告陶超兵赔偿，我公司只能在商业险中承担连带赔偿责任。被告黄梅县昌达汽车运输有限公司未提交证据。对原告提交的证据，被告陶超兵对证据3、5、8真实性有异议，对证据6证明目的有异议，对其它证据无异议；被告黄梅县昌达汽车运输有限公司对证据6证明目的有异议，对其它证据无异议；对此本院认为，证据3客观真实，予以确认，证据5交通费数额，本院结合实际酌定，对证据6证明目的，本院将结合实际及其它相关证据予以综合评议，证据8司法鉴定结论，被告陶超兵在本院规定的期限内未申请重新鉴定，予以确认，对其它无异议的证据，予以确认。对被告陶超兵提交的证据，原告及被告黄梅县昌达汽车运输有限公司均无异议，予以确认。此外，本院根据原告申请，调查核实如下证据：1、大河镇派出所、大河镇街道社区居委会书面证明，证明原告同其叔父计道立从2006年起即在大河镇合伙经营卤菜生意至现在。2、证人邹某证言，证明原告同其叔父计道立从2006年起即在大河镇合伙经营卤菜生意，从2009年起二人租赁其房屋经营至现在。3、证人梅某（系邹某邻居）证言，证明内容同上。上述证据原、被告双方质证后均无异议，本院予以确认。经审理查明：2014年6月12日18时许，被告陶超兵驾驶鄂J×××××中型自卸货车由四祖往大河（由北往南）方向行驶，在大河镇义丰村十二组急转弯路段，同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告计多涛负次要责任。另查明如下：一、原告计多涛因本次事故受伤，当天在黄梅县人民医院住院治疗，费用2000元，第二天即转入中国人民解放军171医院住院治疗65天，治疗费计93759.40元，共计住院治疗66天，治疗费用95759.40元。二、黄冈博林司法鉴定所（2014）临法鉴字第703号司法鉴定意见书结论如下：计多涛因外伤致C2椎体底部骨折、C4椎体骨折，构成IX（9）级伤残，因T2椎体骨折，构成IX（10）级伤残，综合评定伤残指数22%，后期治疗费2000元左右，误工损失日180日，出院后护理时间1个月，营养期限2个月。鉴定时间2014年9月15日，鉴定费1200元。三、庭审中原告陈述事故发生后在大河镇派出所领取被告陶超兵款60000元。四、原告计多涛同其叔父计道立从2006年起即在大河镇合伙经营一品轩卤菜生意至现在。五、被告陶超兵系鄂J×××××中型自卸货车实际车主，其同被告黄梅县昌达汽车运输有限公司系挂靠关系，双方无异议。该车曾投保，但本次事故发生时保险期限已过。本院认为，被告陶超兵驾驶鄂J×××××中型自卸货车同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告负次要责任，本院予以确认。因鄂J×××××中型自卸货车挂靠被告黄梅县昌达汽车运输有限公司，故原告的各项损失经本院核实确认后，依责任界线对被告陶超兵应赔偿的部分由被告黄梅县昌达汽车运输有限公司共同连带赔偿，被告黄梅县昌达汽车运输有限公司辩称其只能在商业险中承担连带赔偿责任于法无据，本院不予采纳，被告陶超兵诉前支付原告60000元可从其应赔偿款中剔除。本案中鄂J×××××中型自卸货车未投保交强险，原告要求比照交强险赔偿符合最高人民法院《关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第十九条“未依法投保交强险的机动车发生交通事故造成损害，当事人请求投保义务人在交强险责任限额范围内予以赔偿的，人民法院应予支持。”之规定，本院予以支持。本案中原告要求按城镇居民标准予以赔偿是否支持，对此本院认为，原告虽然属农村户口，但其同叔父计道立从2006年起即在大河镇合伙经营一品轩卤菜生意至现在并提供了一系列证据证实，本院亦调查核实属实，二被告对此亦无异议，故原告该项请求符合最高人民法院民一庭（2005）民他字第25号《关于经常居住地在城镇的农村居民在交通事故中伤亡应如何计算赔偿费用的复函》精神，本院予以支持。原告计多涛的各项损失本院核实如下：住院治疗费95759.40元、后期治疗费2000元、误工费7712.62元（事故发生之日2014年6月12日至定残前一日2014年9月14日计92天×30599元／年）、护理费6840.46元［（住院66天＋出院后护理时间1个月）×26008元／年］、住院伙食补助费3300元（66天×50元／天）、营养费2000元（酌定）、交通费500元（酌定）、伤残赔偿金100786.40元（22906元／年×20年×22%）、精神抚慰金6000元、鉴定费1200元，合计226098.88元。综上，依照《中华人民共和国侵权责任法》第十六条、第四十八条，最高人民法院《关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第三条、第十九条，参照最高人民法院《关于审理人身损害赔偿案件适用法律若干问题的解释》第十七条、十八条、十九条、二十条、二十一条、二十二条、二十三条、二十四条、二十五条，参照《湖北省道路交通事故损害赔偿标准》（2014年度）之规定，判决如下：一、原告计多涛的各项损失226098.88元，由被告陶超兵赔偿194269.22元{比照交强险赔偿120000元，依责任界线比例赔偿74269.22元［（226098.88元-120000元）×70%］}，剔除被告陶超兵诉前支付原告60000元，下余应赔偿134269.22元，由被告黄梅县昌达汽车运输有限公司承担连带赔偿责任，其余损失原告自行负担。上述应履行义务，限义务人于本判决效之日起十日内履行完毕。逾期履行的，应当按照《中华人民共和国民事诉讼法》第二百二十九条之规定加倍支付迟延履行期间的债务利息。二、驳回原告计多涛的其它诉讼请求。本案受理费3100元，由原告负担930元，由被告陶超兵、被告黄梅县昌达汽车运输有限公司共同负担2170元。如不服本判决，可在判决书送达之日起十五日内递交上诉状，并按对方当事人或代表人的人数提出副本，上诉于湖北省黄冈市中级人民法院。</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#b723f0' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=cf"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=cf"><span style="font-style: italic;">/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=cf</span></a><br>' + '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=cf"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">cf</span></a><br>' +
+                            '原告黄梅县昌达汽车运输有限责任公司。所在地：黄梅镇二环路。负责人：程彩娥，该公司经理。委托代理人周文杰，湖北恩祺律师事务所律师。代理权限：调查取证，出庭诉讼，增加、变更诉讼请求，参与调解，签收法律文书。被告张长国。被告中国太平洋财产保险股份有限公司九江中心支公司。所在地：九江市长虹大道258号。负责人：肖明，该公司经理。委托代理人张要武，江西惟民律师事务所律师。代理权限：提出答辩，提交证据，承认或反驳对方诉讼请求，申请重新鉴定，调解，签收法律文书。原告黄梅县昌达汽车运输有限责任公司诉被告张长国、被告中国太平洋财产保险股份有限公司九江中心支公司机动车交通事故责任纠纷一案，本院受理后依法组成合议庭公开开庭进行了审理，原告、被告中国太平洋财产保险股份有限公司九江中心支公司委托代理人到庭参加了诉讼，被告张长国经本院合法传唤未到庭，本案现已审理终结。原告黄梅县昌达汽车运输有限责任公司诉称，2013年4月22日9时53分，被告张长国驾驶赣G×××××中型自卸货车由黄标线梅川（西）往余川（东）方向行驶，至黄标线223公里＋600米处，超同向的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车避让不及，发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任。因赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险，故诉诸法律，要求判决上述被告共同赔偿原告的鄂J×××××重型货车车辆损失、施救费、评估费损失合计4847元。原告为支持其诉讼主张，向本院提交了如下证据：1、原告营业执照、组织机构代码证、驾驶员宋国栋行驶证、驾驶证，拟证明原告系鄂J×××××重型货车所有人、宋国栋有驾驶资格。2、道路交通事故认定书，拟证明被告张长国负事故全部责任。3、武穴市物价局（2013）025号车物损失价值鉴定结论书，拟证明鄂J×××××重型货车因本次事故造成的损失。4、施救费及评估费发票，金额分别为700元、300元。5、保单、出险信息表，拟证明赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险。被告张长国未作答辩亦未提交证据。被告中国太平洋财产保险股份有限公司九江中心支公司辩称，1、这是一起连环交通事故，涉及到另一方事故车辆，另一方事故车辆在本次事故中也应承担无责任限额赔偿，故本案应追加另一方事故车辆作为本案共同被告在无责任限额范围内承担赔偿责任。2、财产损失限额是2000元，超出部分在商业第三者责任险范围内依责任划分进行赔付。3、我方不承担本案诉讼费、鉴定费。被告中国太平洋财产保险股份有限公司九江中心支公司未提交证据。对原告提交的证据，被告中国太平洋财产保险股份有限公司九江中心支公司对证据4中的两张评估费票据（金额分别为100元、300元）有异议，认为系非正规票据，法庭应不予采信，对该质证规定予以采纳，对其它无异议的证据予以采信。经审理查明：2013年4月22日9时53分，被告张长国驾驶赣G×××××中型自卸货车由黄标线梅川（西）往余川（东）方向行驶，至黄标线223公里＋600米处，超同向的宋国栋驾驶的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车避让不及，发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任，原告及陈良无责任。另查明如下：一、鄂J×××××重型货车所有人为原告黄梅县昌达汽车运输有限责任公司，驾驶员宋国栋系该公司职员。二、赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险（不计免赔），保险期限自2012年6月4日零时起至2013年6月3日二十四时止。三三异议94.50、武穴市物价局（2013）025号车物损失价值鉴定结论书结论如下：鄂J×××××重型货车因事故造成损失材料费1447元，工时费2100元，合计损失3547元，鉴定费300元。四、鄂J×××××重型货车在事故发生后产生施救费700元，被告中国太平洋财产保险股份有限公司九江中心支公司无异议。本院认为，被告张长国驾驶赣G×××××中型自卸货车超同向的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任，原告及陈良无责任，本院予以确认。因鄂J×××××重型货车对于赣G×××××中型自卸货车及鄂J×××××中型货车均属于第三者，故为赣G×××××中型自卸货车及鄂J×××××中型货车承保交强险及商业险的保险公司均应依照相关规定对鄂J×××××重型货车在此次事故中所遭受的损失承担赔偿责任。但鉴于原告在审理过程中已向本院书面陈述自愿放弃对为鄂J×××××中型货车承保交强险的保险公司主张权利，并表示同意在赣G×××××中型自卸货车的交强险或商业险保险限额内应赔偿其损失的总额内扣减100元，是对其诉权及实体权利的处分，该处分符合法律规定，亦不损害被告中国太平洋财产保险股份有限公司九江中心支公司利益，故本院依法予以准许。反之，被告中国太平洋财产保险股份有限公司九江中心支公司对应辩驳观点，本院不予采纳。综上，原告各项损失经本院核实确认并扣减100元后，首先由被告中国太平洋财产保险股份有限公司九江中心支公司在交强险范围内赔偿，超出部分亦由该公司按被告张长国应负责任依商业保险合同约定予以赔偿，保险免赔部分由被告张长国赔偿。原告的各项损失，本院核实如下：材料费及工时费损失3547元，评估费300元，施救费700元，合计4547元。综上，依照《中华人民共和国侵权责任法》第十六条、第四十八条，《中华人民共和国道路交通安全法》第七十六条，《最高人民法院关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第十六条，《中华人民共和国民事诉讼法》第一百四十四条之规定，缺席判决如下：一、由被告中国太平洋财产保险股份有限公司九江中心支公司赔偿原告黄梅县昌达汽车运输有限责任公司各项损失4147元（4547元-鉴定费300元-100元），其中交强险范围内赔偿1900元，商业险范围内赔偿2247元。二、由被告张长国赔偿原告黄梅县昌达汽车运输有限责任公司各项损失300元。上述义务人应履行的义务，限于本判决生效之日起三日内履行完毕。逾期履行的，应当按照《中华人民共和国民事诉讼法》第二百五十三条之规定加倍支付迟延履行期间的债务利息。三、驳回原告黄梅县昌达汽车运输有限责任公司的其他诉讼请求。本案受理费50元，由原告负担5元，由被告张长国负担45元。如不服本判决，可在判决书送达之日起十五日内递交上诉状并按对方当事人或代表人的人数提供副本，上诉于湖北省黄冈市中级人民法院。</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#b723f0' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=cf"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=cf"><span style="font-style: italic;">/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=cf</span></a><br>' + '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=cf"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">cf</span></a><br>' +
+                            '董健与安徽恒升置业有限公司房屋买卖合同纠纷一审民事判决书池州市贵池区人民法院民事判决书（2015）贵民一初字第247号原告：董健，女，1994年11月7日生，汉族，住安徽省池州市贵池区。委托代理人：张精康，安徽天贵律师事务所律师。委托代理人：桂娟，安徽天贵律师事务所律师。被告：安徽恒升置业有限公司，住所地安徽省池州市贵池区。法定代表人：杜忠德，该公司董事长。委托代理人：孙昌伟，安徽安贵律师事务所律师。原告董健与被告安徽恒升置业有限公司（以下简称“恒升公司”）房屋买卖合同纠纷一案，本院于2015年1月13日立案受理后，依法由代理审判员殷满亮适用简易程序于2015年3月13日公开开庭进行了审理。原告董健的委托代理人张精康及被告恒升公司的委托代理人孙昌伟到庭参加诉讼。本案现已审理终结。董健诉称：原告于2014年7月26日认购被告开发的“紫悦府”商品房一套，并支付定金10万元，但因被告在销售商品房时搭售车位，原告认为被告的搭售行为违反法律规定，且属于商业欺诈。故原告具状法院，要求被告立即返还原告定金10万元及利息损失（从2014年7月26日起按中国人民银行同期贷款利率计算至实际付清日止）并承担本案诉讼费用。恒升公司辩称：原、被告是在原告多次现场查看的情况下签订了《商品房认购协议书》，原告在签订协议书当天交纳定金10万元，双方在协议中约定于2014年8月3日前签订正式的商品房买卖合同，协议签订后，原告未按约定与被告签订正式的商品房买卖合同等事宜，被告先后分别于2014年8月12日、2014年8月19日书面通知原告完成签订合同等事宜，但原告签收通知书后仍然拒绝与被告签订商品房买卖合同，被告于2014年9月5日向原告发出解除合同通知书，通知书明确约定解除双方签订的认购协议书，根据认购协议书约定定金不予退还，至此协议书已经依法解除。被告认为认购协议书是双方真实意思表示，其内容不违反法律、行政法规的强制性规定，合法有效。原告单方违约，拒绝与被告签订正式的商品房买卖合同，定金应不予退还。综上，原告的诉请无事实和法律依据，请求法院依法驳回原告的诉请。经审理查明：恒升公司系紫悦府小区的建设单位。2014年7月26日，董健向恒升公司转账支付了紫悦府19幢108室房屋及配套车库的预售定金10万元。后董健与恒升公司一直未订立商品房买卖合同。恒升公司分别于2014年8月12日、2014年8月19日两次向董健发出催告函，要求其在限期内与恒升公司签订《商品房买卖合同》，否则应承担相应的违约责任。恒升公司于2014年9月5日向董健发出《解除商品房认购协议书通知书》，称因董健逾期未与恒升公司签订《商品房买卖合同》，恒升公司解除双方签订的《商品房认购协议书》，并不予退还董健支付的定金10万元。现双方就定金应否退还一事产生纠纷，以致成诉。另查明，恒升公司持有一份注明签订日期为2014年7月26日的《商品房认购协议书》复印件，董健对该协议书有异议，称双方并未签订协议书，恒升公司也未能提供原件核对，并称其不持有原件是因为该协议书仅有的一份原件在董健处。池州市住房和城乡建设委员会为恒升公司办理了《商品房预售许可证》，就案涉19幢108室及下复式准予预售。上述事实有收据、《签订商品房买卖合同催告函》、《解除商品房认购协议书通知书》、《商品房预售许可证》及当事人陈述等证据在卷佐证。本院认为：无法与原件、原物核对的复印件、复制品不能单独作为认定案件事实的依据。本案恒升公司持有的《商品房认购协议书》系复印件，按常理应双方各执一份原件或至少恒升公司应持有一份原件，但恒升公司称该协议书仅有的一份原件在董健处，不符合常理。另董健对该复印件不予认可，认为双方并未签订协议书，而恒升公司既未能提供原件予以核对，也未能提供其他证据对该协议的真实性予以佐证，故本院对该份证据的真实性不予认定。本案双方当事人均未举证证明至今未签订商品房买卖合同存在可归责于对方当事人的事由，故本院认定该商品房买卖合同未能签订系因不可归责于双方当事人的事由，因不可归责于当事人双方的事由，导致商品房买卖合同未能订立的，出卖人应当将定金返还买受人，故本院对董健要求返还定金10万元的请求予以支持。因双方均未举证对方存在过错，故对董健要求恒升公司承担利息损失的请求，不予支持。《最高人民法院关于审理商品房买卖合同纠纷案件适用法律若干问题的解释》第四条、《中华人民共和国民事诉讼法》第六十四条第一款的规定，判决如下：一、被告安徽恒升置业有限公司于本判决生效之日起十日内返还原告董健支付的定金10万元；二、驳回原告董健的其它诉讼请求。如果未按本判决指定的期间履行给付金钱义务，应当依照《中华人民共和国民事诉讼法》第二百五十三条之规定，加倍支付迟延履行期间的债务利息。案件受理费2300元，减半收取1150元，由被告安徽恒升置业有限公司负担。如不服本判决，可在判决书送达之日起十五日内，向本院递交上诉状，并按对方当事人的人数提出副本，上诉于安徽省池州市中级人民法院。代理审判员殷满亮二〇一五年四月十日书记员葛树荣</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#b723f0' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=0/480/2608/85a5c798-2815-459b-a39d-22dee4af86b1.html&amp;method=cf"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=0/480/2608/85a5c798-2815-459b-a39d-22dee4af86b1.html&amp;method=cf"><span style="font-style: italic;">/Siblir/?url=0/480/2608/85a5c798-2815-459b-a39d-22dee4af86b1.html&amp;method=cf</span></a><br>' + '<a href="/Siblir/?url=0/480/2608/85a5c798-2815-459b-a39d-22dee4af86b1.html&amp;method=cf"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">cf</span></a><br>' +
+                            '原告：綦会来，男，1973年12月11日出生，汉族。委托代理人：周雪林，北京市百瑞（济南）律师事务所律师。被告：山东利津经济开发区管理委员会。法定代表人：韩春强，职务：主任。委托代理人：宋凯，山东诚正勤律师事务所律师。原告綦会来不服被告山东利津经济开发区管理委员会（以下简称利津开发区管委会）作出的《违法建设规划影响认定书》，于2014年1月24日向本院提起行政诉讼。本院受理后在法定期限内向被告送达了起诉状副本及应诉通知书。本院依法组成合议庭，于2014年2月21日公开开庭审理了本案。原告綦会来及其委托代理人周雪林，被告利津开发区管委会的委托代理人宋凯到庭参加诉讼。本案现已审理终结。2013年5月7日利津县城市管理行政执法局（以下简称利津县城管局）就綦会来所建房屋的性质向被告利津开发区管委会发出询问函，征询綦会来在利八路西延路北，某村东北角建设的房屋是否位于城市规划区，有没有取得建设工程规划许可证。被告利津开发区管委会当日针对綦会来所建房屋作出《违法建设规划影响认定书》，认定綦会来的建设行为未取得建设工程规划许可证，不符合利津县城市总体规划，该建筑属违章建筑，且对周边影响较大，应当无条件拆除。原告綦会来诉称，原告于2006年在利津镇某村宅基地上建设了房屋用于居住，此住宅是全家唯一的住宅。2013年5月7日被告作出了《违法建设规划影响认定书》，认定原告的房屋属于违章建筑。原告认为被告作出认定书主体不合法，事实不清，证据不足，程序违法，适用法律错误，请求人民法院依法予以撤销。被告利津开发区管委会辩称，（一）被告作出《违法建设规划影响认定书》不是具体行政行为，不具有可诉性。本案涉及的《违法建设规划影响认定书》是被告根据利津县城管局《关于綦会来所建房屋性质的询问函》而作出的回复，只是给利津县城管局出具的答复意见。该意见仅是利津县城管局作出行政处罚的证据，是一种证明行为。这种证明意见是被告与城管执法部门工作配合的内部往来文件，不具有单独的可诉性。（二）本案涉及原告的违法建筑已由利津县城管局依法作出行政处罚，原告对行政处罚不服已向利津县人民法院提出了行政诉讼，且案件正在审理过程中。原告已依法行使了法律所规定的救济权利，并且被告出具的《违法建设规划影响认定书》只是行政处罚案件的一份证明，是行政处罚案件的一个组成部分，不是单独的具体行政行为。原告就同样的行政处罚案件再次对被告提出行政诉讼，违反了一事不再理的诉讼原则。综上所述，请求人民法院查明事实，依法驳回原告的起诉。本案原、被告双方争议的焦点是：1、被告利津开发区管委会应利津县城管局《关于綦会来所建房屋性质的询问函》，作出《违法建设规划影响认定书》的行为是否具有可诉性？2、原告綦会来已就利津县城管局对其所建房屋作出的限期拆除行政处罚行为提起了行政诉讼，法院受理本案是否属于就同样的行政处罚再次处理，是否违反一事不再理的原则？3、被告利津开发区管委会有无应利津县城管局的询问作出《违法建设规划影响认定书》的职权？4、被告利津经济开发区管委会作出《违法建设规划影响认定书》，认定“原告建设房屋未取得建设工程规划许可证且不符合利津县城市总体规划，该建筑属违章建筑”的证据是否充分？被告在法定期限内向本院提交了以下作出《违法建设规划影响认定书》的证据、依据：1、山东省人民政府《关于济南槐荫工业园区等设立为省级开发区的通知》（鲁政字（2006）71号，2006年3月6日）。2、山东省人大常委会于1994年1月17日颁布实施的《山东省经济技术开发区管理条例》。3、山东省人民政府于1998年1月19日颁布实施的《山东省省级经济开发区管理暂行办法》。4、利津县人民政府办公室《关于印发利津经济开发区管理委员会职能配置内设机构和人员编制规定的通知》（2007年11月5日印发）。5、利津县机构编制委员会《关于部分行政区划调整后有关机构编制问题的通知》（利编发（2010）2号，2010年1月19日印发）。被告用以上证据，证明利津开发区属省政府批准设立的省级开发区。经利津县人民政府授权，利津开发区管委会负责开发区内建设工程项目管理，核发建筑工程规划许可证等职权。6、《利津县城市总体规划文本（附图）》。7、东营人民政府2004年7月7日《关于﹤利津县城市总体规划﹥的批复》。被告用证据6、7，证明原告綦会来所建房屋位于利津县城市总体规划区内，且不符合利津县城市总体规划。8、利津县城管局于2013年5月7日向被告发出的《关于綦会来所建房屋性质的询问函》（询问函同时附房屋现场勘验图一份、勘验照片6张）。被告用证据8证明原告綦会来建设房屋的所处位置以及作出的《违法建设规划影响认定书》系应利津县城管局的询问而作的回复。9、《中华人民共和国城乡规划法》。被告用证据9证明其认定原告所建房屋属违章建筑，应当无条件拆除符合法律规定。经庭审质证，原告的意见为：对证据1没有异议；对证据2，该条例第二条规定，本条例适用于本省行政区域内经国务院批准设立的经济技术开发区，而被告利津开发区系经省政府批准设立的省级经济技术开发区，故证据2与本案没有关联性；对证据3、4、5的真实性无异议，但该三份证据不能证明被告具有认定违法建筑的职权；对证据6、7的真实性无异议，但被告没有证据证明原告房屋所在的位置，仅以城市规划图不能证明原告所建房屋违反城市规划；对证据8，即利津县城管局《关于綦会来所建房屋性质的询问函》及所附的房屋现场勘验图、勘验照片，原告认为被告没有进行调查即直接作出认定，主要证据不足，程序违法；对证据9没有异议，但认为《城乡规划法》规定县级以上地方人民政府规划主管部门有权作出规划影响认定，而被告没有相应的法定职权。经庭审质证，本院对被告提交的证据作如下认证：对证据1，原告没有异议，应作为本案的有效证据。该证据能够证明被告利津开发区系经山东省人民政府2006年3月6日批准设立的省级开发区。对证据2，因该条例适用于山东省行政区域内经国务院批准设立的经济技术开发区，故原告认为该证据与本案没有关联性的质证意见成立，该证据不能作为本案的有效证据。对证据3、4、5，原告对其真实性无异议，故应作为本案的有效证据。该三份证据能够证明被告利津开发区管委会在其管辖范围内具有建设项目规划以及核发建筑工程规划许可证等职权。对证据6、7、8，原告对其真实性无异议，本院认为应作为本案的有效证据。该三份证据能够证明原告所建房屋位于利津县城市总体规划区内。对证据9原告无异议，应作为本案有效证据。经庭审质证，认证，本院查明以下事实：利津县城管局在巡查中发现，原告綦会来在利津县凤凰城街道某村东北角、利八路西延路北侧建设有平房、东屋及西厂房，遂于2013年5月7日向被告发出询问函，征询原告所建房屋是否位于城市规划区内，是否取得建设工程规划许可证。被告利津开发区管委会当日向利津县城管局作出《违法建设规划影响认定书》，认定原告綦会来的建设行为未取得建设工程规划许可证，不符合利津县城市总体规划，该建筑属违章建筑，且对周边影响较大，应当无条件拆除。利津县城管局依据被告的《违法建设规划影响认定书》及其他相关证据对原告作出了限期拆除的行政处罚决定。本院认为，被告利津开发区系经山东省人民政府批准设立的省级经济技术开发区，按照《山东省省级经济开发区管理暂行办法》的规定以及利津县人民政府的授权，被告利津开发区管委会在其管辖范围内具有规划管理工作的行政职权。被告利津开发区管委会应利津县城管局的询问，作出《违法建设规划影响认定书》，实质上是对原告所建房屋的性质进行了认定，该认定是城管部门作出限期拆除行政处罚的事实依据，对原告綦会来的权利义务产生实际影响，故对被告利津开发区管委会称该答复不具有可诉性的答辩意见，本院不予采纳。被告作出违法建设规划认定属于行政确认行为，而利津县城管局作出限期拆除决定属于行政处罚行为，两者行政主体不同，行政行为的性质不同，所依据的事实及程序不同，故原告提起本案诉讼不违反一事不再理的诉讼原则。被告利津开发区管委会在没有进行调查询问的情况下，即认定原告的建设行为未取得建设工程规划许可证，不符合利津县城市总体规划，其建筑属违章建筑，证据不足，应予以撤销。依照《中华人民共和国行政诉讼法》第五十四条第（二）项之规定，判决如下：撤销被告山东利津经济开发区管理委员会于2013年5月7日向利津县城市管理行政执法局作出的《违法建设规划影响认定书》。案件受理费50元，由被告山东利津经济开发区管理委员会负担。如不服本判决，可在判决书送达之日起十五日内提起上诉，向本院递交上诉状，并按对方当事人的人数递交上诉状副本，上诉于山东省东营市中级人民法院。</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#b723f0' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=3fae3bc0-087e-412b-b37c-aed54265f881.html&amp;method=cf"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=3fae3bc0-087e-412b-b37c-aed54265f881.html&amp;method=cf"><span style="font-style: italic;">/Siblir/?url=3fae3bc0-087e-412b-b37c-aed54265f881.html&amp;method=cf</span></a><br>' + '<a href="/Siblir/?url=3fae3bc0-087e-412b-b37c-aed54265f881.html&amp;method=cf"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">cf</span></a><br>' +
+                            '        <div class="casetitle">黎某与于某离婚纠纷一审民事判决书</div><div class="casecourt">定远县人民法院</div><div class="textcategory">民事判决书</div><div class="casecode">（2016）皖1125民初2658号</div><div class="content">原告：黎某，农民。委托代理人：王金梅，安徽苏滁律师事务所律师。委托代理人：邰平，安徽苏滁律师事务所实习律师。被告：于某（又名於某），农民。原告黎某与被告于某离婚纠纷一案，本院于2016年6月6日立案受理后，依法由代理审判员王贡贤独任审判，于2016年8月9日公开开庭进行了审理。原告黎某及其委托代理人王金梅、邰平、被告于某均到庭参加诉讼。本案现已审理终结。原告黎某诉称：我与被告于2005年7月相识，××××年××月××日在民政局办理结婚登记。2008年11月、××××年××月分别生育女儿，取名於某甲、於某乙。但被告婚后赌博等恶习让双方感情出现裂痕难以共同生活，我认为现原被告感情已破裂，请求人民法院判决我与被告离婚，婚生女於妙涵由原告抚养，禀告承担本案诉讼费用。被告于某辩称：不同意女儿给原告抚养，不同意离婚。经审理查明:原告黎某与被告于某于2005年7月相识，××××年××月××日在民政局办理结婚登记（结婚证字号皖滁定远结字第0107031XX号）。2008年12月17日、××××年××月××日分别生育女儿於某甲、於某乙。婚后感情尚可。婚后因琐事发生争吵，原告黎某遂以其夫妻感情破裂为由诉至本院。另查明：被告于某，又名於某，原身份证号码××。经当庭举证、质证，据以认定上述查明事实的主要证据有原、被告的当庭陈述及其提交的身份证、结婚证等证据在卷证实，足以认定。本院认为：原、被告的婚姻关系合法有效，受法律保护。本案原、被告自由恋爱结婚并育有二女，应当认定双方存在一定的夫妻感情。夫妻之间偶有争执属正常现象，只要夫妻双方相互尊重，经常沟通与交流，完全可能和好如初。目前因原告无证据证明双方因感情不和分居，也无证据证明其夫妻感情确已破裂，故对原告要求离婚的诉讼请求，本院不予支持。综上所述，依照《中华人民共和国婚姻法》第三十二条、《中华人民共和国民事诉讼法》第六十四条第一款、《最高人民法院关于＜民事诉讼证据的相关规定＞》第二条、第七十六条的规定，判决如下：不准原告黎某与被告于某离婚；案件受理费200元，减半收取100元，由原告黎某负担。如不服本判决，可在判决书送达之日起十五日内，向本院递交上诉状，并按对方当事人的人数提出副本，上诉于安徽省滁州市中级人民法院。</div><div class="judge">代理审判员王贡贤二〇一六年八月九日书记员杨超</div>        </td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#f02364' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=db"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=db"><span style="font-style: italic;">/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=db</span></a><br>' + '<a href="/Siblir/?url=1/100/1109/b8182361-e5ea-40f5-bebe-4a348343040f.html&amp;method=db"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">db</span></a><br>' +
+                            '原告黄梅县昌达汽车运输有限责任公司。所在地：黄梅镇二环路。负责人：程彩娥，该公司经理。委托代理人周文杰，湖北恩祺律师事务所律师。代理权限：调查取证，出庭诉讼，增加、变更诉讼请求，参与调解，签收法律文书。被告张长国。被告中国太平洋财产保险股份有限公司九江中心支公司。所在地：九江市长虹大道258号。负责人：肖明，该公司经理。委托代理人张要武，江西惟民律师事务所律师。代理权限：提出答辩，提交证据，承认或反驳对方诉讼请求，申请重新鉴定，调解，签收法律文书。原告黄梅县昌达汽车运输有限责任公司诉被告张长国、被告中国太平洋财产保险股份有限公司九江中心支公司机动车交通事故责任纠纷一案，本院受理后依法组成合议庭公开开庭进行了审理，原告、被告中国太平洋财产保险股份有限公司九江中心支公司委托代理人到庭参加了诉讼，被告张长国经本院合法传唤未到庭，本案现已审理终结。原告黄梅县昌达汽车运输有限责任公司诉称，2013年4月22日9时53分，被告张长国驾驶赣G×××××中型自卸货车由黄标线梅川（西）往余川（东）方向行驶，至黄标线223公里＋600米处，超同向的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车避让不及，发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任。因赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险，故诉诸法律，要求判决上述被告共同赔偿原告的鄂J×××××重型货车车辆损失、施救费、评估费损失合计4847元。原告为支持其诉讼主张，向本院提交了如下证据：1、原告营业执照、组织机构代码证、驾驶员宋国栋行驶证、驾驶证，拟证明原告系鄂J×××××重型货车所有人、宋国栋有驾驶资格。2、道路交通事故认定书，拟证明被告张长国负事故全部责任。3、武穴市物价局（2013）025号车物损失价值鉴定结论书，拟证明鄂J×××××重型货车因本次事故造成的损失。4、施救费及评估费发票，金额分别为700元、300元。5、保单、出险信息表，拟证明赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险。被告张长国未作答辩亦未提交证据。被告中国太平洋财产保险股份有限公司九江中心支公司辩称，1、这是一起连环交通事故，涉及到另一方事故车辆，另一方事故车辆在本次事故中也应承担无责任限额赔偿，故本案应追加另一方事故车辆作为本案共同被告在无责任限额范围内承担赔偿责任。2、财产损失限额是2000元，超出部分在商业第三者责任险范围内依责任划分进行赔付。3、我方不承担本案诉讼费、鉴定费。被告中国太平洋财产保险股份有限公司九江中心支公司未提交证据。对原告提交的证据，被告中国太平洋财产保险股份有限公司九江中心支公司对证据4中的两张评估费票据（金额分别为100元、300元）有异议，认为系非正规票据，法庭应不予采信，对该质证规定予以采纳，对其它无异议的证据予以采信。经审理查明：2013年4月22日9时53分，被告张长国驾驶赣G×××××中型自卸货车由黄标线梅川（西）往余川（东）方向行驶，至黄标线223公里＋600米处，超同向的宋国栋驾驶的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车避让不及，发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任，原告及陈良无责任。另查明如下：一、鄂J×××××重型货车所有人为原告黄梅县昌达汽车运输有限责任公司，驾驶员宋国栋系该公司职员。二、赣G×××××中型自卸货车在被告中国太平洋财产保险股份有限公司九江中心支公司投保了交强险及商业险（不计免赔），保险期限自2012年6月4日零时起至2013年6月3日二十四时止。三三异议94.50、武穴市物价局（2013）025号车物损失价值鉴定结论书结论如下：鄂J×××××重型货车因事故造成损失材料费1447元，工时费2100元，合计损失3547元，鉴定费300元。四、鄂J×××××重型货车在事故发生后产生施救费700元，被告中国太平洋财产保险股份有限公司九江中心支公司无异议。本院认为，被告张长国驾驶赣G×××××中型自卸货车超同向的鄂J×××××重型货车，遇当事人陈良驾驶鄂J×××××中型货车对向行驶过来，两车发生碰撞，鄂J×××××中型货车被撞得横在路中间，导致鄂J×××××重型货车又与鄂J×××××中型货车相撞，造成三车均受损的事故，武穴市公安局交警大队（2013）第00078号事故责任认定书认定被告张长国负事故全部责任，原告及陈良无责任，本院予以确认。因鄂J×××××重型货车对于赣G×××××中型自卸货车及鄂J×××××中型货车均属于第三者，故为赣G×××××中型自卸货车及鄂J×××××中型货车承保交强险及商业险的保险公司均应依照相关规定对鄂J×××××重型货车在此次事故中所遭受的损失承担赔偿责任。但鉴于原告在审理过程中已向本院书面陈述自愿放弃对为鄂J×××××中型货车承保交强险的保险公司主张权利，并表示同意在赣G×××××中型自卸货车的交强险或商业险保险限额内应赔偿其损失的总额内扣减100元，是对其诉权及实体权利的处分，该处分符合法律规定，亦不损害被告中国太平洋财产保险股份有限公司九江中心支公司利益，故本院依法予以准许。反之，被告中国太平洋财产保险股份有限公司九江中心支公司对应辩驳观点，本院不予采纳。综上，原告各项损失经本院核实确认并扣减100元后，首先由被告中国太平洋财产保险股份有限公司九江中心支公司在交强险范围内赔偿，超出部分亦由该公司按被告张长国应负责任依商业保险合同约定予以赔偿，保险免赔部分由被告张长国赔偿。原告的各项损失，本院核实如下：材料费及工时费损失3547元，评估费300元，施救费700元，合计4547元。综上，依照《中华人民共和国侵权责任法》第十六条、第四十八条，《中华人民共和国道路交通安全法》第七十六条，《最高人民法院关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第十六条，《中华人民共和国民事诉讼法》第一百四十四条之规定，缺席判决如下：一、由被告中国太平洋财产保险股份有限公司九江中心支公司赔偿原告黄梅县昌达汽车运输有限责任公司各项损失4147元（4547元-鉴定费300元-100元），其中交强险范围内赔偿1900元，商业险范围内赔偿2247元。二、由被告张长国赔偿原告黄梅县昌达汽车运输有限责任公司各项损失300元。上述义务人应履行的义务，限于本判决生效之日起三日内履行完毕。逾期履行的，应当按照《中华人民共和国民事诉讼法》第二百五十三条之规定加倍支付迟延履行期间的债务利息。三、驳回原告黄梅县昌达汽车运输有限责任公司的其他诉讼请求。本案受理费50元，由原告负担5元，由被告张长国负担45元。如不服本判决，可在判决书送达之日起十五日内递交上诉状并按对方当事人或代表人的人数提供副本，上诉于湖北省黄冈市中级人民法院。</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#f02364' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=db"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=db"><span style="font-style: italic;">/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=db</span></a><br>' + '<a href="/Siblir/?url=1/426/344/69ed3945-c948-4c62-91b2-25b2dd2d7d9a.html&amp;method=db"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">db</span></a><br>' +
+                            '董健与安徽恒升置业有限公司房屋买卖合同纠纷一审民事判决书池州市贵池区人民法院民事判决书（2015）贵民一初字第247号原告：董健，女，1994年11月7日生，汉族，住安徽省池州市贵池区。委托代理人：张精康，安徽天贵律师事务所律师。委托代理人：桂娟，安徽天贵律师事务所律师。被告：安徽恒升置业有限公司，住所地安徽省池州市贵池区。法定代表人：杜忠德，该公司董事长。委托代理人：孙昌伟，安徽安贵律师事务所律师。原告董健与被告安徽恒升置业有限公司（以下简称“恒升公司”）房屋买卖合同纠纷一案，本院于2015年1月13日立案受理后，依法由代理审判员殷满亮适用简易程序于2015年3月13日公开开庭进行了审理。原告董健的委托代理人张精康及被告恒升公司的委托代理人孙昌伟到庭参加诉讼。本案现已审理终结。董健诉称：原告于2014年7月26日认购被告开发的“紫悦府”商品房一套，并支付定金10万元，但因被告在销售商品房时搭售车位，原告认为被告的搭售行为违反法律规定，且属于商业欺诈。故原告具状法院，要求被告立即返还原告定金10万元及利息损失（从2014年7月26日起按中国人民银行同期贷款利率计算至实际付清日止）并承担本案诉讼费用。恒升公司辩称：原、被告是在原告多次现场查看的情况下签订了《商品房认购协议书》，原告在签订协议书当天交纳定金10万元，双方在协议中约定于2014年8月3日前签订正式的商品房买卖合同，协议签订后，原告未按约定与被告签订正式的商品房买卖合同等事宜，被告先后分别于2014年8月12日、2014年8月19日书面通知原告完成签订合同等事宜，但原告签收通知书后仍然拒绝与被告签订商品房买卖合同，被告于2014年9月5日向原告发出解除合同通知书，通知书明确约定解除双方签订的认购协议书，根据认购协议书约定定金不予退还，至此协议书已经依法解除。被告认为认购协议书是双方真实意思表示，其内容不违反法律、行政法规的强制性规定，合法有效。原告单方违约，拒绝与被告签订正式的商品房买卖合同，定金应不予退还。综上，原告的诉请无事实和法律依据，请求法院依法驳回原告的诉请。经审理查明：恒升公司系紫悦府小区的建设单位。2014年7月26日，董健向恒升公司转账支付了紫悦府19幢108室房屋及配套车库的预售定金10万元。后董健与恒升公司一直未订立商品房买卖合同。恒升公司分别于2014年8月12日、2014年8月19日两次向董健发出催告函，要求其在限期内与恒升公司签订《商品房买卖合同》，否则应承担相应的违约责任。恒升公司于2014年9月5日向董健发出《解除商品房认购协议书通知书》，称因董健逾期未与恒升公司签订《商品房买卖合同》，恒升公司解除双方签订的《商品房认购协议书》，并不予退还董健支付的定金10万元。现双方就定金应否退还一事产生纠纷，以致成诉。另查明，恒升公司持有一份注明签订日期为2014年7月26日的《商品房认购协议书》复印件，董健对该协议书有异议，称双方并未签订协议书，恒升公司也未能提供原件核对，并称其不持有原件是因为该协议书仅有的一份原件在董健处。池州市住房和城乡建设委员会为恒升公司办理了《商品房预售许可证》，就案涉19幢108室及下复式准予预售。上述事实有收据、《签订商品房买卖合同催告函》、《解除商品房认购协议书通知书》、《商品房预售许可证》及当事人陈述等证据在卷佐证。本院认为：无法与原件、原物核对的复印件、复制品不能单独作为认定案件事实的依据。本案恒升公司持有的《商品房认购协议书》系复印件，按常理应双方各执一份原件或至少恒升公司应持有一份原件，但恒升公司称该协议书仅有的一份原件在董健处，不符合常理。另董健对该复印件不予认可，认为双方并未签订协议书，而恒升公司既未能提供原件予以核对，也未能提供其他证据对该协议的真实性予以佐证，故本院对该份证据的真实性不予认定。本案双方当事人均未举证证明至今未签订商品房买卖合同存在可归责于对方当事人的事由，故本院认定该商品房买卖合同未能签订系因不可归责于双方当事人的事由，因不可归责于当事人双方的事由，导致商品房买卖合同未能订立的，出卖人应当将定金返还买受人，故本院对董健要求返还定金10万元的请求予以支持。因双方均未举证对方存在过错，故对董健要求恒升公司承担利息损失的请求，不予支持。《最高人民法院关于审理商品房买卖合同纠纷案件适用法律若干问题的解释》第四条、《中华人民共和国民事诉讼法》第六十四条第一款的规定，判决如下：一、被告安徽恒升置业有限公司于本判决生效之日起十日内返还原告董健支付的定金10万元；二、驳回原告董健的其它诉讼请求。如果未按本判决指定的期间履行给付金钱义务，应当依照《中华人民共和国民事诉讼法》第二百五十三条之规定，加倍支付迟延履行期间的债务利息。案件受理费2300元，减半收取1150元，由被告安徽恒升置业有限公司负担。如不服本判决，可在判决书送达之日起十五日内，向本院递交上诉状，并按对方当事人的人数提出副本，上诉于安徽省池州市中级人民法院。代理审判员殷满亮二〇一五年四月十日书记员葛树荣</td></tr></table><br><br>',
+                            '<table><tr><td style="background-color: ' +
+                            '#6d6262' +
+                            ';">&nbsp;</td><td>dd' +
+                            '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=si"><span style="font-weight: bold;">51djl.com</span></a><br>' + '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=si"><span style="font-style: italic;">/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=si</span></a><br>' + '<a href="/Siblir/?url=1/100/1041/9e4b3866-b618-4539-8247-3ae20ea3cb17.html&amp;method=si"><span style="color: #0000FF; ">北京XX最高人民法院</span></a><br>' + '<a href="北京XX最高人民法院"><span style="color: #0000FF; ">si</span></a><br>' +
+                            '原告计多涛。委托代理人徐进夫，湖北晋梅律师事务所律师。代理权限：代为承认、变更、放弃诉讼请求，参加诉讼，调解，签收法律文书，代为领取标的款。委托代理人张理，湖北晋梅律师事务所律师。代理权限同上。被告陶超兵。委托代理人王仕洲，黄梅镇法律服务所法律工作者。代理权限：参加诉讼，调解，签收法律文书。被告黄梅县昌达汽车运输有限责任公司。负责人：程彩娥，该公司经理。委托代理人石成，黄梅镇法律服务所法律工作者。代理权限：一般代理。原告计多涛诉被告陶超兵、被告黄梅县昌达汽车运输有限公司机动车交通事故责任纠纷一案，本院立案受理后依法组成合议庭公开开庭进行了审理，原、被告双方及委托代理人均到庭参加了诉讼，本案现已审理终结。原告计多涛诉称：2014年6月12日18时许，被告陶超兵驾驶鄂J×××××中型自卸货车由四祖往大河（由北往南）方向行驶，在大河镇义丰村十二组急转弯路段，同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告计多涛负次要责任。因鄂J×××××中型自卸货车所有人为被告黄梅县昌达汽车运输有限公司，故诉诸法律，要求判决上述被告共同赔偿原告住院治疗费、后期治疗费、误工费、护理费、住院伙食补助费、营养费、伤残赔偿金、鉴定费、交通费、精神抚慰金，共计142727.68元（不含诉前垫付），并比照交强险优先赔偿。原告为支持其诉讼主张，向本院提交如下证据：1、原告身份证，拟证明原告身份情况。2、道路交通事故责任认定书，拟证明事故发生的经过及责任划分。3、中国人民解放军第171医院出院小结、诊断证明、医疗费发票、用药清单、病危通知书，拟证明其受伤诊疗情况及医疗费金额。4、住宿费票据，金额710元，拟证明其在九江住院治疗期间产生的住宿费用。5、交通费票据，金额675元。6、原告叔父计道立经营许可证，拟证明其同计道立二人在大河镇共同经营一品轩卤菜店多年。7、被告陶超兵身份证、驾驶证、行车证复印件，拟证明被告陶超兵具有合法驾驶资格及鄂J×××××中型自卸货车所有人为被告黄梅县昌达汽车运输有限公司。8、黄冈博林司法鉴定所意见书及鉴定费发票，拟证明原告构成（9）级伤残，赔偿指数22%。被告陶超兵辩称，对本案的事实无异议，我愿意在法律规定的责任范围内承担相应的责任，原告诉求过高，法庭应依法核实确认，我诉前已为原告垫付了医疗费7万元，我与被告昌达公司系挂靠关系，昌达公司应依法承担连带赔偿责任。被告陶超兵为支持其抗辩主张，向法庭提交如下证据：1、陶超兵驾驶证、行车证，拟证明其具有合法驾驶资格。2、机动车辆保险证，拟证明鄂J×××××中型自卸货车曾投保，但本次事故发生时保险期限已过。被告黄梅县昌达汽车运输有限公司辩称，1、对本案的事实无异议，法庭依法处理。2、原告诉讼请求过高，法庭应依法核实确认，其要求按城镇居民标准赔偿证据不足。3、被告陶超兵与被告黄梅县昌达汽车运输有限责任公司双方系挂靠关系，真正的实际车主是被告陶超兵，我公司曾多次要求被告陶超兵购买保险，但陶超兵都没有履行义务，故原告损失应全部由被告陶超兵赔偿，我公司只能在商业险中承担连带赔偿责任。被告黄梅县昌达汽车运输有限公司未提交证据。对原告提交的证据，被告陶超兵对证据3、5、8真实性有异议，对证据6证明目的有异议，对其它证据无异议；被告黄梅县昌达汽车运输有限公司对证据6证明目的有异议，对其它证据无异议；对此本院认为，证据3客观真实，予以确认，证据5交通费数额，本院结合实际酌定，对证据6证明目的，本院将结合实际及其它相关证据予以综合评议，证据8司法鉴定结论，被告陶超兵在本院规定的期限内未申请重新鉴定，予以确认，对其它无异议的证据，予以确认。对被告陶超兵提交的证据，原告及被告黄梅县昌达汽车运输有限公司均无异议，予以确认。此外，本院根据原告申请，调查核实如下证据：1、大河镇派出所、大河镇街道社区居委会书面证明，证明原告同其叔父计道立从2006年起即在大河镇合伙经营卤菜生意至现在。2、证人邹某证言，证明原告同其叔父计道立从2006年起即在大河镇合伙经营卤菜生意，从2009年起二人租赁其房屋经营至现在。3、证人梅某（系邹某邻居）证言，证明内容同上。上述证据原、被告双方质证后均无异议，本院予以确认。经审理查明：2014年6月12日18时许，被告陶超兵驾驶鄂J×××××中型自卸货车由四祖往大河（由北往南）方向行驶，在大河镇义丰村十二组急转弯路段，同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告计多涛负次要责任。另查明如下：一、原告计多涛因本次事故受伤，当天在黄梅县人民医院住院治疗，费用2000元，第二天即转入中国人民解放军171医院住院治疗65天，治疗费计93759.40元，共计住院治疗66天，治疗费用95759.40元。二、黄冈博林司法鉴定所（2014）临法鉴字第703号司法鉴定意见书结论如下：计多涛因外伤致C2椎体底部骨折、C4椎体骨折，构成IX（9）级伤残，因T2椎体骨折，构成IX（10）级伤残，综合评定伤残指数22%，后期治疗费2000元左右，误工损失日180日，出院后护理时间1个月，营养期限2个月。鉴定时间2014年9月15日，鉴定费1200元。三、庭审中原告陈述事故发生后在大河镇派出所领取被告陶超兵款60000元。四、原告计多涛同其叔父计道立从2006年起即在大河镇合伙经营一品轩卤菜生意至现在。五、被告陶超兵系鄂J×××××中型自卸货车实际车主，其同被告黄梅县昌达汽车运输有限公司系挂靠关系，双方无异议。该车曾投保，但本次事故发生时保险期限已过。本院认为，被告陶超兵驾驶鄂J×××××中型自卸货车同对向骑二轮摩托车的原告计多涛发生碰撞，致原告受伤，黄梅县公安局交警大队（2014）第C178号事故责任认定书认定被告陶超兵负事故主要责任，原告负次要责任，本院予以确认。因鄂J×××××中型自卸货车挂靠被告黄梅县昌达汽车运输有限公司，故原告的各项损失经本院核实确认后，依责任界线对被告陶超兵应赔偿的部分由被告黄梅县昌达汽车运输有限公司共同连带赔偿，被告黄梅县昌达汽车运输有限公司辩称其只能在商业险中承担连带赔偿责任于法无据，本院不予采纳，被告陶超兵诉前支付原告60000元可从其应赔偿款中剔除。本案中鄂J×××××中型自卸货车未投保交强险，原告要求比照交强险赔偿符合最高人民法院《关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第十九条“未依法投保交强险的机动车发生交通事故造成损害，当事人请求投保义务人在交强险责任限额范围内予以赔偿的，人民法院应予支持。”之规定，本院予以支持。本案中原告要求按城镇居民标准予以赔偿是否支持，对此本院认为，原告虽然属农村户口，但其同叔父计道立从2006年起即在大河镇合伙经营一品轩卤菜生意至现在并提供了一系列证据证实，本院亦调查核实属实，二被告对此亦无异议，故原告该项请求符合最高人民法院民一庭（2005）民他字第25号《关于经常居住地在城镇的农村居民在交通事故中伤亡应如何计算赔偿费用的复函》精神，本院予以支持。原告计多涛的各项损失本院核实如下：住院治疗费95759.40元、后期治疗费2000元、误工费7712.62元（事故发生之日2014年6月12日至定残前一日2014年9月14日计92天×30599元／年）、护理费6840.46元［（住院66天＋出院后护理时间1个月）×26008元／年］、住院伙食补助费3300元（66天×50元／天）、营养费2000元（酌定）、交通费500元（酌定）、伤残赔偿金100786.40元（22906元／年×20年×22%）、精神抚慰金6000元、鉴定费1200元，合计226098.88元。综上，依照《中华人民共和国侵权责任法》第十六条、第四十八条，最高人民法院《关于审理道路交通事故损害赔偿案件适用法律若干问题的解释》第三条、第十九条，参照最高人民法院《关于审理人身损害赔偿案件适用法律若干问题的解释》第十七条、十八条、十九条、二十条、二十一条、二十二条、二十三条、二十四条、二十五条，参照《湖北省道路交通事故损害赔偿标准》（2014年度）之规定，判决如下：一、原告计多涛的各项损失226098.88元，由被告陶超兵赔偿194269.22元{比照交强险赔偿120000元，依责任界线比例赔偿74269.22元［（226098.88元-120000元）×70%］}，剔除被告陶超兵诉前支付原告60000元，下余应赔偿134269.22元，由被告黄梅县昌达汽车运输有限公司承担连带赔偿责任，其余损失原告自行负担。上述应履行义务，限义务人于本判决效之日起十日内履行完毕。逾期履行的，应当按照《中华人民共和国民事诉讼法》第二百二十九条之规定加倍支付迟延履行期间的债务利息。二、驳回原告计多涛的其它诉讼请求。本案受理费3100元，由原告负担930元，由被告陶超兵、被告黄梅县昌达汽车运输有限公司共同负担2170元。如不服本判决，可在判决书送达之日起十五日内递交上诉状，并按对方当事人或代表人的人数提出副本，上诉于湖北省黄冈市中级人民法院。</td></tr></table><br><br>',
+                            ]
 
-    <script src="/static/layui/layui.js" charset="utf-8"></script>
-    <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
-    <script>
-        layui.use(['laypage', 'layer'], function () {
-            var laypage = layui.laypage
-                , layer = layui.layer;
+                            //完整功能
+                            laypage.render({
+                                elem: 'demo7',
+                                count: data.length,
+                                page: true,
+                                layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip'],
+                                jump: function(obj) {
+                                    console.log(obj)
+                                    //模拟渲染
+                                    document.getElementById('retrieval_data_list').innerHTML = function() {
+                                        var arr = []
+                                          , thisData = data.concat().splice(obj.curr * obj.limit - obj.limit, obj.limit);
+                                        layui.each(thisData, function(index, item) {
+                                            arr.push('<dd>' + item + '</dd>');
+                                        });
+                                        return arr.join('');
+                                    }();
+                                }
+                            });
 
-            var data = [
-                {%  for e in retrieval_data %}
-                    '<a href="{{ e.url }}"><span style="font-weight: bold;">{{ e.title }}</span></a><br>' +
-                    '<a href="{{ e.url }}"><span style="font-style: italic;">{{ e.url }}</span></a><br>' +
-                    '<a href="{{ e.url }}"><span style="color: #0000FF; ">{{ e.source }}</span></a><br>' +
-                    '<a href="{{ e.url }}"><span style="color: #0000FF; ">{{ e.method }}</span></a><br>' +
-                    '{{ e.content | safe }}<br><br>',
-                {% endfor %}
-            ]
-
-            //完整功能
-            laypage.render({
-                elem: 'demo7'
-                , count: data.length
-                , layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']
-                , jump: function (obj) {
-                    console.log(obj)
-                    //模拟渲染
-                    document.getElementById('retrieval_data_list').innerHTML = function () {
-                        var arr = []
-                            , thisData = data.concat().splice(obj.curr * obj.limit - obj.limit, obj.limit);
-                        layui.each(thisData, function (index, item) {
-                            arr.push('<dd>' + item + '</dd>');
                         });
-                        return arr.join('');
-                    }();
-                }
-            });
+                    </script>
+                    <div class="layui-footer" style="position: static; text-align: center">
+                Supported by: BDAA Server Management Group, Anhui Province Key Laboratory of Big Data Analysis and
+                Application, University of Science and Technology of China.
+            </div>
+                </div>
+            </div>
+        </div>
+        <script src="/static/layui/layui.js"></script>
+        <script>
+            layui.use(['element', 'util', 'layer'], function() {
+                var element = layui.element
+                  , util = layui.util
+                  , layer = layui.layer
+                  , $ = layui.$;
 
-        });
-    </script>
-{% endblock %}
+                //固定块
+                util.fixbar({
+                    bar1: true,
+                    bar2: false,
+                    css: {
+                        right: 50,
+                        bottom: 100
+                    },
+                    bgcolor: '#393D49',
+                    click: function(type) {
+                        if (type === 'bar1') {
+                            layer.msg('(ง •̀_•́)ง')
+                        } else if (type === 'bar2') {
+                            layer.msg('第二个 bar 未开启')
+                        }
+                    }
+                })
+            });
+        </script>
+    </body>
+</html>
