@@ -1,0 +1,67 @@
+{% extends "discussion/navigator_discussion.html" %}
+{% block content %}
+    <br><h1>Swarm Intelligence based Legal Information Retriever</h1>
+    <hr>
+    <blockquote class="layui-elem-quote">
+        这里是Siblir区，分享提供一些记录相关供大家参考~<br>
+
+        <dd><a href="https://baike.baidu.com/item/%E8%84%9A%E6%9C%AC/1697005"><span style="color: #0000FF; ">类案检索</span></a></dd>
+    </blockquote>
+<br><h3>关键字检索</h3>
+    <hr>
+    <form class="layui-form" action="/Siblir/" method="post">
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><i class="layui-icon layui-icon-search"></i></label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" class="layui-textarea" name="query"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit lay-filter="demo1" lay-on="test-msg-dark">搜索</button>
+            </div>
+        </div>
+    </form>
+
+    <ul id="retrieval_data_list"></ul>
+    <div id="demo7"></div>
+
+    <script src="/static/layui/layui.js" charset="utf-8"></script>
+    <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
+    <script>
+        layui.use(['laypage', 'layer'], function () {
+            var laypage = layui.laypage
+                , layer = layui.layer;
+
+            var data = [
+                {%  for e in retrieval_data %}
+                    '<a href="{{ e.url }}"><span style="font-weight: bold;">{{ e.title }}</span></a><br>' +
+                    '<a href="{{ e.url }}"><span style="font-style: italic;">{{ e.url }}</span></a><br>' +
+                    '<a href="{{ e.url }}"><span style="color: #0000FF; ">{{ e.source }}</span></a><br>' +
+                    '<a href="{{ e.url }}"><span style="color: #0000FF; ">{{ e.method }}</span></a><br>' +
+                    '{{ e.content | safe }}<br><br>',
+                {% endfor %}
+            ]
+
+            //完整功能
+            laypage.render({
+                elem: 'demo7'
+                , count: data.length
+                , layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']
+                , jump: function (obj) {
+                    console.log(obj)
+                    //模拟渲染
+                    document.getElementById('retrieval_data_list').innerHTML = function () {
+                        var arr = []
+                            , thisData = data.concat().splice(obj.curr * obj.limit - obj.limit, obj.limit);
+                        layui.each(thisData, function (index, item) {
+                            arr.push('<dd>' + item + '</dd>');
+                        });
+                        return arr.join('');
+                    }();
+                }
+            });
+
+        });
+    </script>
+{% endblock %}
