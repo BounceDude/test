@@ -1,0 +1,604 @@
+<html>
+<head>
+
+    <meta charset="UTF-8">
+    <style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --primary: #1e40af;
+    --primary-hover: #1e3a8a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ===== 工具栏 ===== */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    max-width: 100%;
+  }
+
+  .tool-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  .btn {
+    padding: 7px 14px;
+    font-size: 13.5px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text);
+    background: #f3f4f6;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    background: #e5e7eb;
+  }
+
+  .btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* 颜色选择 */
+  .colors {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .color-dot:hover {
+    transform: scale(1.15);
+  }
+
+  .color-dot.active {
+    border-color: #1a1a1a;
+    transform: scale(1.15);
+  }
+
+  /* 粗细 */
+  input[type="range"] {
+    width: 90px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .size-label {
+    font-size: 12.5px;
+    color: var(--muted);
+    min-width: 34px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 画布 ===== */
+  .canvas-wrap {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    cursor: crosshair;
+    touch-action: none;
+    background: #fff;
+  }
+
+  canvas.eraser {
+    cursor: cell;
+  }
+
+  .hint {
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .toolbar { padding: 10px; gap: 8px; }
+    .btn { padding: 6px 10px; font-size: 13px; }
+    input[type="range"] { width: 70px; }
+    h1 { font-size: 18px; }
+  }
+</style>
+    <title>qingqing.cn</title>
+
+</head>
+
+<body>
+<div id="head">
+    4399小游戏 <input> <a href="https://so2.4399.com/search/search.php?k=%BF%F1%B1%E2%D0%A1%C5%F3%D3%D1">搜索</a> 导航 用户 换肤
+</div>
+<div id="game">
+    <table>
+        <tr><td>name  advertisement<div id="h5">
+
+
+            <h1>🎨 画板</h1>
+
+<!-- ==================== 工具栏 ==================== -->
+<div class="toolbar">
+
+  <!-- 工具 -->
+  <div class="tool-group">
+    <button class="btn active" id="penBtn" onclick="setTool('pen')">✏️ 画笔</button>
+    <button class="btn" id="eraserBtn" onclick="setTool('eraser')">🧽 橡皮</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 颜色 -->
+  <div class="tool-group colors" id="colorPalette">
+    <!-- JS 动态填充 -->
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 粗细 -->
+  <div class="tool-group">
+    <span class="size-label" id="sizeLabel">4</span>
+    <input type="range" id="sizeRange" min="1" max="40" value="4">
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 操作 -->
+  <div class="tool-group">
+    <button class="btn" id="undoBtn" onclick="undo()" disabled>↶ 撤销</button>
+    <button class="btn" onclick="clearCanvas()">🗑 清空</button>
+    <button class="btn btn-primary" onclick="saveImage()">💾 保存图片</button>
+  </div>
+
+</div>
+
+<!-- ==================== 画布 ==================== -->
+<div class="canvas-wrap">
+  <canvas id="canvas"></canvas>
+</div>
+
+<p class="hint">支持鼠标与触屏 · 撤销可回退多步 · 保存为 PNG 图片</p>
+
+<script>
+/* ============================================================
+   初始化
+   ============================================================ */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// 画笔状态
+let isDrawing = false;
+let tool = 'pen';          // 'pen' | 'eraser'
+let color = '#1a1a1a';
+let size = 4;
+let lastX = 0, lastY = 0;
+
+// 历史记录（用于撤销）
+let history = [];
+let historyIndex = -1;
+const MAX_HISTORY = 30;
+
+// 高 DPI 适配
+function setupCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  // 画布显示尺寸：随窗口自适应，最大 900px
+  const displayWidth = Math.min(window.innerWidth - 48, 900);
+  const displayHeight = Math.round(displayWidth * 0.62);
+
+  canvas.style.width = displayWidth + 'px';
+  canvas.style.height = displayHeight + 'px';
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+
+/* ============================================================
+   颜色调色板
+   ============================================================ */
+const COLORS = [
+  '#1a1a1a', '#dc2626', '#ea580c', '#d97706',
+  '#16a34a', '#0891b2', '#2563eb', '#7c3aed',
+  '#db2777', '#78350f', '#6b7280', '#ffffff',
+];
+
+function buildPalette() {
+  const palette = document.getElementById('colorPalette');
+  palette.innerHTML = '';
+  COLORS.forEach((c, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (i === 0 ? ' active' : '');
+    dot.style.background = c;
+    if (c === '#ffffff') {
+      dot.style.border = '1px solid #e5e7eb';
+    }
+    dot.onclick = () => {
+      color = c;
+      setTool('pen'); // 选颜色自动切回画笔
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+    };
+    palette.appendChild(dot);
+  });
+}
+
+/* ============================================================
+   工具切换
+   ============================================================ */
+function setTool(t) {
+  tool = t;
+  document.getElementById('penBtn').classList.toggle('active', t === 'pen');
+  document.getElementById('eraserBtn').classList.toggle('active', t === 'eraser');
+  canvas.classList.toggle('eraser', t === 'eraser');
+}
+
+/* ============================================================
+   绘制逻辑
+   ============================================================ */
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top,
+  };
+}
+
+function startDrawing(e) {
+  e.preventDefault();
+  isDrawing = true;
+  const { x, y } = getPos(e);
+  lastX = x;
+  lastY = y;
+  // 画一个点（单击也能画点）
+  drawLine(x, y, x, y);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const { x, y } = getPos(e);
+  drawLine(lastX, lastY, x, y);
+  lastX = x;
+  lastY = y;
+}
+
+function endDrawing(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  saveHistory();
+}
+
+function drawLine(x1, y1, x2, y2) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : color;
+  ctx.lineWidth = tool === 'eraser' ? size * 3 : size;
+  ctx.stroke();
+}
+
+/* ============================================================
+   历史记录（撤销）
+   ============================================================ */
+function saveHistory() {
+  // 截断当前索引之后的历史
+  history = history.slice(0, historyIndex + 1);
+  history.push(canvas.toDataURL());
+  if (history.length > MAX_HISTORY) {
+    history.shift();
+  }
+  historyIndex = history.length - 1;
+  updateUndoBtn();
+}
+
+function undo() {
+  if (historyIndex <= 0) return;
+  historyIndex--;
+  restoreFromHistory();
+}
+
+function restoreFromHistory() {
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 用 CSS 尺寸绘制，避免 DPI 问题
+    const w = canvas.width / (window.devicePixelRatio || 1);
+    const h = canvas.height / (window.devicePixelRatio || 1);
+    ctx.drawImage(img, 0, 0, w, h);
+  };
+  img.src = history[historyIndex];
+  updateUndoBtn();
+}
+
+function updateUndoBtn() {
+  document.getElementById('undoBtn').disabled = historyIndex <= 0;
+}
+
+/* ============================================================
+   清空 / 保存
+   ============================================================ */
+function clearCanvas() {
+  if (!confirm('确定要清空画布吗？')) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  saveHistory();
+}
+
+function saveImage() {
+  // 把白色背景合成进去（否则 PNG 透明）
+  const exportCanvas = document.createElement('canvas');
+  const dpr = window.devicePixelRatio || 1;
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+  const ectx = exportCanvas.getContext('2d');
+
+  // 白底
+  ectx.fillStyle = '#ffffff';
+  ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+  ectx.drawImage(canvas, 0, 0);
+
+  // 下载
+  const link = document.createElement('a');
+  const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  link.download = `drawing-${ts}.png`;
+  link.href = exportCanvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ============================================================
+   事件绑定
+   ============================================================ */
+function bindEvents() {
+  // 鼠标
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDrawing);
+  canvas.addEventListener('mouseleave', endDrawing);
+
+  // 触屏
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', endDrawing);
+  canvas.addEventListener('touchcancel', endDrawing);
+
+  // 粗细
+  const sizeRange = document.getElementById('sizeRange');
+  const sizeLabel = document.getElementById('sizeLabel');
+  sizeRange.addEventListener('input', () => {
+    size = parseInt(sizeRange.value);
+    sizeLabel.textContent = size;
+  });
+
+  // 键盘快捷键
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + Z 撤销
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      undo();
+    }
+    // Ctrl/Cmd + S 保存
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      saveImage();
+    }
+  });
+
+  // 窗口大小变化（重新适配画布，保留已画内容）
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const oldData = canvas.toDataURL();
+      const oldW = canvas.width;
+      const oldH = canvas.height;
+      setupCanvas();
+      const img = new Image();
+      img.onload = () => {
+        const w = canvas.width / (window.devicePixelRatio || 1);
+        const h = canvas.height / (window.devicePixelRatio || 1);
+        ctx.drawImage(img, 0, 0, w, h);
+      };
+      img.src = oldData;
+    }, 200);
+  });
+}
+
+/* ============================================================
+   启动
+   ============================================================ */
+function init() {
+  setupCanvas();
+  buildPalette();
+  bindEvents();
+  saveHistory(); // 初始空白状态
+}
+
+init();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div></td><td><div id="related">
+            <table><tr><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td></tr><tr><td><a href="https://h.4399.com/">H5游戏</a></td><td>冰蛙与火蛙5</td></tr></table>
+
+</div><div id="webpage">
+            <table><tr><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td></tr><tr><td>原神</td><td>造梦无双</td></tr></table>
+</div></td></tr>
+
+
+    </table>
+
+    🏔️重玩
+    🏔️放大
+    🏔️缩小
+    🏔️最佳
+    🏔️全屏🏔️到手机上玩🏔️下载🏔️评论🏔️举报🏔️收藏🏔️关灯
+
+
+
+
+</div>
+
+<table>
+    <tr><td>我玩过的<table><tr><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td></tr><tr><td>原神</td><td>生死狙击</td></tr></table>
+        <div id="广告提示分类">4399快来玩游戏吧&nbsp;温馨提示：适度游戏，谨防沉迷&nbsp;分类：益智</div>
+<div id="recommend">
+    <table><tr><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td></tr><tr><td>原神</td><td>生死狙击</td></tr></table>
+
+</div>
+    <div id="guide">
+    <blockquote class="layui-elem-quote">
+        <b>【从细胞到奇点2】</b><br>
+        <hr>
+        <h1>游戏玩法 (本游戏合适12岁以上用户)</h1>
+        <h2>操作指南</h2>
+鼠标操作
+        <h2>如何开始</h2>
+游戏加载完毕点击PLAY即可开始游戏。
+        <h2>游戏目标</h2>
+合理操作，进化恐龙。
+        <h2>游戏介绍</h2>
+游戏内你的目标是通过解锁恐龙、获得化石点数和完成任务来推进模拟。你可以在屏幕的右上角看到所有任务。完成所有任务后，触发灭绝事件以开始新的模拟。
+        <h1>其他版本</h1>
+
+<img src="/static/roles/drawer/herio.png" width="100px">从细胞到奇点
+    </blockquote>
+</div>
+
+
+<div id="comments">
+    <div id="publish">
+<button>常用表情</button><button>特殊表情</button><button>快速回复</button>
+        <textarea >发表评论</textarea>
+    <button>上传图片</button>❤❤❤❤❤
+    </div>
+    提示23896条评论327237条回复<div id="comment须知">须知：1.请谨慎联系</div><div id="comment联系">如有不知情尽快联系我们</div>
+    最新最热置顶
+    <div id="comment">
+
+        🏔️83734399用户2026-10-15山西评论点赞(3)回复举报❤❤❤❤❤
+        或东西 回复：真好3833722评论点赞回复举报id
+        到达半人马座
+    </div>
+    上一页123下一页到达页确定
+</div>
+
+    </td><td><div id="favorite">
+        <table><tr><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td><td>
+    <img src="/static/roles/drawer/herio.png" width="100px"></td></tr><tr><td>超级坦克大战无敌版</td><td>超级坦克大战2无敌缓一缓</td></tr></table>
+
+
+</div></td></tr>
+</table>
+
+<div id="foot">
+    <div id="版权">@copyright2000-2026 </div>
+    <div id="提示">湿度沉迷游戏谨防伤身 </div>
+    <div id="关于"><a href="javascript:;">关于我们</a> <a href="javascript:;">加入我们</a></div>
+    <div id="许可">警2312 网安(1028)376373839302Copyright&nbsp;©&nbsp;2021 中国科学技术大学 登记号：2021SR0958754</div>
+    <div id="联系">邮箱998@mail.com联系电话：66399384 </div>
+    <div id="报备">禁止联系私自转让 </div>
+<i class="layui-icon layui-icon-more-vertical"></i>
+</div>
+
+</body>
+
+
+</html>
