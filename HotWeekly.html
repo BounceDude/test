@@ -1,6 +1,10 @@
-<html>
-HotWeekly
-<style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotWeekly · Top 排行（标签后置 + TOP 3/总数）</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -19,7 +23,7 @@ HotWeekly
         }
 
         .container {
-            max-width: 720px;
+            max-width: 880px;
             width: 100%;
             background: #ffffff;
             border-radius: 1.6rem;
@@ -78,7 +82,7 @@ HotWeekly
         .card {
             background: #fbfaf8;
             border-radius: 1rem;
-            padding: 0.85rem 0.7rem 0.6rem;
+            padding: 0.85rem 0.75rem 0.7rem;
             border: 1px solid #edeae5;
             transition: all 0.2s ease;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
@@ -99,9 +103,7 @@ HotWeekly
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.35rem;
-            border-bottom: 1.5px solid #eee8e0;
+            margin-bottom: 0.3rem;
         }
 
         .card-title {
@@ -119,15 +121,27 @@ HotWeekly
             line-height: 1;
         }
 
+        /* ===== 右上角徽章：TOP 3/总数 ===== */
         .top-badge {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 600;
             background: #e8e3dd;
             color: #4d4d5e;
-            padding: 0.15rem 0.5rem;
+            padding: 0.12rem 0.45rem;
             border-radius: 100px;
             letter-spacing: 0.02em;
             white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 分类介绍语 */
+        .card-desc {
+            font-size: 0.68rem;
+            color: #7a7a8a;
+            line-height: 1.45;
+            margin-bottom: 0.55rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px dashed #e8e2da;
         }
 
         /* 链接列表 */
@@ -135,16 +149,30 @@ HotWeekly
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.4rem;
             flex: 1;
         }
 
         .link-list li {
             margin: 0;
-            padding: 0;
+            padding: 0.32rem 0.4rem 0.32rem 0.45rem;
+            border-radius: 0.55rem;
+            background: #ffffff;
+            border: 1px solid #f0ece7;
+            transition: background 0.15s;
+        }
+
+        .link-list li:hover {
+            background: #fdfcfb;
+            border-color: #e6dfd7;
+        }
+
+        /* 链接单行：排名 + 链接 + 标签 + 点击次数 */
+        .link-row {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.35rem;
+            flex-wrap: wrap;
         }
 
         /* 排名数字 */
@@ -180,15 +208,15 @@ HotWeekly
 
         /* 链接本身 */
         .link-list a {
-            flex: 1;
             font-size: 0.78rem;
             font-weight: 500;
             color: #1e3c72;
             text-decoration: none;
             word-break: break-word;
-            padding: 0.15rem 0;
+            padding: 0.1rem 0;
             transition: color 0.15s;
             line-height: 1.35;
+            flex-shrink: 0;
         }
 
         .link-list a:hover {
@@ -197,18 +225,48 @@ HotWeekly
             text-underline-offset: 2px;
         }
 
-        /* 点击次数 */
+        /* 标签组 — 紧跟在链接后面 */
+        .tag-group {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.22rem;
+            margin-left: 0.1rem;
+        }
+
+        .tag {
+            font-size: 0.55rem;
+            font-weight: 500;
+            color: #5f6b7a;
+            background: #eef2f7;
+            padding: 0.08rem 0.4rem;
+            border-radius: 100px;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+            border: 1px solid #e3e9f0;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .tag:hover {
+            background: #e2e9f2;
+            color: #2c3e5c;
+            border-color: #cbd8e6;
+        }
+
+        /* 点击次数 — 推到最右侧 */
         .click-count {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 600;
             color: #4f5f72;
             background: #edf1f6;
-            padding: 0.1rem 0.45rem;
+            padding: 0.08rem 0.4rem;
             border-radius: 100px;
             flex-shrink: 0;
             font-variant-numeric: tabular-nums;
             letter-spacing: 0.01em;
             white-space: nowrap;
+            margin-left: auto;
         }
 
         /* 提示条 */
@@ -250,8 +308,8 @@ HotWeekly
             transform: scale(0.96);
         }
 
-        /* 小屏适配：一排放 2 个或 1 个 */
-        @media (max-width: 560px) {
+        /* 小屏适配 */
+        @media (max-width: 680px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 0.7rem;
@@ -274,23 +332,38 @@ HotWeekly
             }
 
             .click-count {
-                font-size: 0.55rem;
-                padding: 0.08rem 0.35rem;
+                font-size: 0.52rem;
+                padding: 0.06rem 0.3rem;
+            }
+
+            .tag {
+                font-size: 0.5rem;
+                padding: 0.06rem 0.32rem;
+            }
+
+            .card-desc {
+                font-size: 0.62rem;
+            }
+
+            .top-badge {
+                font-size: 0.52rem;
+                padding: 0.1rem 0.35rem;
             }
         }
 
-        @media (max-width: 380px) {
+        @media (max-width: 440px) {
             .grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
-
-    <div class="container">
+</head>
+<body>
+<div class="container">
     <h1>分类导航 · Top 排行</h1>
     <div class="subhead">
         <span>📦 6 个分类</span>
-        <span>🏅 每个分类 Top 3 链接</span>
+        <span>🏷️ 标签紧跟链接</span>
         <span>🔗 点击链接自动移至末尾</span>
     </div>
 
@@ -300,83 +373,660 @@ HotWeekly
     </div>
 
     <div class="hint">
-        <span>💡 点击分类内的链接 → 该链接移至本分类末尾，点击次数 +1</span>
+        <span>💡 点击链接 → 移至本分类末尾，点击次数 +1</span>
         <button class="reset-btn" id="resetBtn" title="重置所有数据">⟲ 重置</button>
     </div>
 </div>
+
 <script>
     (function() {
         "use strict";
 
         // ========== 数据定义 ==========
-        // 6 个分类，每个分类下有 3~4 个链接，模拟 Top 排行
         const CATEGORIES = [
             {
                 key: "website",
                 name: "网站",
                 emoji: "🌐",
+                desc: "最常用的综合网站入口，搜索、百科、代码托管一应俱全。",
                 links: [
-                    { name: "Google", url: "https://www.google.com", clicks: 158 },
-                    { name: "GitHub", url: "https://www.github.com", clicks: 120 },
-                    { name: "Wikipedia", url: "https://www.wikipedia.org", clicks: 76 }
+                    { name: "Google", url: "https://www.google.com", clicks: 158, tags: ["网页", "搜索"] },
+                    { name: "GitHub", url: "https://www.github.com", clicks: 120, tags: ["代码", "托管"] },
+                    { name: "Wikipedia", url: "https://www.wikipedia.org", clicks: 76, tags: ["百科", "知识"] }
                 ]
             },
             {
                 key: "video",
                 name: "视频",
                 emoji: "🎬",
+                desc: "在线视频与影视娱乐，涵盖短视频、长视频和流媒体。",
                 links: [
-                    { name: "YouTube", url: "https://www.youtube.com", clicks: 142 },
-                    { name: "Bilibili", url: "https://www.bilibili.com", clicks: 88 },
-                    { name: "Netflix", url: "https://www.netflix.com", clicks: 45 }
+                    { name: "YouTube", url: "https://www.youtube.com", clicks: 142, tags: ["视频", "分享"] },
+                    { name: "Bilibili", url: "https://www.bilibili.com", clicks: 88, tags: ["弹幕", "二次元"] },
+                    { name: "Netflix", url: "https://www.netflix.com", clicks: 45, tags: ["影视", "流媒体"] }
                 ]
             },
             {
                 key: "image",
                 name: "图片",
                 emoji: "🖼️",
+                desc: "高质量图片素材与设计灵感，免费图库和设计社区。",
                 links: [
-                    { name: "Unsplash", url: "https://unsplash.com", clicks: 95 },
-                    { name: "Dribbble", url: "https://dribbble.com", clicks: 60 },
-                    { name: "Pexels", url: "https://www.pexels.com", clicks: 41 }
+                    { name: "Unsplash", url: "https://unsplash.com", clicks: 95, tags: ["图库", "免费"] },
+                    { name: "Dribbble", url: "https://dribbble.com", clicks: 60, tags: ["设计", "灵感"] },
+                    { name: "Pexels", url: "https://www.pexels.com", clicks: 41, tags: ["摄影", "素材"] }
                 ]
             },
             {
                 key: "feed",
                 name: "动态",
                 emoji: "📰",
+                desc: "实时资讯与社区动态，了解技术、热点和行业趋势。",
                 links: [
-                    { name: "Reddit", url: "https://www.reddit.com", clicks: 65 },
-                    { name: "Twitter / X", url: "https://x.com", clicks: 54 },
-                    { name: "Hacker News", url: "https://news.ycombinator.com", clicks: 25 }
+                    { name: "Reddit", url: "https://www.reddit.com", clicks: 65, tags: ["社区", "讨论"] },
+                    { name: "Twitter / X", url: "https://x.com", clicks: 54, tags: ["社交", "热点"] },
+                    { name: "Hacker News", url: "https://news.ycombinator.com", clicks: 25, tags: ["技术", "极客"] }
                 ]
             },
             {
                 key: "comment",
                 name: "评论",
                 emoji: "💬",
+                desc: "技术问答与产品讨论，程序员和产品人的聚集地。",
                 links: [
-                    { name: "Stack Overflow", url: "https://stackoverflow.com", clicks: 98 },
-                    { name: "Dev.to", url: "https://dev.to", clicks: 34 },
-                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18 }
+                    { name: "Stack Overflow", url: "https://stackoverflow.com", clicks: 98, tags: ["问答", "编程"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["开发者", "博客"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["产品", "发现"] }
                 ]
             },
             {
                 key: "music",
                 name: "歌曲",
                 emoji: "🎵",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
                 links: [
-                    { name: "Spotify", url: "https://www.spotify.com", clicks: 112 },
-                    { name: "SoundCloud", url: "https://soundcloud.com", clicks: 52 },
-                    { name: "网易云音乐", url: "https://music.163.com", clicks: 30 }
+                    { name: "Spotify", url: "https://www.spotify.com", clicks: 112, tags: ["音乐", "流媒体"] },
+                    { name: "SoundCloud", url: "https://soundcloud.com", clicks: 52, tags: ["独立", "音频"] },
+                    { name: "网易云音乐", url: "https://music.163.com", clicks: 30, tags: ["歌单", "评论"] }
                 ]
-            }
+            },
+            {
+                key: "comment",
+                name: "有趣区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "马保国", url: "https://stackoverflow.com", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "A9大哥返贫", url: "https://mp.weixin.qq.com/s/7xkW3o_itFfknqVII6l-fA", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "排卵期的女友让我心惊肉跳", url: "https://www.bilibili.com/video/BV1RBa96ZETj", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "名言区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "风浪越大鱼越贵", url: "https://stackoverflow.com", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "不发脾气只发财", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "知语：怀里兜着午夜的风", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "生活就像被强奸,如果不能反抗,就好好享受吧", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "如果科学解释不了那就交给爱吧", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "是结婚证需要这类人来证明", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "看见伤疤，但不要让伤疤成为你的全名。", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "猜你喜欢",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "风浪越大鱼越贵", url: "https://stackoverflow.com", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "今日推文",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "风浪越大鱼越贵", url: "https://stackoverflow.com", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "参考文献",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "意林", url: "https://mp.weixin.qq.com/s/JIXhDkII1U1GNT_4FsPmtg", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "应用",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "哔哩哔哩", url: "https://www.bilibili.com/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "知乎", url: "https://www.zhihu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "推文",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "哔哩哔哩", url: "https://www.bilibili.com/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "知乎", url: "https://www.zhihu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "热搜",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "哔哩哔哩", url: "https://www.bilibili.com/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "知乎", url: "https://www.zhihu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "好物分享",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "哔哩哔哩", url: "https://www.bilibili.com/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "知乎", url: "https://www.zhihu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "好图分享",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "Maomi图库", url: "https://pic.vuk91nin3uqw.cc/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "游侠图库", url: "https://pic.ali213.net/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "动画区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "Maomi图库", url: "https://pic.vuk91nin3uqw.cc/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "游侠图库", url: "https://pic.ali213.net/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "动漫区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "Maomi图库", url: "https://pic.vuk91nin3uqw.cc/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "游侠图库", url: "https://pic.ali213.net/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "妙招区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "齐民要术", url: "https://www.xyyuedu.com/gdmz/qiminyaoshu/index.html", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "妙招姐", url: "https://space.bilibili.com/287051252?spm_id_from=333.337.0.0", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Dev.to", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "直播区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "童锦程【798】", url: "https://www.huya.com/527988", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "胡胡不胡o", url: "https://live.bilibili.com/27868290", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "白鲨AyoM", url: "https://www.douyu.com/728", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "动态区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "空友爱看", url: "https://rule.tencent.com/rule/202508100002", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "小红书", url: "https://www.xiaohongshu.com/explore", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "声音区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "春语实验室语音对话", url: "http://ow.thnuclub.com/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "小红书", url: "https://www.xiaohongshu.com/explore", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "文章区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "意林", url: "https://mp.weixin.qq.com/s/JIXhDkII1U1GNT_4FsPmtg", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "小红书", url: "https://www.xiaohongshu.com/explore", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "音乐区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "来不及", url: "https://music.163.com/#/playlist?id=18248911566", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "学习俄罗斯神曲第一天《dadada》", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "广告区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "红果短视频", url: "https://music.163.com/#/playlist?id=18248911566", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "泰国广告", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "玩具区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "红果短视频", url: "https://music.163.com/#/playlist?id=18248911566", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "泰国广告", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "美女区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "红果短视频", url: "https://music.163.com/#/playlist?id=18248911566", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "泰国广告", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "党建区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "江西干部学院", url: "https://www.hspx.cn/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "泰国广告", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "活动区",
+                emoji: "💬",
+                desc: "音乐流媒体与音频社区，发现好歌、歌单与独立音乐。",
+                links: [
+                    { name: "健身", url: "https://www.hspx.cn/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "掼蛋", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "算法区",
+                emoji: "",
+                desc: "优秀的算法从不过时",
+                links: [
+                    { name: "油漆工算法", url: "https://www.hspx.cn/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "掼蛋", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "网站区",
+                emoji: "",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "Weibo Gao", url: "http://home.ustc.edu.cn/~weibogao/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "掼蛋", url: "https://www.bilibili.com/video/BV1Lm411R7sC", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "评论区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "Weibo Gao", url: "http://home.ustc.edu.cn/~weibogao/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "帝国の牛蛙", url: "https://www.bilibili.com/video/BV144jM6yEjo", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "优秀博主区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "我要困告了呢i", url: "https://space.bilibili.com/404724315", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "卧龙寺", url: "https://space.bilibili.com/507855548", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "优秀对白区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "在下毛毛雨", url: "https://space.bilibili.com/404724315", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "你们开车都喜欢鞋带绑腿上吗", url: "https://space.bilibili.com/507855548", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "twitter", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "onlyfans", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "绝迹网名区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "浪客剑心", url: "https://space.bilibili.com/404724315", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "锟斤拷", url: "https://space.bilibili.com/507855548", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "名字平平无奇，配上这个姓氏直接封神", url: "https://www.bilibili.com/video/BV1gCti6oEfJ", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "王布宁", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "好用工具区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "高情商回复聊天助手", url: "#小程序://聊天助手/unqrTkLNIqm0OPf", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "deepseek", url: "https://www.deepseek.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "男友约女友出来散步女友穿得很漂亮！", url: "https://www.bilibili.com/video/BV1bwpc6gE5q", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "王布宁", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "美女区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "高情商回复聊天助手", url: "#小程序://聊天助手/unqrTkLNIqm0OPf", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "deepseek", url: "https://www.deepseek.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "男友约女友出来散步女友穿得很漂亮！", url: "https://www.bilibili.com/video/BV1bwpc6gE5q", clicks: 34, tags: ["徐子珊", "搜索"] },
+                    { name: "王布宁", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "困难区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "高情商回复聊天助手", url: "#小程序://聊天助手/unqrTkLNIqm0OPf", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "蟑螂", url: "https://www.deepseek.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "脑子里有蟑螂", url: "https://www.bilibili.com/video/BV1bwpc6gE5q", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "王布宁", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "养眼区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "复明", url: "#小程序://聊天助手/unqrTkLNIqm0OPf", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "近期画的", url: "https://www.bilibili.com/video/BV1Y2Hv65E9Y/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "王布宁", url: "https://dev.to", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "创意区",
+                emoji: "☝",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "避她锋芒！", url: "https://www.bilibili.com/video/BV1oDp46aE2z/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "自从上了中国科大，每天都很通透👍", url: "https://www.bilibili.com/video/BV1AKpk6UEwV/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "知识科普区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "科普君XueShu雪树", url: "https://www.bilibili.com/video/BV1oDp46aE2z/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "为什么飞机不能直线飞过太平洋", url: "https://www.bilibili.com/video/BV1mTpq6kE3i", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "悦耳区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "妹妹", url: "https://www.bilibili.com/video/BV1oDp46aE2z/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "姐姐", url: "https://www.bilibili.com/video/BV1AKpk6UEwV/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "我已不再年轻但岁月教会我智慧", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "妈妈", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "当真爱降临时，请为我循环播放这首歌...", url: "https://www.bilibili.com/video/BV1Kypg6YEWo", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "姥姥", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "自定义区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "科普君XueShu雪树", url: "https://www.bilibili.com/video/BV1oDp46aE2z/", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "自从上了中国科大，每天都很通透👍", url: "https://www.bilibili.com/video/BV1AKpk6UEwV/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "技艺区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "飞牌", url: "https://space.bilibili.com/545795620", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "铸剑", url: "https://space.bilibili.com/1023310670", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "小淘气区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "蓝的发紫", url: "https://space.bilibili.com/545795620", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "学习区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "vlog｜来同济当卧底的一天", url: "https://www.bilibili.com/video/BV1h9hJ6dEDV", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "一觉醒来deepseek和豆包睡在我身边（一）【AI全民制作人】", url: "https://www.bilibili.com/video/BV1HYp16oE8v/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "猎奇区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "这是一期重口味的怪兽盘点【破坏兽】（慎入！）", url: "https://www.bilibili.com/video/BV1ympy6tEHK", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "山海经", url: "https://shanhaijing.5000yan.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "美好区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "不小心把一家奇奇怪怪的店开了6年，我们靠什么赚钱？把子肉酸奶", url: "https://www.bilibili.com/video/BV1uFp26uEEZ", clicks: 98, tags: ["网页", "搜索"] },
+                    { name: "山海经", url: "https://shanhaijing.5000yan.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
+            {
+                key: "comment",
+                name: "美食区",
+                emoji: "👍",
+                desc: "优秀的网站设计",
+                links: [
+                    { name: "厨师长分享：“干炒牛河”的家常做法，干香嫩滑，锅气十足", url: "https://www.bilibili.com/video/BV1BeJC6qEuP", clicks: 98, tags: ["牛肉可能会道歉"] },
+                    { name: "山海经", url: "https://shanhaijing.5000yan.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "动态速写", url: "https://www.bilibili.com/video/BV1oVp66NEaq/", clicks: 34, tags: [] },
+                    { name: "虎扑", url: "https://m.hupu.com/", clicks: 34, tags: ["网页", "搜索"] },
+                    { name: "Facebook", url: "https://www.producthunt.com", clicks: 18, tags: ["网页", "搜索"] }
+                ]
+            },
         ];
 
-        // 深拷贝一份作为工作数据
+        // 深拷贝
         let categoriesData = CATEGORIES.map(cat => ({
             ...cat,
-            links: cat.links.map(link => ({ ...link }))
+            links: cat.links.map(link => ({ ...link, tags: [...link.tags] }))
         }));
 
         const gridContainer = document.getElementById('gridContainer');
@@ -387,11 +1037,10 @@ HotWeekly
             gridContainer.innerHTML = '';
 
             categoriesData.forEach((cat) => {
-                // 每个分类卡片
                 const card = document.createElement('div');
                 card.className = 'card';
 
-                // 头部
+                // ---- 头部 ----
                 const header = document.createElement('div');
                 header.className = 'card-header';
 
@@ -399,23 +1048,35 @@ HotWeekly
                 title.className = 'card-title';
                 title.innerHTML = `<span class="emoji">${cat.emoji}</span><span>${cat.name}</span>`;
 
+                // ===== 右上角徽章：TOP 3/总数 =====
+                const totalLinks = cat.links.length;          // 当前分类的链接总数
+                const topCount = Math.min(3, totalLinks);      // Top 数量（最多 3，不超过总数）
                 const topBadge = document.createElement('span');
                 topBadge.className = 'top-badge';
-                topBadge.textContent = 'TOP 3';
+                topBadge.textContent = `TOP ${topCount}/${totalLinks}`;
+                topBadge.title = `前 ${topCount} 名 / 共 ${totalLinks} 个链接`;
 
                 header.appendChild(title);
                 header.appendChild(topBadge);
 
-                // 链接列表
+                // ---- 介绍语 ----
+                const desc = document.createElement('div');
+                desc.className = 'card-desc';
+                desc.textContent = cat.desc;
+
+                // ---- 链接列表 ----
                 const list = document.createElement('ul');
                 list.className = 'link-list';
 
-                // 按点击次数降序排序（稳定），但已经在数据变化时手动排序了，这里直接渲染
                 cat.links.forEach((link, index) => {
                     const rank = index + 1;
                     const li = document.createElement('li');
 
-                    // 排名数字
+                    // 单行容器：排名 + 链接 + 标签 + 点击次数
+                    const row = document.createElement('div');
+                    row.className = 'link-row';
+
+                    // 排名
                     const rankNum = document.createElement('span');
                     rankNum.className = 'rank-num';
                     if (rank === 1) rankNum.classList.add('r1');
@@ -430,34 +1091,43 @@ HotWeekly
                     a.rel = 'noopener noreferrer';
                     a.textContent = link.name;
 
-                    // 点击事件：点击次数+1，移至本分类末尾，其他按点击次数重新排序
+                    // 点击事件
                     a.addEventListener('click', function(e) {
-                        // 找到当前分类数据
                         const category = categoriesData.find(c => c.key === cat.key);
                         if (!category) return;
 
-                        // 找到当前链接对象
                         const currentLink = category.links.find(l => l.url === link.url);
                         if (!currentLink) return;
 
-                        // 1. 点击次数+1
+                        // 1. 点击次数 +1
                         currentLink.clicks += 1;
 
-                        // 2. 从分类的链接数组中移除该链接
+                        // 2. 移除
                         const idx = category.links.indexOf(currentLink);
                         if (idx > -1) category.links.splice(idx, 1);
 
-                        // 3. 对剩余链接按点击次数降序排序（稳定）
+                        // 3. 剩余按点击次数降序排序（稳定）
                         category.links.sort((a, b) => {
                             if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-                            return 0; // 稳定排序
+                            return 0;
                         });
 
-                        // 4. 将被点击链接 push 到末尾
+                        // 4. 推到末尾
                         category.links.push(currentLink);
 
-                        // 5. 重新渲染
+                        // 5. 重新渲染（总数不变，徽章同步更新排名数据）
                         render();
+                    });
+
+                    // 标签组（紧跟在链接后面）
+                    const tagGroup = document.createElement('span');
+                    tagGroup.className = 'tag-group';
+
+                    link.tags.forEach(tagText => {
+                        const tagEl = document.createElement('span');
+                        tagEl.className = 'tag';
+                        tagEl.textContent = tagText;
+                        tagGroup.appendChild(tagEl);
                     });
 
                     // 点击次数
@@ -465,25 +1135,29 @@ HotWeekly
                     count.className = 'click-count';
                     count.textContent = `${link.clicks}`;
 
-                    li.appendChild(rankNum);
-                    li.appendChild(a);
-                    li.appendChild(count);
+                    // 组装单行
+                    row.appendChild(rankNum);
+                    row.appendChild(a);
+                    row.appendChild(tagGroup);
+                    row.appendChild(count);
+
+                    li.appendChild(row);
                     list.appendChild(li);
                 });
 
                 card.appendChild(header);
+                card.appendChild(desc);
                 card.appendChild(list);
                 gridContainer.appendChild(card);
             });
         }
 
-        // ========== 重置数据 ==========
+        // ========== 重置 ==========
         function resetData() {
             categoriesData = CATEGORIES.map(cat => ({
                 ...cat,
-                links: cat.links.map(link => ({ ...link }))
+                links: cat.links.map(link => ({ ...link, tags: [...link.tags] }))
             }));
-            // 初始按点击次数降序排序
             categoriesData.forEach(cat => {
                 cat.links.sort((a, b) => b.clicks - a.clicks);
             });
@@ -492,7 +1166,6 @@ HotWeekly
 
         // ========== 初始化 ==========
         function init() {
-            // 初始排序
             categoriesData.forEach(cat => {
                 cat.links.sort((a, b) => b.clicks - a.clicks);
             });
@@ -511,582 +1184,5 @@ HotWeekly
         }
     })();
 </script>
-  <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(145deg, #f5f3f0 0%, #ece9e4 100%);
-            min-height: 100vh;            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 2.5rem 1.5rem;
-            color: #1c1c2b;
-        }
-
-        .container {
-            max-width: 820px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: 2rem;
-            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.15), 0 8px 20px -8px rgba(0, 0, 0, 0.05);
-            padding: 2rem 2rem 2.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding-bottom: 0.85rem;
-            border-bottom: 3px solid #e5dfd7;
-            margin-bottom: 0.5rem;
-            color: #1e2a3a;
-        }
-
-        h1::before {
-            content: "🏆";
-            font-size: 2rem;
-            line-height: 1;
-        }
-
-        .subhead {
-            font-size: 0.95rem;
-            color: #6b6b7b;
-            margin-bottom: 1.75rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem 1.5rem;
-            align-items: baseline;
-        }
-
-        .subhead span {
-            background: #f0ece7;
-            padding: 0.3rem 0.9rem;
-            border-radius: 100px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #3f4d5e;
-        }
-
-        /* 排行榜列表 */
-        .ranking-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.55rem;
-            margin-top: 0.5rem;
-        }
-
-        /* 每个链接项 */
-        .link-item {
-            display: flex;
-            align-items: center;
-            gap: 0.9rem;
-            background: #fbfaf8;
-            border-radius: 1rem;
-            padding: 0.65rem 1rem 0.65rem 1.2rem;
-            border: 1px solid #edeae5;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-            cursor: default;
-            position: relative;
-        }
-
-        .link-item:hover {
-            background: #f6f3ef;
-            border-color: #d9d2ca;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-        }
-
-        /* 排名徽章 */
-        .rank-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2.2rem;
-            height: 2.2rem;
-            background: #e8e3dd;
-            border-radius: 0.75rem;
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #4d4d5e;
-            flex-shrink: 0;
-            transition: all 0.2s;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* 前三名徽章特殊颜色 */
-        .rank-badge.top-1 {
-            background: #ffd966;
-            color: #7a5c00;
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-        }
-
-        .rank-badge.top-2 {
-            background: #d4d9e0;
-            color: #3e4b5c;
-            box-shadow: 0 2px 8px rgba(180, 190, 200, 0.3);
-        }
-
-        .rank-badge.top-3 {
-            background: #e6b89c;
-            color: #633e1e;
-            box-shadow: 0 2px 8px rgba(210, 160, 120, 0.3);
-        }
-
-        /* Top 10 区域整体高亮 (可选，这里用文字说明) */
-        .link-item.is-top10 {
-            /* 可加细微左边条，但不用太夸张 */
-            border-left: 4px solid #b0c4de;
-        }
-
-        /* 链接本身 */
-        .link-item a {
-            flex: 1;
-            font-size: 1.08rem;
-            font-weight: 500;
-            color: #1e3c72;
-            text-decoration: none;
-            word-break: break-word;
-            padding: 0.2rem 0;
-            transition: color 0.15s;
-        }
-
-        .link-item a:hover {
-            color: #0a1e3a;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-        }
-
-        /* 点击次数 */
-        .click-counter {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #4f5f72;
-            background: #edf1f6;
-            padding: 0.3rem 0.75rem;
-            border-radius: 100px;
-            flex-shrink: 0;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 0.01em;
-            min-width: 3.5rem;
-            text-align: center;
-            transition: background 0.2s;
-        }
-
-        /* 点击后的小反馈 */
-        .link-item:active {
-            transform: scale(0.995);
-        }
-
-        /* 尾部说明 */
-        .hint {
-            margin-top: 2rem;
-            font-size: 0.85rem;
-            color: #8f8b86;
-            text-align: center;
-            border-top: 1px dashed #dad6d0;
-            padding-top: 1.4rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-
-        .hint kbd {
-            background: #eae5e0;
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #3d3d4d;
-            font-weight: 500;
-            border: 1px solid #d6cfc7;
-            box-shadow: 0 1px 0 #ccc5bd;
-        }
-
-        /* 重置按钮 (小工具，方便测试) */
-        .reset-btn {
-            background: #f0ece7;
-            border: none;
-            border-radius: 100px;
-            padding: 0.35rem 1.1rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #4f4f62;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            border: 1px solid #e0dad2;
-        }
-
-        .reset-btn:hover {
-            background: #e2dbd3;
-            color: #1c1c2b;
-        }
-
-        .reset-btn:active {
-            transform: scale(0.96);
-        }
-    </style>
-    <body>
-<div class="container">
-    <h1>网站链接 · Top 10 排行</h1>
-    <div class="subhead">
-        <span>📋 共 20 个链接</span>
-        <span>🏅 按点击次数排序</span>
-        <span>🔗 点击链接自动移至末尾</span>
-    </div>
-
-    <!-- 链接列表容器，JavaScript 动态渲染 -->
-    <ul class="ranking-list" id="rankingList"></ul>
-
-    <div class="hint">
-        <span>💡 点击任意链接 → 该链接移动到第 20 位，且点击次数 +1</span>
-        <button class="reset-btn" id="resetBtn" title="重置点击次数与顺序">⟲ 重置数据</button>
-    </div>
-</div>
-
-<script>
-    (function() {
-        "use strict";
-
-        // ---------- 初始数据：20 个网站链接（名称 + 初始点击次数） ----------
-        const INITIAL_LINKS = [
-            { name: "Google",     url: "https://www.google.com",   clicks: 158 },
-            { name: "YouTube",    url: "https://www.youtube.com",  clicks: 142 },
-            { name: "GitHub",     url: "https://www.github.com",   clicks: 120 },
-            { name: "Stack Overflow", url: "https://stackoverflow.com", clicks: 98 },
-            { name: "MDN Web Docs", url: "https://developer.mozilla.org", clicks: 87 },
-            { name: "Wikipedia",  url: "https://www.wikipedia.org", clicks: 76 },
-            { name: "Reddit",     url: "https://www.reddit.com",   clicks: 65 },
-            { name: "Twitter / X", url: "https://x.com",           clicks: 54 },
-            { name: "Notion",     url: "https://www.notion.so",    clicks: 43 },
-            { name: "Figma",      url: "https://www.figma.com",    clicks: 32 },
-            { name: "OpenAI",     url: "https://openai.com",       clicks: 29 },
-            { name: "Hacker News", url: "https://news.ycombinator.com", clicks: 25 },
-            { name: "Smashing Magazine", url: "https://www.smashingmagazine.com", clicks: 21 },
-            { name: "CSS-Tricks", url: "https://css-tricks.com",   clicks: 18 },
-            { name: "Dev.to",     url: "https://dev.to",           clicks: 14 },
-            { name: "Codepen",    url: "https://codepen.io",       clicks: 11 },
-            { name: "Product Hunt", url: "https://www.producthunt.com", clicks: 8 },
-            { name: "Dribbble",   url: "https://dribbble.com",     clicks: 6 },
-            { name: "Behance",    url: "https://www.behance.net",  clicks: 3 },
-            { name: "Frontend Mentor", url: "https://www.frontendmentor.io", clicks: 1 }
-        ];
-
-        // 深拷贝一份作为工作数据
-        let linksData = INITIAL_LINKS.map(item => ({ ...item }));
-
-        // 获取列表容器
-        const listEl = document.getElementById('rankingList');
-
-        // ---------- 工具：根据 clicks 降序排序，若点击次数相同则保持相对顺序（稳定排序，利用数组索引） ----------
-        function sortByClicksDesc() {
-            // 利用 map 携带原始索引，保证稳定排序
-            linksData = linksData
-                .map((item, index) => ({ ...item, _index: index }))
-                .sort((a, b) => {
-                    if (b.clicks !== a.clicks) {
-                        return b.clicks - a.clicks;      // 点击次数多的在前
-                    }
-                    return a._index - b._index;          // 点击次数相同则维持原有顺序
-                })
-                .map(({ _index, ...rest }) => rest);     // 移除临时索引
-        }
-
-        // ---------- 渲染排行榜列表 ----------
-        function render() {
-            if (!listEl) return;
-
-            // 先排序（每次渲染前确保按点击次数降序）
-            sortByClicksDesc();
-
-            // 清空列表
-            listEl.innerHTML = '';
-
-            // 遍历数据生成 DOM
-            linksData.forEach((item, index) => {
-                const rank = index + 1;               // 排名从 1 开始
-                const isTop10 = rank <= 10;            // 是否为 Top10
-
-                // 创建 li
-                const li = document.createElement('li');
-                li.className = 'link-item' + (isTop10 ? ' is-top10' : '');
-                // 可选: 添加 data 属性便于调试
-                li.dataset.url = item.url;
-                li.dataset.rank = rank;
-
-                // 排名徽章
-                const badge = document.createElement('span');
-                badge.className = 'rank-badge';
-                if (rank === 1) badge.classList.add('top-1');
-                else if (rank === 2) badge.classList.add('top-2');
-                else if (rank === 3) badge.classList.add('top-3');
-                badge.textContent = rank;
-
-                // 链接
-                const link = document.createElement('a');
-                link.href = item.url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.textContent = item.name;
-                // 给链接绑定点击事件：阻止默认？不阻止默认，保留跳转；但需要移动位置。
-                // 使用 addEventListener 在链接上，但为了确保链接跳转不受影响，我们使用「捕获」或者直接监听链接点击。
-                // 由于我们希望点击链接时既跳转又移动位置，使用普通的 click 事件，不阻止默认行为。
-                // 但要注意：跳转可能导致页面很快离开，不过我们使用的是 target="_blank"，打开新标签页，当前页面保留，没问题。
-                // 但用户可能不想跳转？需求是“点击其中一个链接，这个链接自动排到20个链接的末尾”，但同时链接本身是网站链接，应该可以跳转。
-                // 所以保留 target=_blank，让用户在新标签页打开，同时当前页面执行移动逻辑。
-                link.addEventListener('click', function(e) {
-                    // 不阻止默认行为，允许打开新窗口。
-                    // 但注意：移动逻辑需要更新当前链接到末尾，并重新渲染。
-                    // 找到该项在 linksData 中的位置
-                    const currentItem = linksData.find(d => d.url === item.url && d.name === item.name);
-                    if (!currentItem) return;
-
-                    // 1. 点击次数 +1
-                    currentItem.clicks += 1;
-
-                    // 2. 从数组中移除该项
-                    const idx = linksData.indexOf(currentItem);
-                    if (idx !== -1) {
-                        linksData.splice(idx, 1);
-                    }
-
-                    // 3. 将该链接添加到数组末尾（即第20位）
-                    linksData.push(currentItem);
-
-                    // 4. 重新渲染（内部会重新按点击次数排序，点击次数+1后可能排名会变，但需求明确要移到末尾，
-                    //    但是又要求“top10排列的网站链接”，并且点击后排到末尾。这意味着点击后该链接会出现在第20位。
-                    //    但同时我们又需要按点击次数排序显示Top10? 有冲突。
-                    //    仔细阅读需求：“20个链接显示top10排列的网站链接，点击其中一个链接，这个链接自动排到20个链接的末尾”
-                    //    解释：页面显示的是20个链接，但按照点击次数（Top10）排列？还是说显示前10名？但一共20个链接全显示。
-                    //    理解：20个链接全部显示，但排序依据是点击次数，排名前10的会突出显示。点击某个链接后，该链接会被移动到列表末尾（第20位），
-                    //    并且该链接的点击次数增加。这样下一次排序时，它可能因为点击次数增加而上升排名，但因为被移到了末尾，所以位置会重新根据排序决定。
-                    //    但这里有一个矛盾：如果点击后立即重新排序，它可能不是末尾，而是根据点击次数排到中间或前面。
-                    //    需求明确说“点击其中一个链接，这个链接自动排到20个链接的末尾”，意味着它必须位于最后一位，
-                    //    所以排序应该保证点击后该链接在末尾，即我们需要把该链接放在数组最后，并且排序逻辑要尊重这个“末尾”位置？
-                    //    但点击次数增加后，如果它原本点击次数很少，加1后排名可能不变或略升，但放在末尾就矛盾了。
-                    //    仔细分析：可能是初始按点击次数排序显示Top10，点击后强制把该链接放到末尾，并且点击次数+1，但之后不再按点击次数重新排序？
-                    //    或者每次点击后，将点击次数+1，并且强制将该链接置于列表末尾，然后其余链接按点击次数排序，但该链接固定在末尾？
-                    //    更合理的实现：每次点击链接，其点击次数+1，然后把该链接移动到数组末尾，然后对除最后一个元素外的其余元素按点击次数降序排序，最后把该链接放在最后。
-                    //    这样既保证了点击链接在末尾，又让其他19个链接按照点击次数展示排行。
-                    //    但需求又说“top10排列的网站链接”，意味着其他19个仍然按点击次数排序，Top10显示在前10个。
-                    //    所以最终决定：点击链接后，该链接移动到末尾（第20位），点击次数+1；其他19个链接根据点击次数降序排序，排在前19位。
-                    //    这样点击的链接永远在末尾，其他19个仍然保持Top10排行（前10名）。
-                    //    但这样会有一个问题：被点击的链接虽然点击次数增加了，但因为它固定末尾，所以它不会参与Top10排名？不符合直觉。
-                    //    另一种更符合“点击后排到末尾”的常见交互：类似“置底”效果。但这里又要显示Top10，我猜是：
-                    //    列表始终按点击次数降序显示所有20个链接，但点击链接后，该链接被移动到末尾并保持点击次数+1，但之后排序会将它重新排上去？
-                    //    但是需求描述比较简洁，结合用户之前的交互“点击其中一个链接，这个链接自动排到20个链接的末尾”，
-                    //    我决定采用最直接的做法：点击链接后，该链接移动到末尾，并且不再根据点击次数重新排序。而是保持其他链接相对顺序？
-                    //    不，这样会丢失Top10意义。
-                    //    仔细观察用户需求：“20个链接显示top10排列的网站链接”可能是指列表整体按点击次数排序，但只突出前10名。
-                    //    “点击其中一个链接，这个链接自动排到20个链接的末尾”表示被点击的链接会被放置到最后，即使它的点击次数很高。
-                    //    所以我的方案：每次点击后，该链接移动到数组末尾（索引19），点击次数+1；其他链接保持原有相对顺序（或者仍然按点击次数排序？）。
-                    //    为了同时满足“Top10排列”和“点击后排到末尾”，我决定：初始按点击次数排序；点击链接后，该链接移到末尾，点击次数+1；其他链接的相对顺序保持不变（已经按点击次数排序好了）。
-                    //    但下一次点击其他链接时，需要重新处理。这可能导致列表逐渐乱序。
-                    //    为了让列表始终有条理，我选择：在每次点击后，先将该链接移动到末尾，然后对除末尾外的19个链接按点击次数降序排序，末尾固定为被点击的链接。
-                    //    这样其他19个始终按点击次数排序，Top10依然存在（指前10个），被点击的链接固定在末尾，并且它的点击次数也增加了，但不会影响其他链接排名。
-                    //    如果用户点击了多个链接，它们会依次被放到末尾，并且点击次数增加，但其他链接排名会不断更新，这样比较合理。
-                    //    下面实现这个逻辑。
-
-                    // 重新整理：上面已经移除了currentItem并加到末尾，但为了固定末尾元素不被排序影响，我们需要在排序时排除最后一个元素。
-                    // 但render函数内部调用sortByClicksDesc会全局排序，把末尾元素也参与排序，从而可能离开末尾。
-                    // 所以我们需要改造排序逻辑：在render中不全局排序，而是保持末尾元素不变，对前面的元素排序。
-                    // 但点击次数显示需要实时更新，排序前需要先更新clicks，然后重新排序除最后一个元素外的部分。
-                    // 为了清晰，我将移动和排序逻辑抽离为单独函数，在点击事件中调用。
-
-                    // 但为了不让代码过于复杂，我采用以下方式：点击后，currentItem.clicks+1，从数组中移除并push到末尾。
-                    // 然后重新渲染时，render函数会按点击次数降序排序整个数组，这样currentItem可能因为clicks增加而排在前面，就违背了“排到末尾”。
-                    // 所以需要特殊处理：在render中，如果检测到某个链接被标记为“强制末尾”，则固定它。
-                    // 可以使用一个forceLastUrl集合，但过于复杂。
-
-                    // 我决定简化需求解读：用户可能只是想要“点击链接后，该链接移动到列表末尾（视觉上的20个链接的末尾）”，
-                    // 同时链接的点击次数+1，并且列表仍然按点击次数降序排列显示Top10？但那样点击后它可能不是末尾。
-                    // 如果必须两者兼得，只能将“移动到末尾”理解为用户点击后，链接在DOM中移动到末尾，但排序后位置会变？那用户看到的就是它跑到了别处，不符合预期。
-
-                    // 重新看需求原文：“html功能是20个链接显示top10排列的网站链接，点击其中一个链接，这个链接自动排到20个链接的末尾”
-                    // 可能意思是：页面上有20个链接，默认按点击次数（或某种排名）显示Top10排列（即前10名有特殊标识），
-                    // 点击某个链接后，这个链接会被移到列表的最后一位（第20位），同时它的点击次数增加？
-                    // 但这样Top10标识会变化，被点击的链接可能从Top10掉出，符合直觉。
-
-                    // 因此最终方案：点击链接后，该链接移动到数组末尾，点击次数+1，其他19个链接按点击次数降序排序（Top10仍然标识前10个），最后一个固定为点击的链接。
-                    // 在render中体现为：先分离最后一个元素，对剩余19个排序，然后合并。但点击时我们需要先设置好数组结构。
-                    // 为了避免混乱，我在点击事件中直接重新组织linksData，然后调用render，render不再排序，而是相信linksData的顺序已经是最终顺序。
-                    // 但其他情况如重置时需要排序。所以我在render中不再排序，而是提供一个外部排序函数。
-                    // 为了可维护性，我将在点击事件中完成所有排序逻辑，然后调用render直接使用linksData顺序。
-
-                    // 重新梳理：
-                    // 1. 每个链接对象有 clicks 属性。
-                    // 2. 点击链接时：该链接 clicks+1。
-                    // 3. 从 linksData 中移除该链接。
-                    // 4. 对剩余 linksData 按 clicks 降序排序（稳定排序）。
-                    // 5. 将被点击链接 push 到 linksData 末尾。
-                    // 6. 调用 render（render内部不再排序，直接渲染 linksData 顺序）。
-                    // 这样，被点击链接永远在末尾，其他链接按点击次数排序。完美满足需求。
-
-                    // 所以，修改点击处理逻辑如下：
-                    // 但这里我直接在点击事件中完成，但要注意link的点击事件会同时触发跳转，需要确保数据先更新。
-
-                    // 由于点击事件可能很快跳转（新标签页），当前页面的JS会在跳转前执行完成。没问题。
-
-                    // 下面开始执行上述步骤：
-                    // (1) 已经currentItem.clicks += 1
-                    // (2) 从 linksData 中移除
-                    const indexInArray = linksData.indexOf(currentItem);
-                    if (indexInArray > -1) {
-                        linksData.splice(indexInArray, 1);
-                    }
-
-                    // (3) 对剩余 linksData 按 clicks 降序排序（稳定）
-                    linksData.sort((a, b) => {
-                        if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-                        return 0; // 稳定排序依赖V8引擎的稳定排序，或自己维护索引，这里简单处理
-                    });
-                    // 注意：现代 JS 引擎 sort 是稳定的，所以相同 clicks 会保持相对顺序。
-
-                    // (4) 将被点击链接 push 到最后
-                    linksData.push(currentItem);
-
-                    // (5) 重新渲染，render 内部不再排序
-                    render(false); // 传入 false 表示不自动排序
-                });
-
-                // 点击计数
-                const counter = document.createElement('span');
-                counter.className = 'click-counter';
-                counter.textContent = `${item.clicks} 次`;
-
-                // 组装
-                li.appendChild(badge);
-                li.appendChild(link);
-                li.appendChild(counter);
-
-                listEl.appendChild(li);
-            });
-        }
-
-        // ---------- 渲染函数（可选排序） ----------
-        // 如果 autoSort 为 true，先按点击次数降序排序（稳定）
-        function render(autoSort = true) {
-            if (!listEl) return;
-
-            if (autoSort) {
-                // 稳定排序: 使用 _index 辅助
-                linksData = linksData
-                    .map((item, idx) => ({ ...item, _idx: idx }))
-                    .sort((a, b) => {
-                        if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-                        return a._idx - b._idx;
-                    })
-                    .map(({ _idx, ...rest }) => rest);
-            }
-
-            // 清空列表
-            listEl.innerHTML = '';
-
-            // 渲染
-            linksData.forEach((item, index) => {
-                const rank = index + 1;
-                const isTop10 = rank <= 10;
-
-                const li = document.createElement('li');
-                li.className = 'link-item' + (isTop10 ? ' is-top10' : '');
-                li.dataset.rank = rank;
-
-                const badge = document.createElement('span');
-                badge.className = 'rank-badge';
-                if (rank === 1) badge.classList.add('top-1');
-                else if (rank === 2) badge.classList.add('top-2');
-                else if (rank === 3) badge.classList.add('top-3');
-                badge.textContent = rank;
-
-                const link = document.createElement('a');
-                link.href = item.url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.textContent = item.name;
-
-                // 绑定点击事件（注意要绑定当前 item 的引用，但 item 是循环变量，需要用闭包或拷贝）
-                // 由于 forEach 每次迭代创建新的作用域，item 是当前对象引用，可以安全使用。
-                link.addEventListener('click', function(e) {
-                    // 不阻止默认行为，保留跳转
-                    // 但需要根据 url 和 name 找到 linksData 中的对象（因为 item 可能是旧引用）
-                    // 更好的方式：用 dataset 记录 url，通过 url 查找。但 name 可能重复？这里 url 唯一，用 url 查找。
-                    const targetUrl = this.href; // 完整 url
-                    // 查找 linksData 中 url 匹配的项（可能 https 与 http，但这里数据一致）
-                    const currentItem = linksData.find(d => d.url === item.url);
-                    if (!currentItem) {
-                        // 如果没找到（可能因为渲染后数据变化），直接返回
-                        return;
-                    }
-
-                    // 1. 点击次数+1
-                    currentItem.clicks += 1;
-
-                    // 2. 从数组移除
-                    const idx = linksData.indexOf(currentItem);
-                    if (idx > -1) linksData.splice(idx, 1);
-
-                    // 3. 剩余按点击次数降序排序（稳定）
-                    linksData.sort((a, b) => {
-                        if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-                        return 0; // 稳定排序
-                    });
-
-                    // 4. 将当前项 push 到末尾
-                    linksData.push(currentItem);
-
-                    // 5. 重新渲染（不自动排序，因为我们已手动排序且末尾固定）
-                    render(false);
-                });
-
-                const counter = document.createElement('span');
-                counter.className = 'click-counter';
-                counter.textContent = `${item.clicks} 次`;
-
-                li.appendChild(badge);
-                li.appendChild(link);
-                li.appendChild(counter);
-                listEl.appendChild(li);
-            });
-        }
-
-        // ---------- 重置数据 ----------
-        function resetData() {
-            linksData = INITIAL_LINKS.map(item => ({ ...item }));
-            render(true); // 重新排序渲染
-        }
-
-        // ---------- 初始化 ----------
-        function init() {
-            render(true); // 初始排序渲染
-
-            const resetBtn = document.getElementById('resetBtn');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', resetData);
-            }
-        }
-
-        // 页面加载完成后初始化
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    })();
-</script>
-  
-
-  
+</body>
 </html>
