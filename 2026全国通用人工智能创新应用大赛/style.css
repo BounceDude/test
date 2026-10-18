@@ -1,0 +1,117 @@
+/* style.css - 2026 TEC-AGI 共享样式 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #f8faff;
+    color: #1a2b4c;
+    line-height: 1.6;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* 头部导航 */
+.header {
+    background: #0a1a2f;
+    color: white;
+    padding: 16px 0;
+    border-bottom: 2px solid #2d7aff;
+    position: sticky; top: 0; z-index: 100;
+}
+.header .container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.logo-area { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, #2d7aff, #00c6ff);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; color: #0a1a2f;
+}
+.logo-text { font-size: 1.3rem; font-weight: 700; color: #fff; }
+.sub-logo { font-size: 0.75rem; color: #8bb5ff; margin-top: 2px; }
+
+.nav-links { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.nav-links a { color: #e0ecff; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.2s; padding-bottom: 4px; border-bottom: 2px solid transparent; }
+.nav-links a:hover, .nav-links a.active { color: #fff; border-bottom-color: #2d7aff; }
+.btn-primary {
+    background: linear-gradient(135deg, #2d7aff, #0066ff);
+    color: white !important;
+    padding: 9px 22px !important;
+    border-radius: 40px;
+    font-weight: 600;
+    border-bottom: none !important;
+}
+
+/* 页面横幅 */
+.page-banner {
+    background: linear-gradient(135deg, #07162b, #0f2648);
+    color: white;
+    padding: 48px 0;
+    border-bottom: 1px solid #2a3f60;
+}
+.page-banner h1 { font-size: 2.2rem; margin-bottom: 8px; }
+.page-banner p { color: #b8d6ff; font-size: 1.05rem; }
+
+/* 内容区域 */
+.section { padding: 64px 0; }
+.section-white { background: #fff; }
+.section-light { background: #f5f9ff; }
+.section-title { font-size: 1.8rem; font-weight: 700; color: #0a1a2f; margin-bottom: 8px; }
+.section-sub { color: #5a6e8a; margin-bottom: 36px; }
+
+/* 卡片网格 */
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+
+.card {
+    background: #fff;
+    border: 1px solid #e2edff;
+    border-radius: 16px;
+    padding: 28px;
+    transition: 0.25s;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,70,150,0.08); border-color: #b8d2ff; }
+.card h3 { font-size: 1.15rem; margin-bottom: 10px; color: #0a1a2f; }
+.card p { color: #4a5e7a; font-size: 0.92rem; }
+
+.tag {
+    display: inline-block;
+    background: #e6f0ff; color: #1a5cd8;
+    padding: 3px 12px; border-radius: 40px;
+    font-size: 0.78rem; font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* 新闻列表 */
+.news-item {
+    display: flex; align-items: center; gap: 20px;
+    padding: 18px 24px; background: #fff;
+    border: 1px solid #e2edff; border-radius: 12px;
+    margin-bottom: 10px; text-decoration: none; color: inherit;
+    transition: 0.2s;
+}
+.news-item:hover { border-color: #2d7aff; background: #f0f7ff; transform: translateX(6px); }
+.news-date { font-weight: 700; color: #2d7aff; min-width: 100px; font-size: 0.9rem; }
+.news-title { flex: 1; font-weight: 500; color: #0a1a2f; }
+
+/* 数据统计 */
+.stat { text-align: center; }
+.stat .num { font-size: 2.2rem; font-weight: 800; color: #2d7aff; }
+.stat .label { font-size: 0.9rem; color: #5a6e8a; }
+
+/* 页脚 */
+.footer { background: #07162b; color: #9bb7de; padding: 48px 0 24px; border-top: 1px solid #1e3755; }
+.footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 36px; }
+.footer-col { flex: 1 1 200px; }
+.footer-col h4 { color: #fff; margin-bottom: 14px; font-size: 1rem; }
+.footer-col p, .footer-col a { color: #9bb7de; text-decoration: none; display: block; margin-bottom: 8px; font-size: 0.88rem; }
+.footer-col a:hover { color: #4a8eff; }
+.copyright { text-align: center; padding-top: 32px; margin-top: 32px; border-top: 1px solid #1e3755; font-size: 0.82rem; color: #6a84a4; }
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .nav-links { gap: 14px; }
+    .page-banner h1 { font-size: 1.6rem; }
+    .section-title { font-size: 1.4rem; }
+    .news-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .logo-text { font-size: 1rem; }
+    .sub-logo { font-size: 0.65rem; }
+}
