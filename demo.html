@@ -97,6 +97,10 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ===== 结果区：默认隐藏，分析后才显示 ===== */
+  .results { display: none; }
+  .results.show { display: block; animation: fadeIn 0.4s ease; }
+
   /* ===== 结果卡片 ===== */
   .result-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -257,12 +261,10 @@
   .detail-list .label { color: var(--muted); font-size: 13.5px; }
   .detail-list .value { font-weight: 600; text-align: right; }
 
-  /* 详情页雷达图容器 */
   .detail-radar {
     width: 100%; height: 340px; margin: 0 auto;
   }
 
-  /* 案件时间线 */
   .timeline { position: relative; padding-left: 24px; }
   .timeline::before {
     content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px;
@@ -350,6 +352,7 @@
       <div>正在分析案件事实…</div>
     </div>
 
+    <!-- 结果区：初始不显示任何框架 -->
     <div class="results" id="results">
 
       <div class="result-card">
@@ -431,7 +434,7 @@ const CHARGE_KB = [
   { keywords: ['合同', '违约', '协议'], charge: '合同纠纷', caseType: '民事', plaintiff: ['守约方'], defendant: ['违约方'] },
 ];
 
-/* 律师库：每个 tag 对应一个能力值（0-100），维度和 tags 相同 */
+/* 律师库：tagScores 改为 0~1 的小数，与 tags 一一对应 */
 const LAWYER_KB = [
   {
     id: 'L1',
@@ -439,7 +442,7 @@ const LAWYER_KB = [
     firm: '北京中衡律师事务所',
     years: 15,
     tags: ['婚姻家庭', '赠与纠纷', '财产分割'],
-    tagScores: [96, 92, 88],   // 与 tags 一一对应
+    tagScores: [0.96, 0.92, 0.88],   // 0~1
     matchCharges: ['婚姻家庭纠纷', '赠与合同纠纷'],
     matchScore: 96,
     title: '高级合伙人 · 婚姻家事部主任',
@@ -468,7 +471,7 @@ const LAWYER_KB = [
     firm: '上海弘正律师事务所',
     years: 12,
     tags: ['婚姻家事', '妇女权益', '损害赔偿'],
-    tagScores: [94, 90, 86],
+    tagScores: [0.94, 0.90, 0.86],
     matchCharges: ['婚姻家庭纠纷', '名誉权纠纷'],
     matchScore: 92,
     title: '合伙人 · 妇女权益保护中心副主任',
@@ -496,7 +499,7 @@ const LAWYER_KB = [
     firm: '广州明理律师事务所',
     years: 18,
     tags: ['刑事辩护', '重婚罪', '诈骗罪'],
-    tagScores: [95, 82, 88],
+    tagScores: [0.95, 0.82, 0.88],
     matchCharges: ['重婚罪', '诈骗罪'],
     matchScore: 88,
     title: '主任 · 刑事辩护团队负责人',
@@ -525,7 +528,7 @@ const LAWYER_KB = [
     firm: '深圳恒信律师事务所',
     years: 10,
     tags: ['劳动争议', '合同纠纷'],
-    tagScores: [90, 84],
+    tagScores: [0.90, 0.84],
     matchCharges: ['劳动争议', '合同纠纷'],
     matchScore: 85,
     title: '合伙人 · 劳动法团队负责人',
@@ -838,7 +841,6 @@ function render(r) {
     `<span class="charge-tag">${c}<span class="num">#${i + 1}</span></span>`
   ).join('');
 
-  // 律师卡片：雷达图容器
   document.getElementById('lawyerList').innerHTML = r.lawyers.map(l => `
     <div class="lawyer">
       <div class="lawyer-avatar">${l.name[0]}</div>
@@ -876,7 +878,7 @@ function render(r) {
 }
 
 /* ============================================================
-   雷达图构建（通用）
+   雷达图构建（满分 1）
    ============================================================ */
 function buildRadarOptions(tags, scores, opts = {}) {
   const height = opts.height || 160;
@@ -898,7 +900,7 @@ function buildRadarOptions(tags, scores, opts = {}) {
     legend: { enabled: false },
     tooltip: {
       enabled: true,
-      pointFormat: '<b>{point.y}</b> / 100',
+      pointFormat: '<b>{point.y:.2f}</b> / 1.00',
     },
     xAxis: {
       categories: tags,
@@ -914,10 +916,10 @@ function buildRadarOptions(tags, scores, opts = {}) {
     },
     yAxis: {
       min: 0,
-      max: 100,
+      max: 1,                    // 满分 1
       gridLineInterpolation: 'polygon',
       lineWidth: 0,
-      tickInterval: 25,
+      tickInterval: 0.25,
       labels: { enabled: false },
       gridLineColor: '#e5e7eb',
       gridLineWidth: 1,
@@ -935,7 +937,7 @@ function buildRadarOptions(tags, scores, opts = {}) {
         },
         dataLabels: {
           enabled: dataLabel,
-          format: '{y}',
+          format: '{y:.2f}',
           style: { fontSize: '10px', color: '#1e40af', fontWeight: '600' },
         },
       },
@@ -955,7 +957,6 @@ function buildRadarOptions(tags, scores, opts = {}) {
   };
 }
 
-/* 结果页小雷达图 */
 function initResultRadars(lawyers) {
   lawyers.forEach(l => {
     const containerId = `radar-${l.id}`;
@@ -973,7 +974,6 @@ function initResultRadars(lawyers) {
   });
 }
 
-/* 详情页大雷达图 */
 function initDetailRadar(lawyer) {
   const container = document.getElementById('lawyer-radar-detail');
   if (!container) return;
@@ -1017,12 +1017,12 @@ function showLawyerDetail(lawyerId) {
       <div class="detail-stat"><div class="label">平均周期</div><div class="value" style="font-size:18px;">${lawyer.stats.avgDuration}</div></div>
     </div>
 
-    <!-- 能力雷达图 -->
+    <!-- 能力雷达图（满分 1） -->
     <div class="detail-section">
       <h3>📊 能力雷达图</h3>
       <div class="detail-radar" id="lawyer-radar-detail"></div>
       <p style="margin-top:12px;font-size:13px;color:#6b7280;text-align:center;">
-        能力值基于执业年限、案件数量、胜诉率、专业领域等综合评估，满分 100。
+        能力值基于执业年限、案件数量、胜诉率、专业领域等综合评估，满分 1.00。
       </p>
     </div>
 
@@ -1075,8 +1075,6 @@ function showLawyerDetail(lawyerId) {
   `;
 
   showView('lawyer');
-
-  // 切换视图后，等布局完成再初始化雷达图
   setTimeout(() => initDetailRadar(lawyer), 100);
 }
 
@@ -1406,6 +1404,28 @@ ctx.restore();
 
       ctx.fill();
       ctx.restore();
+      var num = 1
+for (var i = 0; i <= num; i++) {
+    var radius = 15
+         var k = -1 + (2 * (i + 1) - 1) / num;
+        var a = Math.acos(k);
+        var b = a * Math.sqrt(num * Math.PI);
+        var x = radius * Math.sin(a) * Math.cos(b);
+        var y = radius * Math.sin(a) * Math.sin(b);
+        var z = radius * Math.cos(a);
+    var fl = 450 //焦距
+
+    ctx.save();
+    ctx.beginPath();
+    var scale = fl / (fl - z);
+    var alpha = (z + Radius) / (2 * Radius);
+    ctx.arc(vpx + this.x + x, vpy + this.y + y, 1 * scale, 0, 2 * Math.PI, true);
+    ctx.fillStyle = "rgba(190, 46, 202," + (alpha + 0.5) + ")"
+
+      ctx.fill();
+      ctx.restore();
+}
+
       ctx.font = '16px Arial';
 ctx.fillStyle = 'black'
         ctx.fillText(this.t, vpx + this.x, vpy + this.y);
