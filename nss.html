@@ -1,0 +1,701 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态可拖动 · 邻接矩阵节点关系图</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 32px;
+            padding: 24px;
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            max-width: 1200px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 0 8px;
+        }
+
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            letter-spacing: -0.02em;
+        }
+
+        .title span {
+            background: #334155;
+            color: #94a3b8;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 400;
+            border: 1px solid #475569;
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-human {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid #60a5fa;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+        }
+
+        .dot-agent {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            background: #f97316;
+            border: 2px solid #fb923c;
+            box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+        }
+
+        .canvas-wrapper {
+            background: #0b1120;
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            cursor: grab;
+            transition: cursor 0.1s;
+        }
+
+        .canvas-wrapper:active {
+            cursor: grabbing;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #0b1120;
+            transition: opacity 0.2s;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 14px 22px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px #334155;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            max-width: 320px;
+            line-height: 1.6;
+            border-left: 6px solid #3b82f6;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip .prop-key {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tooltip .prop-value {
+            color: #f1f5f9;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1rem;
+        }
+
+        .tooltip .node-type {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            margin-top: 4px;
+        }
+
+        .node-type.human {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .node-type.agent {
+            background: #7c2d12;
+            color: #fdba74;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+            padding: 0 8px;
+            color: #64748b;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer code {
+            background: #1e293b;
+            padding: 4px 14px;
+            border-radius: 40px;
+            color: #94a3b8;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            border: 1px solid #334155;
+        }
+
+        .reset-btn {
+            background: #334155;
+            border: none;
+            color: #e2e8f0;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reset-btn:hover {
+            background: #475569;
+            border-color: #64748b;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="title">
+                <h1>🔗 邻接矩阵节点关系图</h1>
+                <span>可拖动 · 悬停查看属性 · 防重叠</span>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="dot-human"></div>
+                    <span>Human</span>
+                </div>
+                <div class="legend-item">
+                    <div class="dot-agent"></div>
+                    <span>Agent</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper" id="canvasWrapper">
+            <canvas id="graphCanvas" width="1000" height="600"></canvas>
+        </div>
+
+        <div class="footer">
+            <div>
+                <code>邻接矩阵: [[0,1,1,0,0,1], [1,0,1,1,0,0], [1,1,0,0,1,0], [0,1,0,0,1,1], [0,0,1,1,0,1], [1,0,0,1,1,0]]</code>
+            </div>
+            <button class="reset-btn" id="resetBtn">
+                <span>⟳</span> 重置布局
+            </button>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        (function() {
+            // ---------- 节点数据 ----------
+            // utils.Node(0, "human"), utils.Node(1, "human"), utils.Node(2, "agent", "phone"), 
+            // utils.Node(3, "agent", "broadcast"), utils.Node(4, "agent", "screen"), utils.Node(5, "agent", "server")
+            // 将 subtype 改为 role
+            const nodesData = [
+                { id: 0, type: 'human', label: 'Node 0', role: null },
+                { id: 1, type: 'human', label: 'Node 1', role: null },
+                { id: 2, type: 'agent', label: 'Node 2', role: 'phone' },
+                { id: 3, type: 'agent', label: 'Node 3', role: 'broadcast' },
+                { id: 4, type: 'agent', label: 'Node 4', role: 'screen' },
+                { id: 5, type: 'agent', label: 'Node 5', role: 'server' },
+            ];
+
+            // ---------- 邻接矩阵 (对称矩阵，表示无向连接) ----------
+            // 给定邻接矩阵: 6x6
+            const adjacencyMatrix = [
+                [0, 1, 1, 0, 0, 1],
+                [1, 0, 1, 1, 0, 0],
+                [1, 1, 0, 0, 1, 0],
+                [0, 1, 0, 0, 1, 1],
+                [0, 0, 1, 1, 0, 1],
+                [1, 0, 0, 1, 1, 0],
+            ];
+
+            // 从邻接矩阵生成边 (无向图，避免重复)
+            const linksData = [];
+            for (let i = 0; i < adjacencyMatrix.length; i++) {
+                for (let j = i + 1; j < adjacencyMatrix[i].length; j++) {
+                    if (adjacencyMatrix[i][j] !== 0) {
+                        linksData.push({ source: i, target: j });
+                    }
+                }
+            }
+
+            // ---------- 画布设置 ----------
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = 1000;
+            const height = 600;
+            canvas.width = width;
+            canvas.height = height;
+
+            // 节点物理参数
+            const NODE_RADIUS = 32;
+            const NODE_RADIUS_AGENT = 28;
+            const CHARGE_STRENGTH = -380; // 斥力(增强防止重叠)
+            const LINK_DISTANCE = 160;
+            const LINK_STRENGTH = 0.06;
+            const DAMPING = 0.85;
+            const GRAVITY = 0.008;
+            const MIN_DIST = 80; // 最小距离(硬性斥力)
+
+            // 节点状态
+            const nodes = nodesData.map((data) => ({
+                ...data,
+                x: width / 2 + (Math.random() - 0.5) * 500,
+                y: height / 2 + (Math.random() - 0.5) * 400,
+                vx: 0,
+                vy: 0,
+                radius: data.type === 'human' ? NODE_RADIUS : NODE_RADIUS_AGENT,
+                pinned: false,
+            }));
+
+            // 边
+            const links = linksData.map(l => ({
+                source: nodes.find(n => n.id === l.source),
+                target: nodes.find(n => n.id === l.target),
+            })).filter(l => l.source && l.target);
+
+            // 快速查找id对应的节点
+            const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+            // 拖拽状态
+            let draggedNode = null;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+
+            // 悬停
+            let hoveredNode = null;
+
+            // 动画循环
+            let animationFrame = null;
+            let physicsRunning = true;
+
+            // ---------- 力导向模拟 (增强防重叠) ----------
+            function simulate() {
+                // 节点间斥力 (增强)
+                for (let i = 0; i < nodes.length; i++) {
+                    const a = nodes[i];
+                    if (a.pinned) continue;
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const b = nodes[j];
+                        if (b.pinned) continue;
+
+                        let dx = b.x - a.x;
+                        let dy = b.y - a.y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 1) dist = 1;
+
+                        // 基础斥力
+                        const force = CHARGE_STRENGTH / (dist * dist);
+                        // 额外硬性斥力防止重叠
+                        let extraForce = 0;
+                        if (dist < MIN_DIST) {
+                            extraForce = (MIN_DIST - dist) * 0.8;
+                        }
+
+                        const totalForce = force + extraForce;
+                        const fx = (dx / dist) * totalForce;
+                        const fy = (dy / dist) * totalForce;
+
+                        a.vx += fx;
+                        a.vy += fy;
+                        b.vx -= fx;
+                        b.vy -= fy;
+                    }
+                }
+
+                // 弹簧力 (边)
+                for (let link of links) {
+                    const a = link.source;
+                    const b = link.target;
+                    if (a.pinned && b.pinned) continue;
+
+                    let dx = b.x - a.x;
+                    let dy = b.y - a.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 1) dist = 1;
+
+                    const force = (dist - LINK_DISTANCE) * LINK_STRENGTH;
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+
+                    if (!a.pinned) {
+                        a.vx += fx;
+                        a.vy += fy;
+                    }
+                    if (!b.pinned) {
+                        b.vx -= fx;
+                        b.vy -= fy;
+                    }
+                }
+
+                // 中心引力
+                const centerX = width / 2;
+                const centerY = height / 2;
+                for (let node of nodes) {
+                    if (node.pinned) continue;
+                    node.vx += (centerX - node.x) * GRAVITY;
+                    node.vy += (centerY - node.y) * GRAVITY;
+                }
+
+                // 更新位置
+                for (let node of nodes) {
+                    if (node.pinned) continue;
+
+                    node.vx *= DAMPING;
+                    node.vy *= DAMPING;
+                    node.x += node.vx;
+                    node.y += node.vy;
+
+                    // 边界限制
+                    const margin = 40;
+                    if (node.x < margin) { node.x = margin; node.vx *= -0.5; }
+                    if (node.x > width - margin) { node.x = width - margin; node.vx *= -0.5; }
+                    if (node.y < margin) { node.y = margin; node.vy *= -0.5; }
+                    if (node.y > height - margin) { node.y = height - margin; node.vy *= -0.5; }
+                }
+            }
+
+            // ---------- 绘制 ----------
+            function draw() {
+                if (physicsRunning) {
+                    simulate();
+                }
+
+                ctx.clearRect(0, 0, width, height);
+
+                // 绘制背景网格
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 0.8;
+                for (let i = 0; i < width; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, height);
+                    ctx.stroke();
+                }
+                for (let i = 0; i < height; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(width, i);
+                    ctx.stroke();
+                }
+
+                // 绘制边
+                for (let link of links) {
+                    const a = link.source;
+                    const b = link.target;
+                    const isHighlight = (hoveredNode && (hoveredNode.id === a.id || hoveredNode.id === b.id));
+
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = isHighlight ? '#60a5fa' : '#334155';
+                    ctx.lineWidth = isHighlight ? 3 : 1.8;
+                    ctx.shadowColor = isHighlight ? 'rgba(96, 165, 250, 0.4)' : 'transparent';
+                    ctx.shadowBlur = isHighlight ? 16 : 0;
+                    ctx.stroke();
+                }
+                ctx.shadowColor = 'transparent';
+
+                // 绘制节点
+                const sortedNodes = [...nodes].sort((a, b) => {
+                    if (hoveredNode && a.id === hoveredNode.id) return 1;
+                    if (hoveredNode && b.id === hoveredNode.id) return -1;
+                    return 0;
+                });
+
+                for (let node of sortedNodes) {
+                    const isHovered = hoveredNode && hoveredNode.id === node.id;
+                    const radius = node.radius;
+
+                    // 阴影
+                    ctx.shadowColor = isHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)';
+                    ctx.shadowBlur = isHovered ? 32 : 16;
+                    ctx.shadowOffsetY = isHovered ? 0 : 4;
+
+                    // 节点主体
+                    ctx.beginPath();
+                    if (node.type === 'human') {
+                        ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
+                    } else {
+                        const r = 14;
+                        const w = radius * 2;
+                        const h = radius * 2;
+                        const x = node.x - radius;
+                        const y = node.y - radius;
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + w - r, y);
+                        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                        ctx.lineTo(x + w, y + h - r);
+                        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                        ctx.lineTo(x + r, y + h);
+                        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                        ctx.closePath();
+                    }
+
+                    // 填充渐变
+                    const gradient = ctx.createRadialGradient(node.x - 8, node.y - 8, 8, node.x, node.y, radius + 12);
+                    if (node.type === 'human') {
+                        gradient.addColorStop(0, '#60a5fa');
+                        gradient.addColorStop(0.7, '#3b82f6');
+                        gradient.addColorStop(1, '#1e40af');
+                    } else {
+                        gradient.addColorStop(0, '#fb923c');
+                        gradient.addColorStop(0.7, '#f97316');
+                        gradient.addColorStop(1, '#9a3412');
+                    }
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+
+                    // 边框
+                    ctx.shadowBlur = isHovered ? 20 : 6;
+                    ctx.strokeStyle = isHovered ? '#ffffff' : (node.type === 'human' ? '#2563eb' : '#c2410c');
+                    ctx.lineWidth = isHovered ? 3.5 : 2.5;
+                    ctx.stroke();
+
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+
+                    // 编号
+                    ctx.font = 'bold 18px "Inter", "SF Mono", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(node.id, node.x, node.y - 4);
+
+                    // 类型/角色文字 (role 替代 subtype)
+                    ctx.font = '11px "Inter", sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    if (node.type === 'agent' && node.role) {
+                        ctx.fillText(node.role, node.x, node.y + 16);
+                    } else if (node.type === 'human') {
+                        ctx.fillText('human', node.x, node.y + 16);
+                    }
+
+                    // 悬停高亮圈
+                    if (isHovered) {
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, radius + 6, 0, 2 * Math.PI);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([6, 8]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+
+            // 动画循环
+            function animate() {
+                draw();
+                animationFrame = requestAnimationFrame(animate);
+            }
+
+            // ---------- 事件处理 ----------
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY,
+                };
+            }
+
+            function findNodeAt(mx, my) {
+                for (let i = nodes.length - 1; i >= 0; i--) {
+                    const node = nodes[i];
+                    const dx = mx - node.x;
+                    const dy = my - node.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= node.radius + 4) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+
+            // 鼠标按下
+            canvas.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const { x, y } = getMousePos(e);
+                const node = findNodeAt(x, y);
+
+                if (node) {
+                    draggedNode = node;
+                    draggedNode.pinned = true;
+                    dragOffsetX = node.x - x;
+                    dragOffsetY = node.y - y;
+                }
+            });
+
+            // 鼠标移动
+            canvas.addEventListener('mousemove', (e) => {
+                const { x, y } = getMousePos(e);
+
+                if (draggedNode) {
+                    draggedNode.x = x + dragOffsetX;
+                    draggedNode.y = y + dragOffsetY;
+                    const margin = 30;
+                    draggedNode.x = Math.max(margin, Math.min(width - margin, draggedNode.x));
+                    draggedNode.y = Math.max(margin, Math.min(height - margin, draggedNode.y));
+                    draggedNode.vx = 0;
+                    draggedNode.vy = 0;
+                    return;
+                }
+
+                const node = findNodeAt(x, y);
+                hoveredNode = node;
+
+                canvas.style.cursor = node ? 'pointer' : 'grab';
+
+                const tooltip = document.getElementById('tooltip');
+                if (node) {
+                    const typeClass = node.type === 'human' ? 'human' : 'agent';
+                    let extraInfo = '';
+                    if (node.role) {
+                        extraInfo = `<div><span class="prop-key">role</span> <span class="prop-value">"${node.role}"</span></div>`;
+                    }
+                    tooltip.innerHTML = `
+                        <div style="margin-bottom: 6px;">
+                            <span class="node-type ${typeClass}">${node.type.toUpperCase()}</span>
+                        </div>
+                        <div><span class="prop-key">id</span> <span class="prop-value">${node.id}</span></div>
+                        <div><span class="prop-key">type</span> <span class="prop-value">"${node.type}"</span></div>
+                        ${extraInfo}
+                        <div style="margin-top: 8px; font-size: 0.75rem; color: #64748b;">
+                            utils.Node(${node.id}, "${node.type}"${node.role ? `, "${node.role}"` : ''})
+                        </div>
+                    `;
+                    tooltip.style.left = (e.clientX + 24) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                } else {
+                    tooltip.classList.remove('visible');
+                }
+            });
+
+            // 鼠标松开
+            window.addEventListener('mouseup', () => {
+                if (draggedNode) {
+                    draggedNode.pinned = false;
+                    draggedNode = null;
+                    canvas.style.cursor = 'grab';
+                }
+            });
+
+            // 鼠标离开
+            canvas.addEventListener('mouseleave', () => {
+                hoveredNode = null;
+                document.getElementById('tooltip').classList.remove('visible');
+                canvas.style.cursor = 'grab';
+            });
+
+            // 重置布局
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                nodes.forEach(node => {
+                    node.x = width / 2 + (Math.random() - 0.5) * 500;
+                    node.y = height / 2 + (Math.random() - 0.5) * 400;
+                    node.vx = 0;
+                    node.vy = 0;
+                    node.pinned = false;
+                });
+                draggedNode = null;
+                hoveredNode = null;
+                document.getElementById('tooltip').classList.remove('visible');
+            });
+
+            // 启动
+            animate();
+
+            window.addEventListener('beforeunload', () => {
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
