@@ -1,0 +1,1829 @@
+<h1>Yanqing An, 安彦青</h1>
+School of Artifical Intelligence and Data Science, University of Science and Technology of China<br>
+Email: anyq AT mail.ustc.edu.cn<br>
+<p style="font-size: 48px;font-weight: bold">Homepage</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博士 · 学术主页</title>
+    <!-- 使用系统字体以保持学术感，同时引入衬线字体增强权威性 -->
+    <style>
+        /* 全局重置与基调 —— 院士风格：沉稳、简洁、克制、深蓝与灰白 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f7fa;  /* 极浅灰蓝，不刺眼 */
+            font-family: 'Times New Roman', 'Georgia', '宋体', 'SimSun', 'Palatino', serif;
+            color: #1e2b3c;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* 主卡片容器 —— 干净、留白、细边框 */
+        .academic-card {
+            max-width: 1050px;
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 8px 24px rgba(0, 20, 40, 0.06);
+            border: 1px solid #d9e0e8;
+            border-radius: 4px;
+            padding: 3rem 3.5rem;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .academic-card:hover {
+            box-shadow: 0 12px 28px rgba(0, 20, 40, 0.08);
+        }
+
+        /* 页眉区域：院士姓名 + 头衔 */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #b0c4d9;
+            padding-bottom: 1.8rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            font-weight: 500;
+            letter-spacing: 4px;
+            color: #0a2342;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            font-family: 'Times New Roman', 'Georgia', '宋体', serif;
+        }
+
+        .header .subhead {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: #4f6f8f;
+            font-style: italic;
+            border-top: 1px solid #cfdce8;
+            padding-top: 0.9rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        /* 院士肖像与简介双栏布局 */
+        .profile-grid {
+            display: flex;
+            gap: 2.8rem;
+            align-items: flex-start;
+            margin-bottom: 2.8rem;
+            flex-wrap: wrap;
+        }
+
+        .portrait-section {
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 仿学术肖像框 */
+        .portrait-frame {
+            width: 210px;
+            height: 260px;
+            background-color: #e6ecf3;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+            box-shadow: 6px 6px 0 rgba(10, 35, 66, 0.04);
+            position: relative;
+        }
+
+        .portrait-frame::after {
+            content: "⚜";
+            font-size: 4.5rem;
+            color: #a0b8d0;
+            opacity: 0.6;
+            font-weight: 300;
+        }
+
+        .portrait-caption {
+            font-size: 0.85rem;
+            color: #62748c;
+            letter-spacing: 1px;
+            text-align: center;
+            font-style: italic;
+            border-top: 1px dashed #b8c9da;
+            padding-top: 0.6rem;
+            width: 100%;
+        }
+
+        .bio-section {
+            flex: 2 1 400px;
+        }
+
+        .bio-section h2 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #0a2342;
+            border-left: 6px solid #2e4b6e;
+            padding-left: 1rem;
+            margin-bottom: 1.2rem;
+            letter-spacing: 1px;
+            font-family: 'Times New Roman', 'Georgia', '宋体', serif;
+        }
+
+        .bio-section p {
+            font-size: 1.05rem;
+            color: #2b3e55;
+            margin-bottom: 1.2rem;
+            text-align: justify;
+        }
+
+        /* 学术头衔列表 —— 清晰、分隔 */
+        .academic-titles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem 2rem;
+            margin: 1.8rem 0 0.8rem;
+            font-size: 1rem;
+            color: #1d334a;
+        }
+
+        .academic-titles span {
+            position: relative;
+            padding-left: 1.2rem;
+            font-weight: 500;
+        }
+
+        .academic-titles span::before {
+            content: "●";
+            color: #2e4b6e;
+            font-size: 0.7rem;
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+        }
+
+        /* 研究领域 —— 采用简洁标签 */
+        .research-areas {
+            margin: 2.2rem 0 2rem;
+        }
+
+        .research-areas h3 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #0a2342;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #cbdae8;
+            padding-bottom: 0.4rem;
+            letter-spacing: 0.5px;
+            font-family: 'Times New Roman', 'Georgia', '宋体', serif;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .tags span {
+            background-color: #edf2f8;
+            color: #1d3a5a;
+            font-size: 0.9rem;
+            padding: 0.4rem 1.4rem;
+            border-radius: 20px;
+            border: 1px solid #c2d4e6;
+            letter-spacing: 0.3px;
+            transition: all 0.15s;
+            font-family: 'Times New Roman', 'Georgia', '宋体', serif;
+        }
+
+        .tags span:hover {
+            background-color: #d9e4f0;
+            border-color: #8da6c2;
+        }
+
+        /* 代表著作 / 成就 —— 列表风格 */
+        .achievements {
+            margin: 2rem 0 1.8rem;
+        }
+
+        .achievements h3 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #0a2342;
+            border-bottom: 1px solid #cbdae8;
+            padding-bottom: 0.4rem;
+            margin-bottom: 1rem;
+            font-family: 'Times New Roman', 'Georgia', '宋体', serif;
+        }
+
+        .achievements ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .achievements li {
+            display: flex;
+            gap: 0.8rem;
+            font-size: 1rem;
+            color: #20344b;
+            align-items: baseline;
+        }
+
+        .achievements li::before {
+            content: "—";
+            color: #5e7d9c;
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        /* 联系与链接 —— 低调但清晰 */
+        .contact-links {
+            border-top: 1px solid #d9e0e8;
+            padding-top: 2rem;
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #2c4a6b;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            letter-spacing: 0.3px;
+        }
+
+        .contact-item i {
+            font-style: normal;
+            font-weight: 500;
+            color: #587b9c;
+        }
+
+        .email {
+            font-family: 'Times New Roman', 'Georgia', monospace;
+            color: #1d3a5a;
+            font-weight: 500;
+            border-bottom: 1px dotted #b0c4d9;
+        }
+
+        .orcid {
+            color: #3d5f82;
+        }
+
+        .footer-note {
+            margin-top: 1.8rem;
+            text-align: right;
+            font-size: 0.78rem;
+            color: #8395a8;
+            letter-spacing: 0.5px;
+            font-style: italic;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 700px) {
+            .academic-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+                letter-spacing: 2px;
+            }
+
+            .profile-grid {
+                gap: 1.8rem;
+            }
+
+            .portrait-frame {
+                width: 160px;
+                height: 200px;
+            }
+
+            .portrait-frame::after {
+                font-size: 3.5rem;
+            }
+
+            .contact-links {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .academic-card {
+                padding: 1.8rem 1.2rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .portrait-frame {
+                width: 130px;
+                height: 170px;
+            }
+
+            .bio-section h2 {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* 装饰性学术细线 */
+        .academic-divider {
+            width: 60px;
+            height: 2px;
+            background-color: #b0c4d9;
+            margin: 0.8rem auto 0.2rem;
+        }
+
+        /* 引用风格装饰 */
+        .quote {
+            font-style: italic;
+            color: #3f5b78;
+            border-left: 3px solid #b0c4d9;
+            padding-left: 1.2rem;
+            margin: 1.6rem 0 1rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="academic-card">
+        <!-- 页眉：院士姓名与身份 -->
+        <div class="header">
+            <h1>安 彦 青</h1>
+            <div class="subhead">中国科学技术大学博士 · 数据科学</div>
+            <div class="academic-divider"></div>
+        </div>
+
+        <!-- 主内容：肖像 + 简介双栏 -->
+        <div class="profile-grid">
+            <div class="portrait-section">
+                <div class="portrait-frame">
+                    <!-- 院士肖像占位（纯粹学术风格） -->
+                    <img src="/static/discussion/photo/IMG_8284.jpg" height="200px">
+                </div>
+                <div class="portrait-caption">
+                    安彦青博士<br>2027年授予
+                </div>
+            </div>
+            <div class="bio-section">
+                <h2>简 介</h2>
+                <p>
+                    安彦青博士，研究方向律师能力评估，从事法律智能与用户画像相关的研究。2019年毕业于太原理工大学软件工程专业，2027年获中国科学技术大学博士学位。现任合肥市人海网络科技有限公司法人。
+                </p>
+                <p>
+                    他在法律领域的用户画像与用户建模方面取得了创新性的研究成果，提出的“基于历史受理案件记录的律师能力评估方法”被应用于安徽省司法厅。发表论文10余篇，公开发明专利2项。
+                </p>
+                <!-- 学术头衔 -->
+                <div class="academic-titles">
+                    <span>学院党支部副书记</span>
+{#                    <span>发展中国家科学院院士</span>#}
+{#                    <span>美国材料研究学会会士</span>#}
+                </div>
+            </div>
+        </div>
+
+        <!-- 研究领域标签 -->
+        <div class="research-areas">
+            <h3>研究领域</h3>
+            <div class="tags">
+                <span>人工智能</span>
+                <span>用户画像</span>
+                <span>软件工程</span>
+                <span>用户表示学习</span>
+                <span>强化学习</span>
+                <span>法律智能服务</span>
+                <span>合作与竞争</span>
+                <span>数据科学</span>
+            </div>
+        </div>
+
+        <!-- 学术成就 / 代表著作 -->
+        <div class="achievements">
+            <h3>代表成就</h3>
+            <ul>
+                <li>中国机器人大赛武术擂台重量组冠军（2017，排名第三）</li>
+                <li>校优秀共青团干部（校优秀学生干部）、校优秀共青团员（2022）</li>
+                <li>中科大大数据分析与应用安徽省重点实验室服务器管理员 (2022)</li>
+                <li>LawyerPAN: A Proficiency Assessment Network for Trial Lawyers论文发表于SIGKDD 2021（Oral）</li>
+                <li>百度-百度人才智库（TIC） 机器学习实习生, 2019.03 - 2019.08</li>
+                <li>参与科技部重点研发项目 子课题“涉案当事人画像自动构建研究及系统研发”</li>
+            </ul>
+        </div>
+
+        <!-- 一段代表性引用 / 学术理念（增强院士风格） -->
+        <div class="quote">
+            “人生不是终点，是死亡之外的旷野。” —— 安彦青
+        </div>
+
+        <!-- 联系与学术链接 -->
+        <div class="contact-links">
+            <div class="contact-item">
+                <i>✉</i> <span class="email">anyq@mail.ustc.edu.cn</span>
+            </div>
+            <div class="contact-item">
+                <i>🔗</i> <span class="orcid">ORCID: 0000-0001-7977-775X</span>
+            </div>
+            <div class="contact-item">
+                <i>🏛</i> <span>中国科学技术大学人工智能与数据科学学院 · 信智大楼</span>
+            </div>
+        </div>
+
+        <!-- 极简脚注，无干扰 -->
+        <div class="footer-note">
+            Last updated: 2026 · 学术主页
+        </div>
+    </div>
+</body>
+</html>
+
+
+<p style="font-size: 48px;font-weight: bold">Details</p>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安彦青 · 青年学者 | 简约主页</title>
+  <!-- 干净、现代、柔和的字体与图标 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f7f9fc;  /* 极浅的蓝灰背景，护眼干净 */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    /* 主卡片 — 极简白底、柔光阴影、圆润边角 */
+    .scholar-card {
+      max-width: 1040px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 2.5rem;
+      box-shadow: 0 15px 35px -10px rgba(0, 20, 30, 0.08), 0 5px 20px -5px rgba(0, 0, 0, 0.02);
+      padding: 3rem 2.8rem;
+      transition: all 0.2s ease;
+    }
+
+    /* 顶部信息区：头像 + 姓名/职称 + 简短介绍 */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2.8rem;
+      flex-wrap: wrap;
+    }
+
+    .avatar-frame {
+      flex-shrink: 0;
+      width: 112px;
+      height: 112px;
+      background: #eef2f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #ffffff;
+      box-shadow: 0 8px 18px -6px rgba(0, 40, 60, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.02);
+    }
+
+    .avatar-frame i {
+      font-size: 4.2rem;
+      color: #2c3e50;
+      font-weight: 300;
+      opacity: 0.9;
+    }
+
+    .profile-title h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b1e2c;
+      margin-bottom: 0.35rem;
+      line-height: 1.2;
+    }
+
+    .profile-title .badge {
+      display: inline-block;
+      background: #eaf1f9;
+      color: #1f4a6b;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.25rem 1rem;
+      border-radius: 30px;
+      margin-bottom: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    .profile-title .badge i {
+      font-size: 0.75rem;
+      margin-right: 0.3rem;
+      color: #2d6a8f;
+    }
+
+    .profile-title .short-bio {
+      font-size: 1.1rem;
+      color: #476b7f;
+      max-width: 600px;
+      font-weight: 400;
+      border-left: 4px solid #b6d2e6;
+      padding-left: 1.1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* 分隔线 — 极淡 */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, #e2e9f0 0%, #d0dde9 50%, #e2e9f0 100%);
+      margin: 2.2rem 0 2.5rem 0;
+      opacity: 0.7;
+    }
+
+    /* 研究领域标签 */
+    .research-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .research-tags span {
+      background: #f0f5fb;
+      color: #1f4a6b;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 1.3rem;
+      border-radius: 40px;
+      letter-spacing: 0.2px;
+      border: 1px solid #d9e6f2;
+      transition: all 0.15s;
+    }
+
+    .research-tags span i {
+      margin-right: 0.5rem;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      color: #2c6280;
+    }
+
+    /* 两列布局：左侧主要学术内容，右侧轻量信息 */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2.8rem;
+    }
+
+    /* 通用区块标题 */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #3e5e73;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title i {
+      font-size: 1rem;
+      color: #4d7b9c;
+      opacity: 0.8;
+    }
+
+    /* 出版物列表 */
+    .pub-list {
+      list-style: none;
+    }
+
+    .pub-list li {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.3rem;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .pub-list li:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .pub-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #0b1e2c;
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+    }
+
+    .pub-authors {
+      font-size: 0.85rem;
+      color: #567a91;
+      margin-bottom: 0.25rem;
+      font-weight: 400;
+    }
+
+    .pub-authors .highlight {
+      font-weight: 600;
+      color: #1f4a6b;
+    }
+
+    .pub-journal {
+      font-size: 0.8rem;
+      color: #6f8fa8;
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pub-journal i {
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .pub-year {
+      font-weight: 500;
+      background: #eef3f9;
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      color: #2b5570;
+      margin-left: 0.5rem;
+    }
+
+    /* 右侧信息卡片 */
+    .info-item {
+      margin-bottom: 2rem;
+    }
+
+    .info-item h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2d4f65;
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-item h4 i {
+      width: 1.2rem;
+      color: #537d99;
+      font-size: 0.95rem;
+    }
+
+    .info-item p, .info-item ul {
+      font-size: 0.92rem;
+      color: #40657c;
+      padding-left: 1.7rem;
+    }
+
+    .info-item ul {
+      list-style: none;
+    }
+
+    .info-item ul li {
+      margin-bottom: 0.4rem;
+      position: relative;
+      padding-left: 1rem;
+    }
+
+    .info-item ul li::before {
+      content: "•";
+      color: #7fa3bc;
+      font-weight: 600;
+      position: absolute;
+      left: 0;
+    }
+
+    /* 简洁的联系方式行 */
+    .contact-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .contact-row a {
+      color: #3b6e92;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.8rem;
+      background: #f4f9ff;
+      border-radius: 30px;
+      transition: all 0.15s;
+      border: 1px solid #d4e2ef;
+    }
+
+    .contact-row a i {
+      font-size: 0.85rem;
+      color: #5882a3;
+    }
+
+    .contact-row a:hover {
+      background: #e2edf9;
+      border-color: #b6cee2;
+      color: #1f4a6b;
+    }
+
+    /* 底部小字 */
+    .footer-note {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      text-align: center;
+      color: #9db4c7;
+      letter-spacing: 0.3px;
+      border-top: 1px solid #eaf0f6;
+      padding-top: 1.8rem;
+    }
+
+    /* 响应式 */
+    @media (max-width: 800px) {
+      .scholar-card {
+        padding: 2rem 1.6rem;
+        border-radius: 2rem;
+      }
+
+      .profile-header {
+        gap: 1.5rem;
+      }
+
+      .avatar-frame {
+        width: 90px;
+        height: 90px;
+      }
+
+      .avatar-frame i {
+        font-size: 3.5rem;
+      }
+
+      .profile-title h1 {
+        font-size: 2rem;
+      }
+
+      .grid-2col {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .short-bio {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .scholar-card {
+        padding: 1.8rem 1.2rem;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .avatar-frame {
+        width: 80px;
+        height: 80px;
+      }
+
+      .avatar-frame i {
+        font-size: 3rem;
+      }
+
+      .profile-title h1 {
+        font-size: 1.8rem;
+      }
+
+      .research-tags span {
+        font-size: 0.8rem;
+        padding: 0.3rem 1rem;
+      }
+
+      .pub-list li {
+        margin-bottom: 1.2rem;
+        padding-bottom: 1rem;
+      }
+
+      .contact-row {
+        gap: 0.8rem;
+      }
+    }
+
+    /* 柔和hover效果 */
+    .pub-list li {
+      transition: all 0.1s;
+    }
+
+    .pub-list li:hover {
+      border-bottom-color: #cbdae8;
+    }
+  </style>
+</head>
+<body>
+  <div class="scholar-card">
+    <!-- 头部：头像 + 姓名/介绍 -->
+    <div class="profile-header">
+      <div class="avatar-frame">
+        <!-- 简约学者风格：使用书本/学者图标 (font-awesome) -->
+<img src="./img.png" height="100px">
+        <i class="fas fa-user-graduate"></i>
+      </div>
+      <div class="profile-title">
+        <span class="badge"><i class="fas fa-leaf"></i> 青年学者 · 助理教授</span>
+        <h1>安 彦 青</h1>
+        <div class="short-bio">
+          计算社会学与复杂网络研究者，关注数字时代的社会连接、信息传播与算法治理。相信跨学科视角能揭示社会运行的新机制。
+        </div>
+      </div>
+    </div>
+
+    <!-- 研究兴趣标签 -->
+    <div class="research-tags">
+      <span><i class="fas fa-network-wired"></i> 复杂网络</span>
+      <span><i class="fas fa-chart-line"></i> 计算社会科学</span>
+      <span><i class="fas fa-globe"></i> 数字治理</span>
+      <span><i class="fas fa-brain"></i> 算法公平性</span>
+      <span><i class="fas fa-users"></i> 社会网络分析</span>
+    </div>
+
+    <!-- 两列核心信息 -->
+    <div class="grid-2col">
+      <!-- 左侧：代表论文/出版物 -->
+      <div class="left-col">
+        <div class="section-title">
+          <i class="fas fa-file-alt"></i> 近期发表
+        </div>
+        <ul class="pub-list">
+          <li>
+            <div class="pub-title">MCTS4LawyerRec: Lawyer Recommendation Using Monte Carlo Tree Search via Litigation Simulation</div>
+            <div class="pub-authors"><span class="highlight">Yanqing An</span>, Yin Gu, Zaixi Zhang, Linan Yue, and Qi Liu</div>
+            <div class="pub-journal">
+              <i class="fas fa-book-open"></i> 社会学研究
+              <span class="pub-year">2026</span>
+            </div>
+          </li>
+          <li>
+            <div class="pub-title">Post-hoc Facts augmented Legal Judgment Prediction</div>
+            <div class="pub-authors"><span class="highlight">Yanqing An</span>, Linan Yue, Weibo Gao, Kai Zhang, Qi Liu</div>
+            <div class="pub-journal">
+              <i class="fas fa-book-open"></i> DASFAA
+              <span class="pub-year">2024</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 右侧：教育/经历 + 联系 + 其他 -->
+      <div class="right-col">
+        <div class="info-item">
+          <h4><i class="fas fa-graduation-cap"></i> 教育与经历</h4>
+          <ul>
+            <li>中国科学技术大学 工学博士 (2019–2027)</li>
+            <li>太原理工大学 软件学院 学士 (2015–2019)</li>
+{#            <li>哈佛大学 定量社会科学研究所 访问学者 (2022)</li>#}
+          </ul>
+        </div>
+
+        <div class="info-item">
+          <h4><i class="fas fa-award"></i> 荣誉与奖励</h4>
+          <ul>
+            <li>2024 青年社会学优秀论文奖</li>
+            <li>2023 国际计算社会科学会议 最佳学生论文</li>
+            <li>牛津大学克拉伦登奖学金 (2019–2023)</li>
+          </ul>
+        </div>
+
+        <div class="info-item">
+          <h4><i class="fas fa-envelope"></i> 联系方式</h4>
+          <div class="contact-row">
+            <a href="./index20261009.html"><i class="fas fa-envelope"></i> a_yq@outlook.com</a>
+            <a href="https://bouncedude.github.io/test/"><i class="fab fa-github"></i> bouncedude.github.io</a>
+            <a href="#homepage2"><i class="fas fa-globe"></i> 个人网站</a>
+            <a href="http://home.ustc.edu.cn/~anyq/"><i class="fas fa-globe"></i> 中国科学技术大学个人网站</a>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <h4><i class="fas fa-chalkboard-teacher"></i> 学术服务</h4>
+          <ul>
+            <li>SIGKDD'2021, ICKG'2020 会议志愿者 (2020-)</li>
+            <li>审稿人: SIGIR 2024, IEEE TKDE</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部脚注 -->
+    <div class="footer-note">
+      <i class="far fa-copyright" style="margin-right: 0.3rem;"></i> 安彦青 · 青年学者主页 — 富强 · 民主 · 法治
+    </div>
+  </div>
+</body>
+</html>
+<p style="font-size: 48px;font-weight: bold" id="Homepage2">Brief</p>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>青年学者 · 安彦青</title>
+  <style>
+    /* ---------- 全局 ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6faff 0%, #eef4fc 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      color: #1e2f44;
+      line-height: 1.55;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    /* ---------- 卡片 ---------- */
+    .scholar-card {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(2px);
+      border-radius: 36px;
+      box-shadow: 0 30px 50px -20px rgba(40, 70, 120, 0.2), 0 8px 20px -8px rgba(0, 20, 50, 0.08);
+      padding: 2.6rem 2.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .scholar-card:hover {
+      box-shadow: 0 40px 60px -20px rgba(40, 70, 120, 0.25);
+    }
+
+    /* ---------- 头部 ---------- */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e0eaf5;
+      padding-bottom: 1.2rem;
+    }
+
+    .name-title h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #0b2a4a, #2e5f8e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+      margin-bottom: 0.2rem;
+    }
+
+    .name-title .subhead {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #5e7a9a;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .name-title .subhead span {
+      background: #e4eefb;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1f4a7a;
+      border: 1px solid #cde0f2;
+      box-shadow: 0 2px 6px rgba(30, 70, 120, 0.05);
+    }
+
+    .lang-switch {
+      font-size: 0.85rem;
+      color: #5e7a9a;
+      background: #ffffff;
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      letter-spacing: 0.3px;
+      font-weight: 600;
+      border: 1px solid #d9e6f5;
+      box-shadow: 0 4px 10px -4px rgba(0, 30, 60, 0.08);
+      transition: all 0.2s;
+    }
+
+    .lang-switch:hover {
+      background: #f5f9ff;
+      border-color: #b8d0e8;
+    }
+
+    /* ---------- 简介 ---------- */
+    .profile {
+      display: flex;
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .avatar {
+      flex-shrink: 0;
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(145deg, #d9e8fc, #c2d8f0);
+      border-radius: 42% 58% 70% 30% / 40% 50% 60% 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 28px -10px rgba(30, 70, 120, 0.25);
+      border: 3px solid #ffffff;
+      outline: 1px solid #cde0f5;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .avatar:hover {
+      transform: scale(1.05) translateY(-4px);
+    }
+
+    .avatar-initials {
+      font-size: 3.2rem;
+      font-weight: 600;
+      color: #3b6ea5;
+      letter-spacing: 1px;
+      font-family: 'Times New Roman', serif;
+      opacity: 0.9;
+    }
+
+    .bio {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .bio p {
+      font-size: 1.02rem;
+      color: #2a4059;
+      margin-bottom: 1.2rem;
+      text-align: justify;
+      line-height: 1.7;
+    }
+
+    .highlight {
+      background: linear-gradient(120deg, #e5f0ff 0%, #e5f0ff 40%, transparent 80%);
+      padding: 0 0.3rem;
+      font-weight: 600;
+      border-radius: 4px;
+      color: #0b2a4a;
+    }
+
+    /* ---------- 研究标签 ---------- */
+    .research-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin: 1.6rem 0 0.8rem;
+    }
+
+    .research-tags span {
+      background: #ffffff;
+      color: #1f4a7a;
+      padding: 0.4rem 1.3rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid #d4e4f5;
+      transition: all 0.2s ease;
+      letter-spacing: 0.2px;
+      box-shadow: 0 4px 10px -6px rgba(30, 70, 120, 0.1);
+      cursor: default;
+    }
+
+    .research-tags span:hover {
+      background: #eef6ff;
+      border-color: #7ba3cf;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px -8px rgba(30, 70, 120, 0.2);
+    }
+
+    /* ---------- 成果网格（更活泼） ---------- */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin: 2rem 0 1.8rem;
+    }
+
+    .achievement-item {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.2rem 1.5rem;
+      border: 1px solid #e2eefb;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      box-shadow: 0 6px 16px -8px rgba(30, 70, 120, 0.08);
+    }
+
+    .achievement-item:hover {
+      background: #f7fbff;
+      border-color: #b8d0e8;
+      transform: translateY(-4px);
+      box-shadow: 0 16px 24px -12px rgba(30, 70, 120, 0.18);
+    }
+
+    .achievement-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      opacity: 0.9;
+      color: #3b6ea5;
+      flex-shrink: 0;
+      width: 34px;
+      text-align: center;
+      filter: drop-shadow(0 4px 4px rgba(59, 110, 165, 0.15));
+    }
+
+    .achievement-text {
+      font-size: 0.98rem;
+      color: #1f3c5c;
+      line-height: 1.5;
+    }
+
+    .achievement-text strong {
+      font-weight: 700;
+      color: #0b2a4a;
+    }
+
+    /* ---------- 联系栏 ---------- */
+    .contact-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2.2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e0eaf5;
+      font-size: 0.95rem;
+    }
+
+    .contact-links {
+      display: flex;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #2f5279;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 2px;
+    }
+
+    .contact-link:hover {
+      color: #0b2a4a;
+      border-bottom-color: #3b6ea5;
+      transform: translateY(-2px);
+    }
+
+    .contact-link .emoji-icon {
+      font-size: 1.1rem;
+      filter: grayscale(0.2);
+    }
+
+    .updated-badge {
+      font-size: 0.8rem;
+      color: #5e7a9a;
+      letter-spacing: 0.3px;
+      font-weight: 600;
+      background: #ffffff;
+      padding: 0.3rem 1.2rem;
+      border-radius: 40px;
+      border: 1px solid #d9e6f5;
+      box-shadow: 0 4px 8px -4px rgba(0, 30, 60, 0.05);
+    }
+
+    .footer-quote {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #5e7a9a;
+      font-style: italic;
+      letter-spacing: 0.2px;
+      border-left: 3px solid #b8d0e8;
+      padding-left: 1rem;
+    }
+
+    /* ---------- 聊天悬浮组件 ---------- */
+    .chat-widget {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .chat-toggle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b6ea5, #1f4a7a);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 16px 30px -8px rgba(30, 70, 120, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      outline: none;
+      position: relative;
+      animation: pulse 2.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 110, 165, 0.4); }
+      70% { box-shadow: 0 0 0 14px rgba(59, 110, 165, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 110, 165, 0); }
+    }
+
+    .chat-toggle:hover {
+      transform: scale(1.08);
+      box-shadow: 0 20px 36px -8px rgba(30, 70, 120, 0.6);
+      animation: none;
+    }
+
+    .chat-toggle:active {
+      transform: scale(0.94);
+    }
+
+    .chat-window {
+      width: 350px;
+      max-width: calc(100vw - 48px);
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 32px 60px -16px rgba(0, 30, 60, 0.35);
+      border: 1px solid #d4e4f5;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(16px) scale(0.92);
+      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.3s;
+      pointer-events: none;
+      transform-origin: bottom right;
+    }
+
+    .chat-window.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #eef5fd, #e2eefb);
+      padding: 1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #d4e4f5;
+    }
+
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #1f4a7a;
+      font-weight: 600;
+      box-shadow: 0 6px 12px -6px rgba(30, 70, 120, 0.2);
+    }
+
+    .chat-header-info h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0b2a4a;
+      letter-spacing: 0.2px;
+    }
+
+    .chat-header-info p {
+      font-size: 0.7rem;
+      color: #5e7a9a;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    .online-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #2e9e5b;
+      border-radius: 50%;
+      margin-right: 4px;
+      box-shadow: 0 0 0 2px rgba(46, 158, 91, 0.2);
+      animation: blink 1.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .chat-close {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      color: #5e7a9a;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-close:hover {
+      background: #ffffff;
+      color: #0b2a4a;
+      box-shadow: 0 4px 8px -4px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-messages {
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 0.8rem 1.2rem;
+      border-radius: 22px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-word;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.bot {
+      background: #f0f7ff;
+      border: 1px solid #d4e6f8;
+      color: #1e3a5c;
+      border-bottom-left-radius: 6px;
+      align-self: flex-start;
+    }
+
+    .message.user {
+      background: linear-gradient(135deg, #3b6ea5, #1f4a7a);
+      color: #ffffff;
+      border-bottom-right-radius: 6px;
+      align-self: flex-end;
+      box-shadow: 0 6px 14px -8px rgba(30, 70, 120, 0.3);
+    }
+
+    .message-time {
+      font-size: 0.65rem;
+      color: #96acbf;
+      margin-top: 4px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .message.user .message-time {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .chat-input-area {
+      display: flex;
+      align-items: center;
+      padding: 0.9rem 1.2rem;
+      background: #fafdff;
+      border-top: 1px solid #e2eefb;
+      gap: 10px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      border: 1px solid #d4e2f0;
+      background: #ffffff;
+      border-radius: 30px;
+      padding: 0.7rem 1.3rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+      color: #1e2f44;
+      box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    .chat-input-area input::placeholder {
+      color: #96acbf;
+      font-weight: 400;
+    }
+
+    .chat-input-area input:focus {
+      border-color: #3b6ea5;
+      box-shadow: 0 0 0 4px rgba(59, 110, 165, 0.12);
+    }
+
+    .chat-send-btn {
+      background: linear-gradient(135deg, #3b6ea5, #1f4a7a);
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      box-shadow: 0 8px 16px -6px rgba(30, 70, 120, 0.35);
+    }
+
+    .chat-send-btn:hover {
+      opacity: 0.9;
+      transform: scale(1.06);
+    }
+
+    .chat-send-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* ---------- 响应式 ---------- */
+    @media (max-width: 700px) {
+      .scholar-card {
+        padding: 2rem 1.5rem;
+        border-radius: 28px;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .name-title h1 {
+        font-size: 2.4rem;
+      }
+
+      .profile {
+        gap: 1.8rem;
+      }
+
+      .avatar {
+        width: 110px;
+        height: 110px;
+      }
+
+      .avatar-initials {
+        font-size: 2.6rem;
+      }
+
+      .achievements-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .contact-links {
+        gap: 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .scholar-card {
+        padding: 1.6rem 1.1rem;
+        border-radius: 24px;
+      }
+
+      .name-title h1 {
+        font-size: 2rem;
+      }
+
+      .bio p {
+        font-size: 0.96rem;
+      }
+
+      .research-tags span {
+        font-size: 0.82rem;
+        padding: 0.3rem 1rem;
+      }
+
+      .chat-widget {
+        bottom: 16px;
+        right: 16px;
+      }
+
+      .chat-toggle {
+        width: 56px;
+        height: 56px;
+        font-size: 1.7rem;
+      }
+
+      .chat-window {
+        width: calc(100vw - 32px);
+        max-width: 340px;
+      }
+    }
+  </style>
+</head>
+<body>
+<section class="awards-section" id="awards">
+  <div class="scholar-card">
+    <!-- 头部 -->
+    <div class="header">
+      <div class="name-title">
+        <h1>林 知 远</h1>
+        <div class="subhead">
+          青年研究员 · 博士生导师
+          <span>国家优青</span>
+        </div>
+      </div>
+      <div class="lang-switch">
+        EN / 中文
+      </div>
+    </div>
+
+    <!-- 个人简介 -->
+    <div class="profile">
+      <div class="avatar">
+        <div class="avatar-initials">林</div>
+      </div>
+      <div class="bio">
+        <p>
+          林知远，<span class="highlight">浙江大学</span>信息与电子工程学院青年研究员，博士生导师。2018年于清华大学获博士学位，2018-2021年在麻省理工学院从事博士后研究。主要研究方向为<span class="highlight">光子集成芯片、微纳光学与智能传感</span>。入选国家“优青”（2023）、中国科协青年人才托举工程。
+        </p>
+        <p>
+          以第一/通讯作者在 <em>Nature Photonics</em>, <em>Light: Science & Applications</em>, <em>Advanced Materials</em> 等期刊发表论文30余篇，授权发明专利8项。主持国家自然科学基金面上项目、国家重点研发计划子课题等。担任 <em>PhotoniX</em> 青年编委、<em>IEEE Photonics Society</em> 会员。
+        </p>
+        <div class="research-tags">
+          <span>光子集成</span>
+          <span>微纳光学</span>
+          <span>智能传感</span>
+          <span>光学超表面</span>
+          <span>片上光互连</span>
+          <span>机器学习光子学</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 学术成果网格 -->
+    <div class="achievements-grid">
+      <div class="achievement-item">
+        <div class="achievement-icon">📄</div>
+        <div class="achievement-text">
+          <strong>Nature Photonics</strong> (2024) 第一作者<br>
+          “拓扑优化实现超紧凑光子集成芯片”
+        </div>
+      </div>
+      <div class="achievement-item">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-text">
+          <strong>国家优秀青年科学基金</strong><br>
+          2023年获得者
+        </div>
+      </div>
+      <div class="achievement-item">
+        <div class="achievement-icon">📘</div>
+        <div class="achievement-text">
+          <strong>Light: Science & Applications</strong> (2023)<br>
+          共同通讯作者，封面论文
+        </div>
+      </div>
+      <div class="achievement-item">
+        <div class="achievement-icon">🔬</div>
+        <div class="achievement-text">
+          <strong>主持</strong> 国自然面上项目、重点研发子课题<br>
+          经费总额 500+ 万元
+        </div>
+      </div>
+    </div>
+
+    <!-- 代表性成果与引用 -->
+    <div style="margin: 1rem 0 0.5rem;">
+      <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.95rem; color: #2f5279; font-weight: 500;">
+        <div>📌 近期代表作：<em>Nature Photonics</em> 18, 234–242 (2024)</div>
+        <div>📌 谷歌学术引用 2600+ ，H-index 28</div>
+      </div>
+      <div class="footer-quote">
+        “用光子芯片连接智能世界 —— 探索光与电的极限。”
+      </div>
+    </div>
+
+    <!-- 联系栏 -->
+    <div class="contact-bar">
+      <div class="contact-links">
+        <a href="#" class="contact-link">
+          <span class="emoji-icon">✉</span> zhiyuan.lin@zju.edu.cn
+        </a>
+        <a href="#" class="contact-link">
+          <span class="emoji-icon">🔗</span> 个人主页 / 谷歌学术
+        </a>
+        <a href="#" class="contact-link">
+          <span class="emoji-icon">🏛</span> 浙江大学玉泉校区 · 信电楼
+        </a>
+      </div>
+      <div class="updated-badge">
+        最近更新 · 2025.03
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 聊天悬浮组件 ========== -->
+  <div class="chat-widget">
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="chat-header-avatar">🤖</div>
+          <div class="chat-header-info">
+            <h4>学术助手</h4>
+            <p><span class="online-dot"></span>在线 · 可回答问题</p>
+          </div>
+        </div>
+        <button class="chat-close" id="chatClose" aria-label="关闭聊天">✕</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message bot">
+          你好！我是林知远老师的学术助手。你可以问我关于研究方向、论文发表或合作事宜。请问有什么可以帮您？
+          <div class="message-time">刚刚</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="输入你的问题..." autocomplete="off" />
+        <button class="chat-send-btn" id="chatSend" aria-label="发送消息">➤</button>
+      </div>
+    </div>
+    <button class="chat-toggle" id="chatToggle" aria-label="打开聊天助手">💬</button>
+  </div>
+</section>
+  <script>
+    (function() {
+      const chatToggle = document.getElementById('chatToggle');
+      const chatWindow = document.getElementById('chatWindow');
+      const chatClose = document.getElementById('chatClose');
+      const chatInput = document.getElementById('chatInput');
+      const chatSend = document.getElementById('chatSend');
+      const chatMessages = document.getElementById('chatMessages');
+
+      function toggleChat() {
+        chatWindow.classList.toggle('open');
+      }
+
+      chatToggle.addEventListener('click', toggleChat);
+      chatClose.addEventListener('click', toggleChat);
+
+      function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+        chatInput.focus();
+
+        setTimeout(() => {
+          const reply = getAutoReply(text);
+          addMessage(reply, 'bot');
+        }, 500);
+      }
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = `${text}<div class="message-time">刚刚</div>`;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function getAutoReply(userText) {
+        const lower = userText.toLowerCase();
+        if (lower.includes('研究方向') || lower.includes('research') || lower.includes('做什么')) {
+          return '林老师的主要研究方向包括光子集成芯片、微纳光学、智能传感和光学超表面。更具体的信息可以查看主页上的研究标签。';
+        } else if (lower.includes('论文') || lower.includes('paper') || lower.includes('发表')) {
+          return '林老师近期在 Nature Photonics (2024) 以第一作者发表了关于拓扑优化光子集成芯片的工作，另外在 Light: Science & Applications 也有封面论文。详细列表可以查看谷歌学术。';
+        } else if (lower.includes('招生') || lower.includes('博士') || lower.includes('硕士') || lower.includes('加入')) {
+          return '林老师课题组每年招收博士/硕士研究生，欢迎有光学、电子、物理背景的同学联系。请将简历发至 zhiyuan.lin@zju.edu.cn。';
+        } else if (lower.includes('联系') || lower.includes('邮箱') || lower.includes('email')) {
+          return '你可以通过邮箱 zhiyuan.lin@zju.edu.cn 直接联系林老师，也可以前往浙江大学玉泉校区信电楼办公室。';
+        } else if (lower.includes('你好') || lower.includes('hi') || lower.includes('hello')) {
+          return '你好！很高兴与你交流。有什么关于林知远老师学术方面的问题，尽管问我。';
+        } else {
+          return '谢谢你的提问！林知远老师课题组致力于光子集成与智能传感研究。你可以尝试问我关于研究方向、论文发表或招生等信息。如需更详细咨询，建议发送邮件至 zhiyuan.lin@zju.edu.cn。';
+        }
+      }
+
+      chatSend.addEventListener('click', sendMessage);
+      chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      chatToggle.addEventListener('click', function() {
+        if (chatWindow.classList.contains('open')) {
+          chatInput.focus();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
+<hr>
+<p style="text-align: center">Yanqing An 2026</p>
