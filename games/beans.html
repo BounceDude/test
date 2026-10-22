@@ -1,0 +1,818 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ 闪光猎手 · 角色移动版</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0b1120 0%, #19233c 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .game-container {
+      background: rgba(18, 28, 46, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 3rem;
+      padding: 1.8rem 2rem 2.2rem;
+      box-shadow: 0 30px 45px -15px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      color: #dce7ff;
+      padding: 0 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .score-box, .timer-box, .flash-count {
+      background: #0a101c;
+      border-radius: 100px;
+      padding: 0.6rem 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(255, 255, 255, 0.05);
+      border: 1px solid #2b3a5c;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .score-box span, .timer-box span, .flash-count span {
+      font-size: 1rem;
+      color: #7c8db0;
+    }
+
+    .score-value, .timer-value, .flash-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #eef5ff;
+      text-shadow: 0 0 12px #4f8cff;
+      min-width: 2.8rem;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0.5rem 0 1.2rem;
+      background: #0e1629;
+      border-radius: 2rem;
+      padding: 0.5rem;
+      box-shadow: inset 0 0 30px #00000080, 0 10px 20px -5px black;
+      border: 1px solid #2e3f5e;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 1.6rem;
+      background: radial-gradient(circle at 30% 30%, #1a253f, #0b111e);
+      cursor: crosshair;
+    }
+
+    .info-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.6rem;
+      padding: 0 0.4rem;
+      color: #a9bbdd;
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #212f4a;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      color: #cbd9ff;
+      cursor: pointer;
+      box-shadow: 0 12px 18px -8px black, inset 0 -4px 0 #0f1728, inset 0 1px 2px rgba(255, 255, 255, 0.08);
+      transition: all 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      border: 1px solid #344464;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #2c3d60;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 24px -8px black;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 6px 10px -4px black, inset 0 -2px 0 #0f1728;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 6px 10px -6px black;
+    }
+
+    .btn-primary {
+      background: #3f5e9e;
+      color: #f0f6ff;
+      border-color: #6f8fd0;
+      box-shadow: 0 12px 18px -8px black, inset 0 -4px 0 #1e2e50, inset 0 1px 2px #aac2ff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #4f72bb;
+    }
+
+    .message-area {
+      text-align: center;
+      margin-top: 1rem;
+      height: 2rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #b7c9f0;
+      transition: all 0.2s;
+      text-shadow: 0 2px 6px black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .final-flash {
+      color: #ffe484;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 550px) {
+      .game-container { padding: 1.2rem 1rem 1.6rem; border-radius: 2rem; }
+      .score-box, .timer-box, .flash-count { padding: 0.4rem 1rem; }
+      .score-value, .timer-value, .flash-value { font-size: 1.2rem; min-width: 2rem; }
+      .btn { padding: 0.6rem 1.2rem; font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">
+      <div class="score-box">
+        <span>🏆</span>
+        <div class="score-value" id="scoreDisplay">0</div>
+      </div>
+      <div class="flash-count">
+        <span>⚡</span>
+        <div class="flash-value" id="flashCountDisplay">0</div>
+      </div>
+      <div class="timer-box">
+        <span>⏳</span>
+        <div class="timer-value" id="timerDisplay">60</div>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="720" height="360"></canvas>
+    </div>
+
+    <div class="info-panel">
+      <span>🎮 方向键 / WASD 移动角色</span>
+      <span>✨ 吃掉闪光得分</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn">▶ 开始游戏</button>
+      <button class="btn" id="resetBtn">⟲ 重置</button>
+    </div>
+
+    <div class="message-area" id="messageArea">
+      ⚡ 开始游戏，用角色捕捉闪光
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ---------- 配置参数 ----------
+      const CANVAS_WIDTH = 720;
+      const CANVAS_HEIGHT = 360;
+      const PLAYER_RADIUS = 18;           // 角色半径
+      const PLAYER_SPEED = 5;             // 移动速度
+      const FLASH_RADIUS = 16;            // 闪光点半径 (可收集)
+      const FLASH_LIFETIME = 2500;        // 闪光存在时间 (ms)
+      const FLASH_SPAWN_INTERVAL = 900;   // 生成间隔 (ms)
+      const MAX_FLASHES = 6;              // 场上最多闪光数量
+      const INIT_TIME = 60;               // 游戏时间 (秒)
+      const SCORE_PER_FLASH = 15;         // 收集一个闪光得分
+
+      // ---------- DOM 元素 ----------
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const flashCountDisplay = document.getElementById('flashCountDisplay');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const messageArea = document.getElementById('messageArea');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      // ---------- 游戏状态 ----------
+      let gameActive = false;
+      let score = 0;
+      let timeLeft = INIT_TIME;
+      let collectedFlashes = 0;           // 已收集闪光数量
+
+      // 角色
+      const player = {
+        x: CANVAS_WIDTH / 2,
+        y: CANVAS_HEIGHT / 2,
+        radius: PLAYER_RADIUS,
+        speed: PLAYER_SPEED
+      };
+
+      // 闪光数组
+      let flashes = [];
+
+      // 键盘状态
+      const keys = {
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+        w: false,
+        a: false,
+        s: false,
+        d: false
+      };
+
+      // 计时器
+      let gameLoopId = null;               // requestAnimationFrame id
+      let intervalTimer = null;            // 倒计时
+      let spawnTimer = null;               // 生成闪光
+      let lastTimestamp = 0;
+
+      // 防止重复结束
+      let gameOverFlag = false;
+
+      // ---------- 初始化/重置 ----------
+      function resetGame() {
+        // 停止所有循环和计时器
+        if (gameLoopId) {
+          cancelAnimationFrame(gameLoopId);
+          gameLoopId = null;
+        }
+        if (intervalTimer) {
+          clearInterval(intervalTimer);
+          intervalTimer = null;
+        }
+        if (spawnTimer) {
+          clearInterval(spawnTimer);
+          spawnTimer = null;
+        }
+
+        gameActive = false;
+        gameOverFlag = false;
+
+        // 重置数据
+        score = 0;
+        timeLeft = INIT_TIME;
+        collectedFlashes = 0;
+        flashes = [];
+
+        // 重置角色位置
+        player.x = CANVAS_WIDTH / 2;
+        player.y = CANVAS_HEIGHT / 2;
+
+        // 更新UI
+        updateUI();
+
+        // 按钮状态
+        startBtn.disabled = false;
+        resetBtn.disabled = false;
+
+        setMessage('⚡ 点击「开始游戏」挑战反应', false);
+
+        // 绘制静态画面
+        draw();
+      }
+
+      // 更新UI
+      function updateUI() {
+        scoreDisplay.textContent = score;
+        flashCountDisplay.textContent = collectedFlashes;
+        timerDisplay.textContent = timeLeft;
+      }
+
+      // 消息设置
+      function setMessage(text, isFinal = false) {
+        if (isFinal) {
+          messageArea.innerHTML = `<span class="final-flash">${text}</span>`;
+        } else {
+          messageArea.textContent = text;
+        }
+      }
+
+      // ---------- 游戏开始 ----------
+      function startGame() {
+        // 如果游戏已经在进行中，先重置
+        if (gameActive) {
+          resetGame();
+        }
+
+        // 重置状态
+        score = 0;
+        timeLeft = INIT_TIME;
+        collectedFlashes = 0;
+        flashes = [];
+        gameActive = true;
+        gameOverFlag = false;
+
+        // 角色重置到中心
+        player.x = CANVAS_WIDTH / 2;
+        player.y = CANVAS_HEIGHT / 2;
+
+        // 清除旧计时器
+        if (intervalTimer) clearInterval(intervalTimer);
+        if (spawnTimer) clearInterval(spawnTimer);
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+
+        // 更新UI
+        updateUI();
+        startBtn.disabled = true;
+        resetBtn.disabled = false;  // 重置可用
+
+        setMessage('🎮 移动角色吃掉闪光！', false);
+
+        // 启动倒计时
+        intervalTimer = setInterval(() => {
+          if (!gameActive) return;
+          timeLeft -= 1;
+          timerDisplay.textContent = timeLeft;
+
+          if (timeLeft <= 0) {
+            timeLeft = 0;
+            timerDisplay.textContent = 0;
+            endGame('timeout');
+          }
+        }, 1000);
+
+        // 启动闪光生成 (立即生成一个，然后定期生成)
+        spawnFlash(); // 立即生成第一个
+
+        if (spawnTimer) clearInterval(spawnTimer);
+        spawnTimer = setInterval(() => {
+          if (!gameActive) return;
+          if (flashes.length < MAX_FLASHES) {
+            spawnFlash();
+          }
+        }, FLASH_SPAWN_INTERVAL);
+
+        // 启动游戏循环 (requestAnimationFrame)
+        lastTimestamp = performance.now();
+        gameLoopId = requestAnimationFrame(gameLoop);
+      }
+
+      // ---------- 游戏结束 ----------
+      function endGame(reason = 'timeout') {
+        if (!gameActive && gameOverFlag) return;
+        if (!gameActive) return;
+
+        gameActive = false;
+        gameOverFlag = true;
+
+        // 停止计时器
+        if (intervalTimer) {
+          clearInterval(intervalTimer);
+          intervalTimer = null;
+        }
+        if (spawnTimer) {
+          clearInterval(spawnTimer);
+          spawnTimer = null;
+        }
+        if (gameLoopId) {
+          cancelAnimationFrame(gameLoopId);
+          gameLoopId = null;
+        }
+
+        // 按钮状态
+        startBtn.disabled = false;
+        resetBtn.disabled = false;
+
+        // 消息
+        if (reason === 'timeout') {
+          setMessage(`⏰ 时间到！得分: ${score} · 收集 ${collectedFlashes} 个闪光`, true);
+        } else {
+          setMessage(`🏁 游戏结束 · 得分 ${score}`, true);
+        }
+
+        // 绘制最终画面
+        draw();
+      }
+
+      // ---------- 生成闪光 ----------
+      function spawnFlash() {
+        if (!gameActive) return;
+        if (flashes.length >= MAX_FLASHES) return;
+
+        // 随机位置，避免太靠近边缘和玩家
+        let x, y, safe = false;
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        while (!safe && attempts < maxAttempts) {
+          x = Math.random() * (CANVAS_WIDTH - 2 * FLASH_RADIUS) + FLASH_RADIUS;
+          y = Math.random() * (CANVAS_HEIGHT - 2 * FLASH_RADIUS) + FLASH_RADIUS;
+
+          // 避免距离玩家太近 (至少 50px)
+          const dx = x - player.x;
+          const dy = y - player.y;
+          const distToPlayer = Math.sqrt(dx*dx + dy*dy);
+
+          if (distToPlayer > 60) {
+            safe = true;
+          }
+          attempts++;
+        }
+
+        // 如果找不到合适位置，就在随机位置生成
+        if (!safe) {
+          x = Math.random() * (CANVAS_WIDTH - 2 * FLASH_RADIUS) + FLASH_RADIUS;
+          y = Math.random() * (CANVAS_HEIGHT - 2 * FLASH_RADIUS) + FLASH_RADIUS;
+        }
+
+        const now = performance.now();
+        flashes.push({
+          x, y,
+          radius: FLASH_RADIUS,
+          createdAt: now,
+          id: Math.random() + now
+        });
+      }
+
+      // ---------- 更新玩家位置 (基于键盘) ----------
+      function updatePlayer(deltaTime) {
+        if (!gameActive) return;
+
+        // 速度归一化因子 (使斜向移动速度一致)
+        let dx = 0, dy = 0;
+
+        // 方向键和WASD
+        if (keys.ArrowUp || keys.w) dy -= 1;
+        if (keys.ArrowDown || keys.s) dy += 1;
+        if (keys.ArrowLeft || keys.a) dx -= 1;
+        if (keys.ArrowRight || keys.d) dx += 1;
+
+        if (dx !== 0 || dy !== 0) {
+          // 归一化对角线
+          const length = Math.sqrt(dx*dx + dy*dy);
+          dx = dx / length;
+          dy = dy / length;
+
+          // 移动
+          player.x += dx * player.speed;
+          player.y += dy * player.speed;
+        }
+
+        // 边界限制 (确保角色完整显示)
+        player.x = Math.max(player.radius, Math.min(CANVAS_WIDTH - player.radius, player.x));
+        player.y = Math.max(player.radius, Math.min(CANVAS_HEIGHT - player.radius, player.y));
+      }
+
+      // ---------- 更新闪光 (生命周期 & 碰撞检测) ----------
+      function updateFlashes(now) {
+        if (!gameActive) return;
+
+        // 1. 移除过期闪光
+        flashes = flashes.filter(flash => {
+          const age = now - flash.createdAt;
+          return age < FLASH_LIFETIME;
+        });
+
+        // 2. 碰撞检测 (角色吃掉闪光)
+        const remainingFlashes = [];
+
+        for (let i = 0; i < flashes.length; i++) {
+          const flash = flashes[i];
+          const dx = player.x - flash.x;
+          const dy = player.y - flash.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+
+          // 如果角色与闪光重叠 (距离小于半径和)
+          if (dist < player.radius + flash.radius) {
+            // 收集！
+            score += SCORE_PER_FLASH;
+            collectedFlashes += 1;
+            // 播放一个简单的视觉反馈 (通过修改消息或直接得分更新)
+            // 这里不保留该闪光 (不加入remainingFlashes)
+            continue;
+          }
+
+          remainingFlashes.push(flash);
+        }
+
+        flashes = remainingFlashes;
+        updateUI();
+      }
+
+      // ---------- 游戏主循环 ----------
+      function gameLoop(now) {
+        if (!gameActive) {
+          // 如果游戏不再活跃，停止循环
+          if (gameLoopId) {
+            cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+          }
+          return;
+        }
+
+        // 计算时间差 (用于平滑移动，这里简单用固定步长，但基于帧率也可以)
+        // 我们采用固定速度乘以deltaTime因子，但为了简单，保持基于帧的移动，但限制最大步长
+        // 不过为了在低帧率下不卡顿，可以做个简易处理
+        const delta = Math.min(32, now - lastTimestamp); // 最大32ms
+        lastTimestamp = now;
+
+        // 实际移动速度 (基于60fps的标准)
+        // 如果delta大于16ms，则放大移动量，但这里保持简单: 使用固定速度，但乘以delta/16的比例
+        // 但为了精确控制，用比例因子
+        const speedFactor = Math.min(2.0, delta / 16.67); // 限制最大2倍
+
+        // 临时调整移动速度 (针对低帧率优化)
+        // 这里简单实现: 在updatePlayer中已经使用了固定speed，我们用比例因子调整
+        // 为了不改动函数，临时修改player.speed？
+        // 更简单: 在updatePlayer中乘上因子; 但updatePlayer被调用时不接收因子，我们重构一下。
+        // 改进: 在updatePlayer中增加参数
+        // 由于是内联，我们在这里重新实现移动逻辑
+        if (gameActive) {
+          let dx = 0, dy = 0;
+          if (keys.ArrowUp || keys.w) dy -= 1;
+          if (keys.ArrowDown || keys.s) dy += 1;
+          if (keys.ArrowLeft || keys.a) dx -= 1;
+          if (keys.ArrowRight || keys.d) dx += 1;
+
+          if (dx !== 0 || dy !== 0) {
+            const length = Math.sqrt(dx*dx + dy*dy);
+            dx = dx / length;
+            dy = dy / length;
+
+            const moveX = dx * player.speed * speedFactor;
+            const moveY = dy * player.speed * speedFactor;
+
+            player.x += moveX;
+            player.y += moveY;
+          }
+
+          // 边界限制
+          player.x = Math.max(player.radius, Math.min(CANVAS_WIDTH - player.radius, player.x));
+          player.y = Math.max(player.radius, Math.min(CANVAS_HEIGHT - player.radius, player.y));
+        }
+
+        // 更新闪光 (使用当前时间)
+        updateFlashes(now);
+
+        // 绘制
+        draw();
+
+        // 继续循环
+        gameLoopId = requestAnimationFrame(gameLoop);
+      }
+
+      // ---------- 绘制 ----------
+      function draw() {
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // 背景装饰 (网格)
+        ctx.strokeStyle = '#1e2a44';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < CANVAS_WIDTH; i += 40) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, CANVAS_HEIGHT);
+          ctx.strokeStyle = '#1a253f';
+          ctx.stroke();
+        }
+        for (let i = 0; i < CANVAS_HEIGHT; i += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, i);
+          ctx.lineTo(CANVAS_WIDTH, i);
+          ctx.strokeStyle = '#1a253f';
+          ctx.stroke();
+        }
+
+        // 绘制闪光 (未收集的)
+        flashes.forEach(flash => {
+          const age = performance.now() - flash.createdAt;
+          const lifePercent = 1 - age / FLASH_LIFETIME;
+          const alpha = Math.max(0.3, lifePercent * 1.2);
+          const scale = 0.8 + 0.4 * Math.sin(age / 150); // 闪烁效果
+
+          // 光晕
+          ctx.shadowColor = '#f7e05e';
+          ctx.shadowBlur = 25;
+
+          // 主光点
+          ctx.beginPath();
+          ctx.arc(flash.x, flash.y, flash.radius * 0.9, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(247, 224, 94, ${alpha})`;
+          ctx.fill();
+
+          // 内圈高亮
+          ctx.shadowBlur = 30;
+          ctx.beginPath();
+          ctx.arc(flash.x, flash.y, flash.radius * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.9})`;
+          ctx.fill();
+
+          // 闪光符号
+          ctx.shadowBlur = 15;
+          ctx.font = 'bold 18px "Segoe UI", sans-serif';
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('⚡', flash.x, flash.y - 2);
+        });
+
+        // 重置阴影
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
+        // 绘制玩家角色 (带光效)
+        ctx.shadowColor = '#4f8cff';
+        ctx.shadowBlur = 30;
+
+        // 角色外发光
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius + 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(79, 140, 255, 0.25)';
+        ctx.fill();
+
+        // 角色主圆
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(player.x-6, player.y-6, 4, player.x, player.y, player.radius+4);
+        gradient.addColorStop(0, '#8bb3ff');
+        gradient.addColorStop(0.8, '#3f5e9e');
+        gradient.addColorStop(1, '#1e2e50');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // 眼睛 (让角色更生动)
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(player.x - 7, player.y - 6, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(player.x + 7, player.y - 6, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(player.x - 7, player.y - 6, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#0b1120';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(player.x + 7, player.y - 6, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#0b1120';
+        ctx.fill();
+
+        // 重置阴影
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
+        // 如果游戏未激活，显示提示文字
+        if (!gameActive && !gameOverFlag) {
+          ctx.font = 'bold 22px "Segoe UI", sans-serif';
+          ctx.fillStyle = 'rgba(180, 200, 240, 0.7)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('按「开始游戏」', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 50);
+        }
+
+        if (gameActive) {
+          // 显示剩余时间（小字重绘）
+          ctx.font = 'bold 14px "Segoe UI", sans-serif';
+          ctx.fillStyle = '#6c7fa0';
+          ctx.textAlign = 'right';
+          ctx.fillText('⚡ 吃掉闪光', CANVAS_WIDTH-20, 30);
+        }
+      }
+
+      // ---------- 键盘事件处理 ----------
+      function handleKeyDown(e) {
+        // 防止页面滚动
+        const key = e.key;
+        if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' ||
+            key === 'w' || key === 'W' || key === 'a' || key === 'A' || key === 's' || key === 'S' || key === 'd' || key === 'D') {
+          e.preventDefault();
+        }
+
+        // 更新按键状态 (统一小写方便处理)
+        if (key === 'ArrowUp') keys.ArrowUp = true;
+        if (key === 'ArrowDown') keys.ArrowDown = true;
+        if (key === 'ArrowLeft') keys.ArrowLeft = true;
+        if (key === 'ArrowRight') keys.ArrowRight = true;
+
+        const lower = key.toLowerCase();
+        if (lower === 'w') keys.w = true;
+        if (lower === 'a') keys.a = true;
+        if (lower === 's') keys.s = true;
+        if (lower === 'd') keys.d = true;
+
+        // 空格键快捷开始 (可选)
+        if (key === ' ' && !gameActive && !startBtn.disabled) {
+          e.preventDefault();
+          startGame();
+        }
+      }
+
+      function handleKeyUp(e) {
+        const key = e.key;
+        if (key === 'ArrowUp') keys.ArrowUp = false;
+        if (key === 'ArrowDown') keys.ArrowDown = false;
+        if (key === 'ArrowLeft') keys.ArrowLeft = false;
+        if (key === 'ArrowRight') keys.ArrowRight = false;
+
+        const lower = key.toLowerCase();
+        if (lower === 'w') keys.w = false;
+        if (lower === 'a') keys.a = false;
+        if (lower === 's') keys.s = false;
+        if (lower === 'd') keys.d = false;
+      }
+
+      // 窗口失去焦点时重置按键 (防止卡方向)
+      function resetKeys() {
+        keys.ArrowUp = false;
+        keys.ArrowDown = false;
+        keys.ArrowLeft = false;
+        keys.ArrowRight = false;
+        keys.w = false;
+        keys.a = false;
+        keys.s = false;
+        keys.d = false;
+      }
+
+      // ---------- 事件监听 ----------
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      window.addEventListener('blur', resetKeys);  // 切换页面时重置按键
+
+      // 按钮事件
+      startBtn.addEventListener('click', startGame);
+      resetBtn.addEventListener('click', () => {
+        resetGame();
+        // 重置时如果游戏活跃，先停止
+      });
+
+      // 防止触摸设备滚动
+      canvas.addEventListener('touchstart', (e) => e.preventDefault());
+
+      // 初始化
+      resetGame();
+
+    })();
+  </script>
+</body>
+</html>
