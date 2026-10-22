@@ -1,0 +1,864 @@
+
+    <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalAI Tutorial · 分页展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fa;
+            font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #1e1e2f;
+            padding: 0 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ---- 顶部导航栏 ---- */
+        .top-bar {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 1.5rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            padding: 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.8rem;
+            border: 1px solid #e9eef3;
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .nav-item {
+            position: relative;
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #3d2c3a;
+            cursor: pointer;
+            padding: 0.4rem 0;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-item.active {
+            color: #7f1146;
+            border-bottom-color: #c12872;
+        }
+
+        .nav-item:hover {
+            color: #a1004e;
+        }
+
+        .dropdown-icon {
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .nav-item.open .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 下拉菜单 */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e9eef3;
+            min-width: 200px;
+            padding: 0.6rem 0;
+            display: none;
+            z-index: 200;
+            flex-direction: column;
+        }
+
+        .nav-item.open .dropdown {
+            display: flex;
+        }
+
+        .dropdown-item {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #2d2d3a;
+            padding: 0.5rem 1.4rem;
+            cursor: pointer;
+            transition: 0.15s;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background: #faf0f4;
+            color: #7f1146;
+        }
+
+        .dropdown-item.active {
+            background: #fdf2f7;
+            color: #7f1146;
+            font-weight: 600;
+            border-left-color: #c12872;
+        }
+
+        /* ---- 内容区域 ---- */
+        .content {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem 2.8rem;
+            margin-top: 1.2rem;
+            border: 1px solid #e9eef3;
+        }
+
+        /* 每个页面的卡片 */
+        .page-card {
+            display: none;
+        }
+
+        .page-card.active {
+            display: block;
+        }
+
+        /* 下拉内页面 */
+        .sub-page {
+            display: none;
+        }
+
+        .sub-page.active {
+            display: block;
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            color: #7f1146;
+            margin-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        .subhead {
+            text-align: center;
+            font-size: 1.05rem;
+            color: #4a4a5a;
+            margin-top: 0.25rem;
+            font-style: italic;
+            font-weight: 400;
+            border-bottom: 1px solid #e0d6db;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .authors {
+            text-align: center;
+            font-size: 1rem;
+            color: #2c2c3a;
+            background: #faf7f9;
+            padding: 0.8rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 0 auto 0.6rem;
+            letter-spacing: 0.3px;
+        }
+
+        .affiliations {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #5e5e6e;
+            margin-bottom: 1.4rem;
+            font-style: italic;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.2rem;
+            margin: 1.4rem 0 2rem;
+        }
+
+        .links a {
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #a1004e;
+            background: #fff0f5;
+            padding: 0.5rem 1.4rem;
+            border-radius: 40px;
+            border: 1px solid #f0c0d0;
+            transition: 0.2s;
+        }
+
+        .links a:hover {
+            background: #a1004e;
+            color: white;
+            border-color: #a1004e;
+        }
+
+        h2 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #7f1146;
+            margin: 2rem 0 0.8rem;
+            border-left: 5px solid #c12872;
+            padding-left: 1rem;
+        }
+
+        h3 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3d2c3a;
+            margin: 1.6rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+            color: #2d2d3a;
+            text-align: justify;
+        }
+
+        .abstract {
+            background: #faf8fa;
+            padding: 1.4rem 1.8rem;
+            border-radius: 16px;
+            border-left: 6px solid #c12872;
+            font-size: 0.98rem;
+            color: #252535;
+            margin-bottom: 1.8rem;
+        }
+
+        .figure {
+            background: #f1f4f9;
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            margin: 1.8rem 0;
+            border: 1px dashed #bcc9d9;
+            color: #5e6e82;
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .figure strong {
+            display: block;
+            color: #7f1146;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            margin: 1.8rem 0;
+        }
+
+        .two-col .figure {
+            margin: 0;
+        }
+
+        .demo-video-placeholder {
+            background: #1e1e2f;
+            color: #b0b8d0;
+            padding: 1.2rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.4rem;
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-video-placeholder span {
+            font-size: 1.4rem;
+        }
+
+        .caption {
+            font-size: 0.88rem;
+            color: #6e6e80;
+            font-style: italic;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #eaeef5;
+            padding: 0.15rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-family: 'PT Sans', sans-serif;
+            color: #3a4a5a;
+            margin-right: 0.5rem;
+        }
+
+        .note-box {
+            font-size: 0.95rem;
+            color: #3a3a4a;
+            background: #f6f2f5;
+            padding: 0.8rem 1.2rem;
+            border-radius: 40px;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e0d6db;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6e6e80;
+            font-family: 'PT Sans', sans-serif;
+        }
+
+        @media (max-width: 700px) {
+            .content {
+                padding: 1.6rem 1.2rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                gap: 1rem;
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+            }
+
+            .links {
+                gap: 0.8rem;
+            }
+
+            .links a {
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 顶部导航栏 ========== -->
+<div class="top-bar" id="topBar">
+    <!-- Abstract -->
+    <div class="nav-item active" data-page="abstract" id="nav-abstract">
+        Home
+    </div>
+
+    <!-- Experiments（带下拉） -->
+    <div class="nav-item" data-page="experiments" id="nav-experiments">
+        Projects <span class="dropdown-icon">▼</span>
+        <div class="dropdown" id="dropdown-experiments">
+            <div class="dropdown-item active" data-sub="task">Accepted Papers</div>
+            <div class="dropdown-item" data-sub="procedure">Awards</div>
+            <div class="dropdown-item" data-sub="results">Poster</div>
+            <div class="dropdown-item" data-sub="ablation">Demonstrations</div>
+            <div class="dropdown-item" data-sub="real-humans">Workshop</div>
+        </div>
+    </div>
+
+    <!-- Demo Videos（带下拉） -->
+    <div class="nav-item" data-page="demo" id="nav-demo">
+        Calls <span class="dropdown-icon">▼</span>
+        <div class="dropdown" id="dropdown-demo">
+            <div class="dropdown-item active" data-sub="cramped">Research Paper</div>
+            <div class="dropdown-item" data-sub="asymmetric">Short Papers</div>
+        </div>
+    </div>
+
+    <div class="nav-item active" data-page="abstract" id="nav-abstract">
+        Sponsor
+    </div>
+
+    <div class="nav-item active" data-page="abstract" id="nav-abstract">
+        Attendance
+    </div>
+
+    <div class="nav-item active" data-page="abstract" id="nav-abstract">
+        Register
+    </div>
+</div>
+
+<!-- ========== 内容区 ========== -->
+<div class="content">
+
+    <!-- ---------- 页面：Abstract ---------- -->
+    <div class="page-card active" id="page-abstract">
+        <h1>1st workshop on LegalAI</h1>
+        <div class="subhead">Tutorial at ACM Conference on Knowledge Discovery and Data Mining (KDD), Aug 14-18, 2021</div>
+
+        <div style="text-align: center;">
+            <div class="authors">
+                Yanqing An · Anran
+            </div>
+            <div class="affiliations">
+                Schedule: Aug. 14, 2021 9:00 AM - 12:00 PM (<a href="https://www.timeanddate.com/worldclock/converter.html?iso=20210814T010000&p1=236">Singapore Time</a>) · Taiyuan,China,17-19,Oct,2027 · The University of Gialidun
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="#" target="_blank">📄 Paper (arXiv)</a>
+            <a href="#" target="_blank">💻 Human-AI Experiments Code</a>
+            <a href="#" target="_blank">🧠 Code</a>
+        </div>
+
+        <h2>Abstract</h2>
+        <div class="abstract">
+            Zero-shot human-AI coordination holds the promise of collaborating with humans without human data.
+            Prevailing methods try to train the ego agent with a population of partners via self-play. However,
+            this kind of method suffers from two problems: 1) The diversity of a population with finite partners is
+            limited, thereby limiting the capacity of the trained ego agent to collaborate with a novel human;
+            2) Current methods only provide a common best response for every partner in the population, which
+            may result in poor zero-shot coordination performance with a novel partner or humans.
+            To address these issues, we first propose the policy ensemble method to increase the diversity of
+            partners in the population, and then develop a context-aware method enabling the ego agent to analyze
+            and identify the partner's potential policy primitives so that it can take different actions accordingly.
+            In this way, the ego agent is able to learn more universal cooperative behaviors for collaborating with
+            diverse partners. We conduct experiments on Overcooked environment, and evaluate the zero-shot human-AI
+            coordination performance of our method with both behavior-cloned human proxies and real humans.
+            The results demonstrate that our method significantly increases the diversity of partners and enables
+            ego agents to learn more diverse behaviors than baselines, thus achieving state-of-the-art performance
+            in all scenarios.
+        </div>
+
+        <div class="figure">
+            <strong>Outline</strong>
+            <div class="caption">法律智能的发展</div>
+
+    1.法条预测到文书生成
+        1.1基于神经网络的法条预测
+
+        1.2基于SVM的刑事法律判决预测
+
+        1.3基于预训练模型的类案检索
+
+    2.神经网络、SVM与预训练
+        2.1rnn,lstm,transfomer
+            1.2.1encoder
+            1.2.2decoder
+            1.2.3positionencoding
+        2.2分类与SVM
+        2.3BERT
+            1.1.1判别器
+            1.1.2模拟器
+            1.1.3生成器
+    3.大模型时代下的法律智能
+        3.1大语言模型
+        3.2能力评估
+        3.3基于智能体的类案检索
+        </div>
+        <div class="figure">
+            <strong>Latest  News</strong>
+Oct. 01, 2021 >> All KDD 2021 content that had speaker permission granted is now available on YouTube at this link [ KDD 2021 Youtube playlist] .
+        </div>
+    </div>
+
+    <!-- ---------- 页面：Experiments ---------- -->
+    <div class="page-card" id="page-experiments">
+        <!-- 子页面：Task -->
+        <div class="sub-page active" id="sub-task">
+            <h2>Papers</h2>
+            <li>
+        <a class="pub-title"
+           href="https://dl.acm.org/doi/abs/10.1145/3447548.3467218"
+           target="_blank" rel="noopener">
+          LawyerPAN: A Proficiency Assessment Network for Trial Lawyers
+        </a>
+        <p class="pub-authors">
+          <span class="me">Yanqing An</span>, Qi Liu, Han Wu, Kai Zhang, Linan Yue, Mingyue Cheng, Hongke Zhao, Enhong Chen
+        </p>
+        <p class="pub-venue">
+          SIGKDD 2021
+          <span class="pub-tag">Oral</span>
+        </p>
+      </li>
+            <div class="figure">
+                <strong>五个 Overcooked 布局</strong>
+                Cramped Room · Asymmetric Advantages · Coordination Ring · Forced Coordination · Counter Circuit
+                <div class="caption">覆盖不同协作难度的任务场景</div>
+            </div>
+        </div>
+
+        <!-- 子页面：Procedure -->
+        <div class="sub-page" id="sub-procedure">
+            <h2>Awards</h2>
+            <h3>Best Paper</h3>
+            <p>
+                Visual Programming: Compositional visual reasoning without training
+            </p>
+            <h3>Best Student Paper</h3>
+            <p>
+                3D Registration with Maximal Cliques
+            </p>
+        </div>
+
+        <!-- 子页面：Results -->
+        <div class="sub-page" id="sub-results">
+            <h2>Results</h2>
+            <div class="two-col">
+                <div class="figure">
+                    <strong>📊 与人类代理模型的协作结果</strong>
+                    PECAN 在五个布局上均超越基线。在 Asymmetric Advantages 中提升尤为显著（+26.8%）。
+                    <div class="caption">PECAN 有效提升协作能力，而非单纯完成任务</div>
+                </div>
+                <div class="figure">
+                    <strong>👥 真实人类协作表现</strong>
+                    PECAN 在人类-AI 协作中优于基线。人类玩家对 PECAN 的自适应性和偏好评分更高。
+                    <div class="caption">PECAN 在真实人机协作中表现更优</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 子页面：Ablation Study -->
+        <div class="sub-page" id="sub-ablation">
+            <h2>Ablation Study</h2>
+            <div class="figure">
+                <strong>📉 消融实验结果</strong>
+                移除策略集成（e）或上下文编码器（c）后性能下降，部分布局甚至低于基线。
+                <div class="caption">两个组件对性能均有重要贡献</div>
+            </div>
+            <p>
+                下图展示了策略集成与上下文感知模块的效果：
+            </p>
+            <div class="figure">
+                <strong>🔍 组件效果分析</strong>
+                (a) t-SNE 显示策略集成提升了伙伴多样性。<br>
+                (b) 当输入随机上下文或错误上下文时性能下降，表明 ego agent 的策略是上下文感知的。
+                <div class="caption">策略集成增加多样性，上下文感知使 ego agent 灵活调整</div>
+            </div>
+        </div>
+
+        <!-- 子页面：Real Humans -->
+        <div class="sub-page" id="sub-real-humans">
+            <h2>Real Humans</h2>
+            <div class="two-col">
+                <div class="figure">
+                    <strong>📋 主观评分</strong>
+                    Schedule: Aug. 14, 2021 9:00 AM - 12:00 PM (Singapore Time)
+
+                    <h3>Part 1: Multi-Objective Optimization (MOO) by Dr. David (Xuejun) Wang</h3>
+Schedule: 09:00 - 10:10 (Singapore Time)
+QA: 10:10 - 10:20 (Singapore Time)
+
+                    Background and History[<a href="">PDF</a>][<a href="">Video</a>]
+Multi Objective Optimization (MOO)
+MOO Solutions
+Selection of the best solution in Pareto set
+MOO libraries
+Summary & QA
+Break: 10:20 - 10:30 (Singapore Time)
+
+                    <h3>Part 2: Recommender Systems with MOO by Dr. Yong Zheng</h3>
+Schedule: 10:30 - 11:50 (Singapore Time)
+QA: 11:50 - 12:00 (Singapore Time)
+
+Intro to RecSys
+Why MOO in RecSys
+RecSys with MOO: Case Studies
+Summary, Guideline, Challenges & QA
+                    <div class="caption">主观评价进一步验证 PECAN 的优势</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------- 页面：Demo Videos ---------- -->
+    <div class="page-card" id="page-demo">
+        <!-- 子页面：Cramped Room -->
+        <div class="sub-page active" id="sub-cramped">
+            <h2>Call for research paper</h2>
+            <p>
+                Papers in the main technical program must describe high-quality, original research. Topics of interest include all aspects of computer vision and pattern recognition including, but not limited to:
+                3D from multi-view and sensors
+3D from single images
+Adversarial attack and defense
+Autonomous driving
+Biometrics
+Computational imaging
+Computer vision for social good
+Computer vision theory
+                人类玩家控制 <span style="color: #0000ff; font-weight: 700;">蓝色</span> 厨师，
+                AI 控制 <span style="color: #00aa00; font-weight: 700;">绿色</span> 厨师。
+            </p>
+            <div class="two-col">
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> MEP 演示
+                    </div>
+                    <div class="caption">MEP：当人类阻挡时，AI 停滞等待</div>
+                </div>
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> PECAN 演示
+                    </div>
+                    <div class="caption">PECAN：人类阻挡时立即调整路线，从另一侧取洋葱</div>
+                </div>
+            </div>
+            <div class="note-box">
+                💡 人类有意阻挡 AI 前往洋葱的路线，PECAN 立即调整，而 MEP 则原地等待。
+            </div>
+            <p>Important Dates</p>
+            Paper Registration Deadline*:
+Submission Deadline*:
+Supplementary Materials Deadline:
+Reviews Released:
+Rebuttal Period:
+Final Decisions:
+
+Fri, Nov 4, 2022 11:59pm Pacific Time
+Fri, Nov 11, 2022 11:59pm Pacific Time
+Fri, Nov 18, 2022 11:59pm Pacific Time
+Tue, Jan 24, 2023
+Tue, Jan 24-31, 2023
+Mon, Feb 27, 2023
+            <p>Paper Submission </p>
+            <p>Policies</p>
+        </div>
+
+        <!-- 子页面：Asymmetric Advantages -->
+        <div class="sub-page" id="sub-asymmetric">
+            <h2>2023 Organizing Committee</h2>
+            <p>
+                人类玩家控制 <span style="color: #0000ff; font-weight: 700;">蓝色</span> 厨师，
+                AI 控制 <span style="color: #00aa00; font-weight: 700;">绿色</span> 厨师。
+            </p>
+            <p>Program Chairs</p>
+            Andreas Geiger (University of Tübingen)
+
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        Accepted by AAMAS 2023 · 简化自 PECAN 演示页面
+    </footer>
+</div>
+
+<!-- ========== 交互脚本 ========== -->
+<script>
+    (function() {
+        // ---------- 状态 ----------
+        let currentPage = 'abstract';       // abstract | experiments | demo
+        let currentSub = {
+            experiments: 'task',
+            demo: 'cramped'
+        };
+
+        // ---------- 元素 ----------
+        const navAbstract = document.getElementById('nav-abstract');
+        const navExperiments = document.getElementById('nav-experiments');
+        const navDemo = document.getElementById('nav-demo');
+
+        const pageAbstract = document.getElementById('page-abstract');
+        const pageExperiments = document.getElementById('page-experiments');
+        const pageDemo = document.getElementById('page-demo');
+
+        const dropdownExperiments = document.getElementById('dropdown-experiments');
+        const dropdownDemo = document.getElementById('dropdown-demo');
+
+        // 所有下拉项
+        const expItems = dropdownExperiments.querySelectorAll('.dropdown-item');
+        const demoItems = dropdownDemo.querySelectorAll('.dropdown-item');
+
+        // 所有子页面
+        const subPages = {
+            task: document.getElementById('sub-task'),
+            procedure: document.getElementById('sub-procedure'),
+            results: document.getElementById('sub-results'),
+            ablation: document.getElementById('sub-ablation'),
+            'real-humans': document.getElementById('sub-real-humans'),
+            cramped: document.getElementById('sub-cramped'),
+            asymmetric: document.getElementById('sub-asymmetric')
+        };
+
+        // ---------- 辅助函数 ----------
+        function closeAllDropdowns() {
+            navExperiments.classList.remove('open');
+            navDemo.classList.remove('open');
+        }
+
+        function hideAllPages() {
+            pageAbstract.classList.remove('active');
+            pageExperiments.classList.remove('active');
+            pageDemo.classList.remove('active');
+        }
+
+        function hideAllSubPages() {
+            Object.values(subPages).forEach(el => {
+                if (el) el.classList.remove('active');
+            });
+        }
+
+        function showPage(page) {
+            hideAllPages();
+            if (page === 'abstract') {
+                pageAbstract.classList.add('active');
+            } else if (page === 'experiments') {
+                pageExperiments.classList.add('active');
+                // 显示当前子页面
+                hideAllSubPages();
+                const subId = currentSub.experiments;
+                if (subPages[subId]) subPages[subId].classList.add('active');
+            } else if (page === 'demo') {
+                pageDemo.classList.add('active');
+                hideAllSubPages();
+                const subId = currentSub.demo;
+                if (subPages[subId]) subPages[subId].classList.add('active');
+            }
+            currentPage = page;
+            updateNavActive();
+        }
+
+        function updateNavActive() {
+            // 导航项高亮
+            navAbstract.classList.remove('active');
+            navExperiments.classList.remove('active');
+            navDemo.classList.remove('active');
+
+            if (currentPage === 'abstract') {
+                navAbstract.classList.add('active');
+            } else if (currentPage === 'experiments') {
+                navExperiments.classList.add('active');
+            } else if (currentPage === 'demo') {
+                navDemo.classList.add('active');
+            }
+
+            // 下拉项高亮
+            expItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.sub === currentSub.experiments);
+            });
+            demoItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.sub === currentSub.demo);
+            });
+        }
+
+        function showSub(page, sub) {
+            // 确保 page 与 sub 匹配
+            if (page === 'experiments') {
+                currentSub.experiments = sub;
+            } else if (page === 'demo') {
+                currentSub.demo = sub;
+            }
+            showPage(page);
+            // 切换子页面
+            hideAllSubPages();
+            if (subPages[sub]) subPages[sub].classList.add('active');
+            // 关闭下拉
+            closeAllDropdowns();
+            updateNavActive();
+        }
+
+        // ---------- 事件绑定 ----------
+
+        // 1. Abstract 点击
+        navAbstract.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPage('abstract');
+            closeAllDropdowns();
+        });
+
+        // 2. Experiments 点击：切换下拉
+        navExperiments.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navExperiments.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) {
+                navExperiments.classList.add('open');
+            }
+            // 如果当前页面不是 experiments，切换到 experiments（默认子页面）
+            if (currentPage !== 'experiments') {
+                showPage('experiments');
+            }
+        });
+
+        // 3. Demo 点击：切换下拉
+        navDemo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navDemo.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) {
+                navDemo.classList.add('open');
+            }
+            if (currentPage !== 'demo') {
+                showPage('demo');
+            }
+        });
+
+        // 4. Experiments 下拉项点击
+        expItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sub = item.dataset.sub;
+                showSub('experiments', sub);
+            });
+        });
+
+        // 5. Demo 下拉项点击
+        demoItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sub = item.dataset.sub;
+                showSub('demo', sub);
+            });
+        });
+
+        // 6. 点击页面其他地方关闭下拉
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.nav-item')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // 7. 阻止下拉菜单内部点击关闭（由子项自身处理）
+        dropdownExperiments.addEventListener('click', (e) => e.stopPropagation());
+        dropdownDemo.addEventListener('click', (e) => e.stopPropagation());
+
+        // ---------- 初始化 ----------
+        showPage('abstract');   // 默认显示 Abstract
+        // 确保下拉项高亮正确
+        updateNavActive();
+    })();
+</script>
+
+</body>
+</html>
