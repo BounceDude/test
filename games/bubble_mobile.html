@@ -1018,3 +1018,353 @@
             ctx.moveTo(0, 8);
             ctx.lineTo(W, 8);
             ctx.stroke();
+
+            // 瞄准线
+            if (game.aimActive && game.running && game.canShoot) {
+                drawAimLine();
+            }
+
+            // 绘制网格泡泡
+            drawGrid();
+
+            // 绘制飞行泡泡
+            if (game.flyingBubble) {
+                drawBubble(game.flyingBubble.x, game.flyingBubble.y, game.flyingBubble.color, bubbleRadius);
+            }
+
+            // 绘制粒子
+            drawParticles();
+
+            // 绘制发射器
+            drawShooter();
+
+            // 绘制下一个泡泡指示
+            if (game.shootBubble && game.running) {
+                drawNextBubbleIndicator();
+            }
+        }
+
+        function drawAimLine() {
+            const origin = getShootOrigin();
+            const angle = game.aimAngle;
+
+            // 计算反弹路径（最多3次）
+            let x = origin.x;
+            let y = origin.y;
+            let vx = Math.cos(angle);
+            let vy = Math.sin(angle);
+            let bounces = 0;
+            const maxBounces = 3;
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 6]);
+
+            for (let step = 0; step < 200 && bounces < maxBounces; step++) {
+                const nx = x + vx * 8;
+                const ny = y + vy * 8;
+
+                // 墙壁反弹
+                if (nx - bubbleRadius <= 0 && vx < 0) {
+                    vx = -vx;
+                    bounces++;
+                    x = bubbleRadius;
+                    y = ny;
+                    continue;
+                }
+                if (nx + bubbleRadius >= W && vx > 0) {
+                    vx = -vx;
+                    bounces++;
+                    x = W - bubbleRadius;
+                    y = ny;
+                    continue;
+                }
+
+                // 绘制线段
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(nx, ny);
+                ctx.stroke();
+
+                x = nx;
+                y = ny;
+
+                // 碰到顶部或网格停止
+                if (y < bubbleRadius + 10) break;
+
+                // 检测是否碰到网格泡泡
+                const hit = checkCollisionWithGrid({ x: x, y: y, radius: bubbleRadius });
+                if (hit) break;
+            }
+
+            ctx.restore();
+        }
+
+        function drawGrid() {
+            for (let r = 0; r < game.grid.length; r++) {
+                for (let c = 0; c < game.grid[r].length; c++) {
+                    if (!game.grid[r][c].active) continue;
+                    const pos = getBubblePos(r, c);
+                    drawBubble(pos.x, pos.y, game.grid[r][c].color, bubbleRadius);
+                }
+            }
+        }
+
+        function drawBubble(x, y, color, radius) {
+            // 阴影
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+
+            // 主体
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 高光
+            ctx.shadowBlur = 0;
+            const gradient = ctx.createRadialGradient(
+                x - radius * 0.3, y - radius * 0.3, radius * 0.1,
+                x, y, radius
+            );
+            gradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+            gradient.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.15)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 小高光点
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.18, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+        }
+
+        function drawParticles() {
+            game.particles.forEach(p => {
+                const alpha = Math.max(0, p.life / p.maxLife);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        function drawShooter() {
+            const origin = getShootOrigin();
+            const angle = game.aimAngle;
+
+            // 炮台底座
+            ctx.save();
+            ctx.translate(origin.x, origin.y);
+
+            // 炮管
+            ctx.save();
+            ctx.rotate(angle + Math.PI / 2);
+            const barrelGrad = ctx.createLinearGradient(0, -30, 0, 10);
+            barrelGrad.addColorStop(0, '#8899cc');
+            barrelGrad.addColorStop(0.5, '#5566aa');
+            barrelGrad.addColorStop(1, '#334466');
+            ctx.fillStyle = barrelGrad;
+            ctx.shadowColor = '#4466ff';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.roundRect(-6, -35, 12, 40, 4);
+            ctx.fill();
+
+            // 炮口
+            ctx.fillStyle = '#aabbff';
+            ctx.beginPath();
+            ctx.arc(0, -35, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 底座圆
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = '#334466';
+            ctx.beginPath();
+            ctx.arc(0, 0, 22, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#5566aa';
+            ctx.beginPath();
+            ctx.arc(0, 0, 16, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 当前泡泡
+            if (game.shootBubble) {
+                ctx.shadowColor = game.shootBubble.color;
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = game.shootBubble.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, bubbleRadius * 0.85, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 高光
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.arc(-4, -4, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function drawNextBubbleIndicator() {
+            // 在发射器左侧显示下一个泡泡
+            if (!game.shootBubble) return;
+            const origin = getShootOrigin();
+            const x = origin.x - 60;
+            const y = origin.y;
+
+            ctx.save();
+            ctx.globalAlpha = 0.7;
+            drawBubble(x, y, game.shootBubble.color, bubbleRadius * 0.6);
+            ctx.restore();
+
+            // 标签
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('NEXT', x, y + 28);
+            ctx.restore();
+        }
+
+        // ==================== 触摸/鼠标事件 ====================
+        let touchStartX = 0, touchStartY = 0;
+        let isTouching = false;
+
+        function getTouchPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) / rect.width * W,
+                y: (clientY - rect.top) / rect.height * H
+            };
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+            const pos = getTouchPos(e);
+            touchStartX = pos.x;
+            touchStartY = pos.y;
+            isTouching = true;
+            startAim(pos.x, pos.y);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!game.running || !isTouching) return;
+            const pos = getTouchPos(e);
+            updateAim(pos.x, pos.y);
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+            isTouching = false;
+            releaseShoot();
+        }, { passive: false });
+
+        // 鼠标支持
+        canvas.addEventListener('mousedown', (e) => {
+            if (!game.running) return;
+            e.preventDefault();
+            const pos = getTouchPos(e);
+            touchStartX = pos.x;
+            touchStartY = pos.y;
+            isTouching = true;
+            startAim(pos.x, pos.y);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!game.running || !isTouching) return;
+            const pos = getTouchPos(e);
+            updateAim(pos.x, pos.y);
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!game.running) return;
+            isTouching = false;
+            releaseShoot();
+        });
+
+        // 键盘支持（桌面调试）
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (!game.aimActive) {
+                    game.aimActive = true;
+                    game.aimAngle = -Math.PI / 2;
+                }
+                const delta = 0.05;
+                if (e.key === 'ArrowLeft') {
+                    game.aimAngle = Math.max(-Math.PI * 0.95, game.aimAngle - delta);
+                } else {
+                    game.aimAngle = Math.min(-Math.PI * 0.05, game.aimAngle + delta);
+                }
+            }
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                if (game.aimActive) {
+                    releaseShoot();
+                }
+            }
+        });
+
+        // 防止页面滚动/缩放
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === canvas) e.preventDefault();
+        }, { passive: false });
+
+        // ==================== 初始化 ====================
+        resize();
+        initGrid();
+        game.shootBubble = createNextBubble();
+        updateNextBubbleUI();
+
+        // 绘制初始画面
+        draw();
+
+        // 按钮事件
+        document.getElementById('startBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        // roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (r > w / 2) r = w / 2;
+                if (r > h / 2) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    })();
+</script>
+</body>
+</html>
