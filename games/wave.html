@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>声波绘影 · 声音的形状</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #050510;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            height: 100dvh;
+            color: white;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            background: #050510;
+            touch-action: none;
+            border-radius: 16px;
+        }
+
+        /* HUD */
+        .hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(100, 200, 255, 0.25);
+            backdrop-filter: blur(8px);
+        }
+
+        .hud-label {
+            font-size: 9px;
+            color: #88ccff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #66ddff;
+            text-shadow: 0 0 20px rgba(100, 220, 255, 0.5);
+            line-height: 1.1;
+        }
+
+        /* 音量指示器 */
+        .volume-indicator {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        .volume-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ffaa, #66ddff, #ff66aa);
+            border-radius: 3px;
+            transition: width 0.05s linear;
+            box-shadow: 0 0 15px rgba(100, 220, 255, 0.5);
+        }
+
+        .volume-label {
+            position: fixed;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #6688aa;
+            letter-spacing: 2px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* 麦克风状态 */
+        .mic-status {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #6688aa;
+            letter-spacing: 1px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(6px);
+            transition: opacity 0.3s;
+        }
+
+        /* 遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 16, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.4s;
+            padding: 24px;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay h1 {
+            font-size: 30px;
+            color: #66ddff;
+            text-shadow: 0 0 40px rgba(100, 220, 255, 0.5);
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .overlay .subtitle {
+            font-size: 13px;
+            color: #8899bb;
+            margin-bottom: 32px;
+            text-align: center;
+            line-height: 2;
+            max-width: 300px;
+        }
+
+        .overlay .subtitle strong {
+            color: #66ddff;
+        }
+
+        .overlay .mic-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            animation: micPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes micPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .overlay .final-score {
+            font-size: 56px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 40px rgba(255, 204, 0, 0.5);
+            margin-bottom: 4px;
+            font-weight: 300;
+        }
+
+        .overlay .final-label {
+            font-size: 12px;
+            color: #8899bb;
+            letter-spacing: 3px;
+            margin-bottom: 28px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            background: transparent;
+            color: #66ddff;
+            border: 1.5px solid #66ddff;
+            padding: 16px 56px;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(100, 220, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+            border-radius: 50%;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(100, 220, 255, 0.1);
+        }
+
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #445566;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+        }
+
+        /* 得分弹出 */
+        .score-pop {
+            position: fixed;
+            font-size: 20px;
+            font-weight: 300;
+            color: #66ddff;
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 0 0 20px rgba(100, 220, 255, 0.8);
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            30% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
+        /* 频率标签 */
+        .freq-label {
+            position: fixed;
+            font-size: 10px;
+            color: rgba(100, 200, 255, 0.4);
+            pointer-events: none;
+            z-index: 5;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+
+        @media (max-width: 400px) {
+            .overlay h1 {
+                font-size: 24px;
+            }
+            .overlay .subtitle {
+                font-size: 12px;
+            }
+            .volume-indicator {
+                width: 160px;
+            }
+            .hint {
+                bottom: 70px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="scoreDisplay">0</div>
+        </div>
+        <div class="hud-box" style="text-align: right;">
+            <div class="hud-label">Best</div>
+            <div class="hud-value" id="bestDisplay" style="font-size: 18px;">0</div>
+        </div>
+    </div>
+
+    <!-- 麦克风状态 -->
+    <div class="mic-status" id="micStatus">🎤 等待麦克风授权</div>
+
+    <!-- 画布 -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 音量指示器 -->
+    <div class="volume-indicator" id="volumeIndicator">
+        <div class="volume-bar" id="volumeBar"></div>
+    </div>
+    <div class="volume-label">音量</div>
+
+    <!-- 提示 -->
+    <div class="hint" id="hintEl">对着麦克风说话或吹气 · 声音越大画面越绚烂</div>
+
+    <!-- 开始遮罩 -->
+    <div class="overlay" id="startOverlay">
+        <div class="mic-icon">🎤</div>
+        <h1>声波绘影</h1>
+        <div class="subtitle">
+            这个游戏<b>没有触摸控制</b><br>
+            对着麦克风<strong>说话、唱歌或吹气</strong><br>
+            声音的<strong>音量</strong>和<strong>频率</strong><br>
+            会化作流动的色彩与粒子
+        </div>
+        <button class="btn" id="startBtn">开启麦克风</button>
+    </div>
+
+    <!-- 结束遮罩 -->
+    <div class="overlay hidden" id="overOverlay">
+        <h1 style="color: #ff66aa;">静默了</h1>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-label">声音能量</div>
+        <button class="btn" id="restartBtn">再来一次</button>
+    </div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ==================== 配置 ====================
+        const CONFIG = {
+            maxParticles: 600,
+            particleLife: 1.2,
+            baseSize: 2,
+            maxSize: 8,
+            decay: 0.985,
+            micSensitivity: 3.5,
+            silenceThreshold: 0.02,
+            energyDecay: 0.995,
+            colorHues: [0, 30, 60, 120, 180, 240, 300, 330]
+        };
+
+        // ==================== 画布 ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const startOverlay = document.getElementById('startOverlay');
+        const overOverlay = document.getElementById('overOverlay');
+        const finalScoreEl = document.getElementById('finalScore');
+        const hintEl = document.getElementById('hintEl');
+        const volumeBar = document.getElementById('volumeBar');
+        const micStatus = document.getElementById('micStatus');
+
+        let W, H;
+
+        // 最佳分数
+        let bestScore = parseInt(localStorage.getItem('sound_shape_best') || '0', 10);
+        bestDisplay.textContent = bestScore;
+
+        // ==================== 游戏状态 ====================
+        const game = {
+            running: false,
+            score: 0,
+            energy: 0,           // 累计声音能量
+            particles: [],
+            waves: [],           // 声波环
+            colorHue: 180,       // 当前色调
+            hueShift: 0,
+            // 音频
+            audioContext: null,
+            analyser: null,
+            microphone: null,
+            dataArray: null,
+            frequencyData: null,
+            volume: 0,
+            dominantFreq: 0,
+            smoothedVolume: 0,
+            // 视觉
+            frame: 0,
+            lastTime: 0,
+            deathTimer: 0,
+            silenceDuration: 0,
+            maxSilence: 3000,    // 静默超过3秒结束
+            gameStartTime: 0,
+            // 粒子系统
+            particlePool: [],
+            // 背景
+            stars: []
+        };
+
+        // 初始化星星
+        function initStars() {
+            game.stars = [];
+            for (let i = 0; i < 80; i++) {
+                game.stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    size: Math.random() * 1.5 + 0.3,
+                    speed: Math.random() * 0.2 + 0.05,
+                    opacity: Math.random() * 0.4 + 0.1,
+                    hue: Math.random() * 360
+                });
+            }
+        }
+
+        // ==================== 尺寸适配 ====================
+        function resize() {
+            const maxW = Math.min(window.innerWidth, 460);
+            const maxH = window.innerHeight;
+
+            W = maxW;
+            H = maxH;
+
+            canvas.width = W;
+            canvas.height = H;
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+
+            initStars();
+        }
+        window.addEventListener('resize', resize);
+
+        // ==================== 音频初始化 ====================
+        async function initAudio() {
+            try {
+                // 请求麦克风权限
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                });
+
+                micStatus.textContent = '🎤 麦克风已连接';
+
+                // 创建音频上下文
+                game.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                game.analyser = game.audioContext.createAnalyser();
+                game.analyser.fftSize = 512;
+                game.analyser.smoothingTimeConstant = 0.8;
+
+                game.microphone = game.audioContext.createMediaStreamSource(stream);
+                game.microphone.connect(game.analyser);
+
+                game.dataArray = new Uint8Array(game.analyser.frequencyBinCount);
+                game.frequencyData = new Uint8Array(game.analyser.frequencyBinCount);
+
+                return true;
+            } catch (err) {
+                console.error('麦克风初始化失败:', err);
+                micStatus.textContent = '⚠️ 麦克风不可用';
+
+                // 降级：使用模拟音量（鼠标位置）
+                micStatus.textContent = '🎤 麦克风不可用 · 使用触摸模拟';
+                return false;
+            }
+        }
+
+        // 获取音量
+        function getVolume() {
+            if (!game.analyser || !game.dataArray) {
+                // 降级：用触摸位置模拟
+                return game.simulatedVolume || 0;
+            }
+
+            game.analyser.getByteTimeDomainData(game.dataArray);
+            game.analyser.getByteFrequencyData(game.frequencyData);
+
+            // 计算 RMS 音量
+            let sum = 0;
+            for (let i = 0; i < game.dataArray.length; i++) {
+                const v = (game.dataArray[i] - 128) / 128;
+                sum += v * v;
+            }
+            const rms = Math.sqrt(sum / game.dataArray.length);
+
+            // 计算主频
+            let maxVal = 0;
+            let maxIdx = 0;
+            for (let i = 0; i < game.frequencyData.length; i++) {
+                if (game.frequencyData[i] > maxVal) {
+                    maxVal = game.frequencyData[i];
+                    maxIdx = i;
+                }
+            }
+            const nyquist = game.audioContext.sampleRate / 2;
+            game.dominantFreq = (maxIdx / game.frequencyData.length) * nyquist;
+
+            // 平滑音量
+            game.smoothedVolume = game.smoothedVolume * 0.7 + rms * 0.3;
+
+            return Math.min(1, game.smoothedVolume * CONFIG.micSensitivity);
+        }
+
+        // ==================== 粒子系统 ====================
+        function getParticle() {
+            if (game.particlePool.length > 0) {
+                return game.particlePool.pop();
+            }
+            return {};
+        }
+
+        function spawnParticle(x, y, vx, vy, size, hue, life) {
+            const p = getParticle();
+            p.x = x;
+            p.y = y;
+            p.vx = vx;
+            p.vy = vy;
+            p.size = size;
+            p.hue = hue;
+            p.life = life;
+            p.maxLife = life;
+            p.alpha = 1;
+            game.particles.push(p);
+            return p;
+        }
+
+        function emitParticles(volume, freq) {
+            if (!game.running) return;
+
+            const count = Math.floor(volume * 8) + 1;
+            const centerX = W / 2;
+            const centerY = H / 2;
+
+            // 频率决定色调
+            let hue = (freq / 2000) * 360;
+            hue = (hue + game.hueShift) % 360;
+
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + volume * 5 + 1;
+
+                // 从中心或靠近中心发射
+                const spread = 30 + volume * 50;
+                const startX = centerX + (Math.random() - 0.5) * spread;
+                const startY = centerY + (Math.random() - 0.5) * spread;
+
+                const size = CONFIG.baseSize + volume * CONFIG.maxSize * Math.random();
+                const life = CONFIG.particleLife * (0.5 + Math.random() * 0.5);
+
+                spawnParticle(
+                    startX, startY,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    size, hue, life
+                );
+            }
+
+            // 生成声波环
+            if (volume > 0.15) {
+                game.waves.push({
+                    x: centerX,
+                    y: centerY,
+                    radius: 10,
+                    maxRadius: 80 + volume * 200,
+                    hue: hue,
+                    life: 1,
+                    speed: 1.5 + volume * 3
+                });
+            }
+
+            // 限制粒子数量
+            while (game.particles.length > CONFIG.maxParticles) {
+                game.particles.shift();
+            }
+        }
+
+        // ==================== 更新 ====================
+        function update(dt) {
+            if (!game.running) return;
+
+            game.frame++;
+            const frameFactor = dt / 16.67;
+
+            // 获取音量
+            const volume = getVolume();
+            game.volume = volume;
+
+            // 更新音量条
+            volumeBar.style.width = (volume * 100) + '%';
+
+            // 更新色调
+            game.hueShift += volume * 2 + 0.3;
+            game.hueShift %= 360;
+
+            // 音量足够大时发射粒子
+            if (volume > CONFIG.silenceThreshold) {
+                game.silenceDuration = 0;
+                game.energy += volume * dt * 0.01;
+                game.score = Math.floor(game.energy);
+
+                // 更新得分
+                scoreDisplay.textContent = game.score;
+
+                // 发射粒子
+                emitParticles(volume, game.dominantFreq);
+
+                // 屏幕中心发光
+                game.colorHue = (game.dominantFreq / 2000) * 360 % 360;
+            } else {
+                game.silenceDuration += dt;
+            }
+
+            // 检查静默超时
+            if (game.silenceDuration > game.maxSilence) {
+                endGame();
+                return;
+            }
+
+            // 更新粒子
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const p = game.particles[i];
+                p.x += p.vx * frameFactor;
+                p.y += p.vy * frameFactor;
+                p.vx *= Math.pow(CONFIG.decay, frameFactor);
+                p.vy *= Math.pow(CONFIG.decay, frameFactor);
+                p.life -= dt / 1000;
+
+                if (p.life <= 0) {
+                    game.particles.splice(i, 1);
+                    game.particlePool.push(p);
+                } else {
+                    p.alpha = Math.max(0, p.life / p.maxLife);
+                }
+            }
+
+            // 更新声波
+            for (let i = game.waves.length - 1; i >= 0; i--) {
+                const w = game.waves[i];
+                w.radius += w.speed * frameFactor;
+                w.life -= dt / 1000 * 0.8;
+
+                if (w.radius > w.maxRadius || w.life <= 0) {
+                    game.waves.splice(i, 1);
+                }
+            }
+
+            // 更新星星
+            game.stars.forEach(s => {
+                s.y += s.speed * frameFactor;
+                if (s.y > H) {
+                    s.y = -5;
+                    s.x = Math.random() * W;
+                }
+            });
+
+            // 静默警告
+            if (game.silenceDuration > 1000) {
+                const remaining = Math.ceil((game.maxSilence - game.silenceDuration) / 1000);
+                hintEl.textContent = `安静了... ${remaining}秒后结束`;
+                hintEl.style.opacity = '1';
+            } else {
+                hintEl.textContent = '对着麦克风说话或吹气 · 声音越大画面越绚烂';
+                hintEl.style.opacity = '0.6';
+            }
+        }
+
+        // ==================== 绘制 ====================
+        function draw() {
+            // 背景 - 深色渐变
+            const bgGrad = ctx.createRadialGradient(
+                W / 2, H / 2, 0,
+                W / 2, H / 2, Math.max(W, H) * 0.7
+            );
+            bgGrad.addColorStop(0, `hsl(${game.colorHue}, 30%, 5%)`);
+            bgGrad.addColorStop(1, '#050510');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // 星星
+            game.stars.forEach(s => {
+                ctx.globalAlpha = s.opacity * (0.5 + game.volume * 0.5);
+                ctx.fillStyle = `hsl(${s.hue + game.hueShift}, 60%, 70%)`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // 绘制声波环
+            game.waves.forEach(w => {
+                const alpha = Math.max(0, w.life) * 0.4;
+                ctx.strokeStyle = `hsla(${w.hue + game.hueShift}, 80%, 60%, ${alpha})`;
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = `hsla(${w.hue + game.hueShift}, 80%, 60%, 0.5)`;
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+            ctx.shadowBlur = 0;
+
+            // 绘制粒子
+            ctx.globalCompositeOperation = 'lighter';
+            game.particles.forEach(p => {
+                const hue = (p.hue + game.hueShift) % 360;
+                const alpha = p.alpha;
+                const size = p.size * p.alpha;
+
+                // 光晕
+                ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.6)`;
+                ctx.shadowBlur = size * 3;
+
+                // 主体
+                ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+
+            // 绘制中心发光（根据音量）
+            if (game.volume > 0.05) {
+                const centerX = W / 2;
+                const centerY = H / 2;
+                const glowRadius = 30 + game.volume * 80;
+
+                const glowGrad = ctx.createRadialGradient(
+                    centerX, centerY, 0,
+                    centerX, centerY, glowRadius
+                );
+                glowGrad.addColorStop(0, `hsla(${game.colorHue + game.hueShift}, 80%, 60%, ${game.volume * 0.3})`);
+                glowGrad.addColorStop(1, 'transparent');
+
+                ctx.fillStyle = glowGrad;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 绘制中心点
+            ctx.fillStyle = `hsla(${game.colorHue + game.hueShift}, 80%, 70%, ${0.3 + game.volume * 0.7})`;
+            ctx.shadowColor = `hsla(${game.colorHue + game.hueShift}, 80%, 60%, 0.8)`;
+            ctx.shadowBlur = 20 + game.volume * 30;
+            ctx.beginPath();
+            ctx.arc(W / 2, H / 2, 4 + game.volume * 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // 绘制频率标签
+            drawFrequencyLabels();
+
+            // 静默警告
+            if (game.silenceDuration > 1500) {
+                const pulse = 0.5 + Math.sin(Date.now() * 0.005) * 0.5;
+                ctx.fillStyle = `rgba(255, 100, 100, ${pulse * 0.15})`;
+                ctx.fillRect(0, 0, W, H);
+            }
+        }
+
+        function drawFrequencyLabels() {
+            // 在画布边缘显示频率刻度
+            const labels = [
+                { freq: 100, label: '低音' },
+                { freq: 500, label: '中音' },
+                { freq: 2000, label: '高音' },
+                { freq: 5000, label: '超高' }
+            ];
+
+            ctx.font = '9px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            labels.forEach((l, i) => {
+                const y = H * 0.15 + i * H * 0.18;
+                const hue = (l.freq / 5000) * 360;
+                const alpha = game.volume > 0.1 ? 0.3 : 0.1;
+
+                ctx.fillStyle = `hsla(${hue + game.hueShift}, 60%, 60%, ${alpha})`;
+                ctx.fillText(l.label, W - 20, y);
+            });
+        }
+
+        // ==================== 游戏开始/结束 ====================
+        async function startGame() {
+            // 初始化音频
+            const audioOk = await initAudio();
+
+            if (!audioOk) {
+                // 降级：使用触摸模拟音量
+                micStatus.textContent = '🎤 触摸屏幕模拟音量';
+                hintEl.textContent = '点击或按住屏幕产生声音';
+            }
+
+            game.running = true;
+            game.score = 0;
+            game.energy = 0;
+            game.particles = [];
+            game.waves = [];
+            game.silenceDuration = 0;
+            game.hueShift = 0;
+            game.colorHue = 180;
+            game.lastTime = 0;
+            game.gameStartTime = Date.now();
+            game.volume = 0;
+            game.smoothedVolume = 0;
+            game.deathTimer = 0;
+
+            scoreDisplay.textContent = '0';
+            bestDisplay.textContent = bestScore;
+            micStatus.style.opacity = '0';
+
+            startOverlay.classList.add('hidden');
+            overOverlay.classList.add('hidden');
+
+            hintEl.style.opacity = '0.6';
+
+            // 恢复 AudioContext（iOS 需要用户手势）
+            if (game.audioContext && game.audioContext.state === 'suspended') {
+                try {
+                    await game.audioContext.resume();
+                } catch (e) {}
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            if (!game.running) return;
+            game.running = false;
+
+            // 保存最佳分数
+            if (game.score > bestScore) {
+                bestScore = game.score;
+                localStorage.setItem('sound_shape_best', bestScore);
+                bestDisplay.textContent = bestScore;
+            }
+
+            finalScoreEl.textContent = game.score;
+            overOverlay.classList.remove('hidden');
+
+            // 停止麦克风
+            if (game.microphone) {
+                try {
+                    game.microphone.mediaStream.getTracks().forEach(t => t.stop());
+                } catch (e) {}
+            }
+            if (game.audioContext) {
+                try {
+                    game.audioContext.close();
+                } catch (e) {}
+                game.audioContext = null;
+                game.analyser = null;
+            }
+
+            micStatus.textContent = '🎤 麦克风已关闭';
+        }
+
+        // ==================== 触摸降级方案 ====================
+        // 如果麦克风不可用，用触摸模拟音量
+        let touchActive = false;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+            touchActive = true;
+            // 模拟音量从触摸位置获取（越靠下音量越大）
+            const rect = canvas.getBoundingClientRect();
+            const y = (e.touches[0].clientY - rect.top) / rect.height;
+            game.simulatedVolume = 0.3 + y * 0.7;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!game.running || !touchActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const y = (e.touches[0].clientY - rect.top) / rect.height;
+            game.simulatedVolume = 0.3 + y * 0.7;
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchActive = false;
+            game.simulatedVolume = 0;
+        }, { passive: false });
+
+        // 鼠标支持
+        let mouseActive = false;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!game.running) return;
+            e.preventDefault();
+            mouseActive = true;
+            const rect = canvas.getBoundingClientRect();
+            const y = (e.clientY - rect.top) / rect.height;
+            game.simulatedVolume = 0.3 + y * 0.7;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!game.running || !mouseActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const y = (e.clientY - rect.top) / rect.height;
+            game.simulatedVolume = 0.3 + y * 0.7;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            mouseActive = false;
+            game.simulatedVolume = 0;
+        });
+
+        // ==================== 主循环 ====================
+        function gameLoop(timestamp) {
+            if (!game.lastTime) game.lastTime = timestamp;
+            const dt = Math.min(timestamp - game.lastTime, 50);
+            game.lastTime = timestamp;
+
+            if (game.running) {
+                update(dt);
+                draw();
+                requestAnimationFrame(gameLoop);
+            } else {
+                // 游戏结束但仍有粒子需要绘制
+                draw();
+            }
+        }
+
+        // ==================== 事件绑定 ====================
+        document.getElementById('startBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        // 防止页面滚动
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === canvas) e.preventDefault();
+        }, { passive: false });
+
+        // 初始化
+        resize();
+        initStars();
+        draw();
+
+        // 启动主循环（用于背景动画）
+        requestAnimationFrame(gameLoop);
+
+        // 标记：如果用户没有麦克风权限，显示提示
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            micStatus.textContent = '🎤 设备不支持麦克风 · 使用触摸模拟';
+            hintEl.textContent = '点击或按住屏幕产生声音';
+        }
+
+    })();
+</script>
+</body>
+</html>
