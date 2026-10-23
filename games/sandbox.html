@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创世沙盒 · 创造</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0b0e1a 0%, #1a1f2f 100%);
+            font-family: 'Segoe UI', system-ui, 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .game-container {
+            background: rgba(18, 22, 36, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 3rem 3rem 2rem 2rem;
+            padding: 24px 28px 28px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 2px #4e5b8e inset, 0 0 20px #6d8cff66;
+            border: 1px solid #a0b0ff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 18px;
+            padding: 0 8px;
+        }
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #d6e2ff, #a4b9ff, #7e9aff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 12px #6d8cffcc;
+            filter: drop-shadow(0 0 6px #2d3f9e);
+        }
+        .essence {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cfddff;
+            background: #1f263b;
+            padding: 8px 22px;
+            border-radius: 40px;
+            border: 1px solid #5b73c0;
+            box-shadow: 0 0 15px #3c4f9e inset, 0 0 10px #2f3b71;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .essence span {
+            color: #ffde9e;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 12px #ffb86b;
+            min-width: 50px;
+            text-align: center;
+        }
+        .canvas-wrapper {
+            border-radius: 24px;
+            padding: 8px;
+            background: #0e111e;
+            box-shadow: 0 0 0 2px #2d3b5e, 0 15px 25px #00000080, 0 0 30px #3d5a9b66;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 18px;
+            background: #0a0d15;
+            cursor: crosshair;
+            box-shadow: 0 0 30px #23315e inset;
+            width: 100%;
+            height: auto;
+            image-rendering: crisp-edges; /* 保持像素感 */
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 6px;
+            gap: 20px;
+        }
+        .palette {
+            display: flex;
+            gap: 12px;
+            background: #1a1f30e0;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid #45528b;
+            box-shadow: 0 0 10px #141b33 inset;
+        }
+        .color-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #b1c8ff;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+            box-shadow: 0 0 10px #00000099;
+        }
+        .color-btn:hover {
+            transform: scale(1.18);
+            filter: brightness(1.2);
+            box-shadow: 0 0 18px #b1d0ff;
+        }
+        .color-btn.active {
+            transform: scale(1.25);
+            border: 3px solid white;
+            box-shadow: 0 0 24px #eef4ff, 0 0 12px #9db9ff;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            background: #222b44;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #e3ecff;
+            border: 1px solid #6276c0;
+            box-shadow: 0 4px 0 #0b0f19, 0 8px 18px #00000070, 0 0 12px #4e64b0 inset;
+            cursor: pointer;
+            transition: all 0.08s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0b0f19, 0 5px 12px #000000, 0 0 12px #4e64b0 inset;
+        }
+        .btn.reset {
+            background: #2f1e33;
+            border-color: #b57e9a;
+            color: #ffd9ec;
+            box-shadow: 0 4px 0 #170e1a, 0 8px 18px #00000070, 0 0 12px #b24d7c inset;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 12px;
+            color: #8192c0;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">✦ 创 造 ✦</div>
+            <div class="essence">
+                💧 精华 <span id="essenceValue">500</span>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="worldCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="palette" id="palette">
+                <!-- 色板由js生成，保留占位 -->
+            </div>
+            <div class="action-buttons">
+                <button class="btn" id="lifeButton">🌱 创造生命</button>
+                <button class="btn reset" id="resetButton">🌀 重置世界</button>
+            </div>
+        </div>
+        <div class="footer">点击或拖拽创造 · 消耗5精华 / 生命体随机移动</div>
+    </div>
+
+    <script>
+        (function(){
+            // ---------- 配置 ----------
+            const canvas = document.getElementById('worldCanvas');
+            const ctx = canvas.getContext('2d');
+            const essenceSpan = document.getElementById('essenceValue');
+
+            // 世界尺寸 (像素网格 80 x 50, 每个格子10px)
+            const GRID_SIZE = 10;
+            const COLS = 80;
+            const ROWS = 50;
+            // 确保canvas大小匹配
+            canvas.width = COLS * GRID_SIZE;
+            canvas.height = ROWS * GRID_SIZE;
+
+            // 世界状态: 二维数组，存储每个格子的颜色 (null 表示空)
+            let world = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+
+            // 生命体集合: 坐标集合 Set (存储 "row,col")
+            let lifeCells = new Set();
+
+            // 精华数量
+            let essence = 500;
+
+            // 当前选中的颜色
+            let currentColor = '#ff7b89'; // 默认颜色, 稍后通过色板设置
+
+            // 动画帧控制
+            let animationFrame = null;
+            let lastMoveTime = 0;
+            const MOVE_INTERVAL = 450; // 毫秒，生命体移动间隔
+
+            // ---------- 工具函数 ----------
+            function updateEssenceDisplay() {
+                essenceSpan.textContent = essence;
+            }
+
+            // 检查位置是否有效
+            function isValidCell(row, col) {
+                return row >= 0 && row < ROWS && col >= 0 && col < COLS;
+            }
+
+            // 从世界中移除生命体标记
+            function removeLifeAt(row, col) {
+                if (!isValidCell(row, col)) return;
+                const key = `${row},${col}`;
+                if (lifeCells.has(key)) {
+                    lifeCells.delete(key);
+                    // 注意：该格子可能还有其他颜色? 但生命体应独占? 为了简化，生命体就是有颜色的格子，但我们在创造生命时覆盖颜色，但移除时需清空格子?
+                    // 我们不直接清空格子，因为生命体移动或消亡时要处理。这里只移除生命标记，实际格子颜色由用户绘制决定。
+                    // 但我们希望生命体有自己的颜色特征? 为了清晰，生命体只是移动的单位，格子颜色不变。但用户可能画了颜色在上面，生命体移动时不改变格子颜色？
+                    // 为了使生命体视觉明显，我们将在生命体移动时改变格子的颜色（生命体自带颜色）?
+                    // 重新设计：生命体是一个独立的视觉元素，不改变世界数组颜色? 但世界数组就是唯一的视觉数据源。
+                    // 简化：每个生命体对应一个格子，并且格子颜色代表生命体颜色（但用户绘制也会改变颜色）。这样生命体移动时，会把原来的格子颜色清除（设置为空），新格子设置颜色为生命体颜色。
+                    // 这就需要每个生命体有颜色属性。但为了简单且符合“创造”主题，我们决定：生命体就是特殊的颜色格子，移动时颜色跟随。
+                    // 因此我们需要跟踪生命体的颜色。我们用Map来存储生命体颜色? 但生命体数量可能多，为了简化，就让生命体颜色与当前选中色无关，统一用发光的白色? 
+                    // 但这样会覆盖用户的画作。
+                    // 重新思考：用户创造生命时，会在点击位置放置一个生命体，该格子颜色变为一种特殊的颜色（比如亮绿/白）。之后生命体移动，会清空原来的格子，并把新格子设为生命体颜色。
+                    // 这样生命体就能被看到。且生命体移动会覆盖用户原来的颜色，这是合理的“创造生命”效果。
+                    // 那我们不需要额外的颜色存储，只需要生命体格子拥有一个固定的颜色（例如 '#b3ffb3' 或 '#f0ffb0'）。
+                    // 但是不同生命体之间没有区别，我们可以使用一个生命色常量。
+                    // 修改: 在创造生命时，将格子设为生命色，并加入lifeCells。移动时，原格子置空，新格子设为生命色。如果新格子原本有生命体，则合并或忽略？
+                    // 为了避免重叠，我们让生命体移动时如果目标格子已有生命体，则原地不动或随机尝试。
+                }
+            }
+
+            // 生命体颜色 (特殊亮色，带发光感)
+            const LIFE_COLOR = '#d4ff9e'; // 浅黄绿
+
+            // 在世界中绘制一个格子 (row, col) 使用颜色 color (null 则清除)
+            function setCell(row, col, color) {
+                if (!isValidCell(row, col)) return;
+                world[row][col] = color;
+            }
+
+            // 获取格子颜色
+            function getCell(row, col) {
+                if (!isValidCell(row, col)) return null;
+                return world[row][col];
+            }
+
+            // 绘制整个画布
+            function render() {
+                // 清除画布
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制背景网格 (淡暗线)
+                ctx.strokeStyle = '#1e253a';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= COLS; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * GRID_SIZE, 0);
+                    ctx.lineTo(i * GRID_SIZE, canvas.height);
+                    ctx.strokeStyle = '#1e253a';
+                    ctx.stroke();
+                }
+                for (let i = 0; i <= ROWS; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * GRID_SIZE);
+                    ctx.lineTo(canvas.width, i * GRID_SIZE);
+                    ctx.strokeStyle = '#1e253a';
+                    ctx.stroke();
+                }
+
+                // 绘制世界中的颜色块
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const color = world[r][c];
+                        if (color) {
+                            ctx.fillStyle = color;
+                            ctx.fillRect(c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE-0.5, GRID_SIZE-0.5);
+                            // 增加一点光晕效果
+                            ctx.shadowColor = color;
+                            ctx.shadowBlur = 8;
+                            ctx.fillRect(c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE-0.5, GRID_SIZE-0.5);
+                            ctx.shadowBlur = 0; // 重置
+                        }
+                    }
+                }
+
+                // 额外绘制生命体（虽然是格子颜色，但可以加一点高亮边框，让它们更醒目）
+                lifeCells.forEach(key => {
+                    const [r, c] = key.split(',').map(Number);
+                    ctx.strokeStyle = '#ffffffcc';
+                    ctx.lineWidth = 2.2;
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = '#c8ff7a';
+                    ctx.strokeRect(c * GRID_SIZE + 1, r * GRID_SIZE + 1, GRID_SIZE-3, GRID_SIZE-3);
+                    // 在中心加一个小亮点
+                    ctx.fillStyle = '#ffffe0';
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.arc(c * GRID_SIZE + GRID_SIZE/2, r * GRID_SIZE + GRID_SIZE/2, 2.5, 0, Math.PI*2);
+                    ctx.fill();
+                });
+                ctx.shadowBlur = 0;
+            }
+
+            // ---------- 生命体移动逻辑 ----------
+            function moveLifeForms() {
+                if (lifeCells.size === 0) return;
+
+                // 收集当前所有生命体坐标
+                const currentLife = Array.from(lifeCells).map(key => {
+                    const [r, c] = key.split(',').map(Number);
+                    return { row: r, col: c };
+                });
+
+                // 新的生命体集合
+                const newLifeSet = new Set();
+
+                // 对于每个生命体，尝试随机移动
+                for (let life of currentLife) {
+                    let { row, col } = life;
+                    // 尝试最多4个方向，避免卡住
+                    const directions = [
+                        { dr: -1, dc: 0 }, // 上
+                        { dr: 1, dc: 0 },  // 下
+                        { dr: 0, dc: -1 }, // 左
+                        { dr: 0, dc: 1 }   // 右
+                    ];
+                    // 随机打乱方向
+                    for (let i = directions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [directions[i], directions[j]] = [directions[j], directions[i]];
+                    }
+
+                    let moved = false;
+                    for (let dir of directions) {
+                        const nr = row + dir.dr;
+                        const nc = col + dir.dc;
+                        if (!isValidCell(nr, nc)) continue;
+                        // 检查目标位置是否已经有生命体（包括当前未移动的，但用newLifeSet检查已经确定要移动到的位置）
+                        const newKey = `${nr},${nc}`;
+                        // 同时检查是否与之前已确定新位置的生命体重叠
+                        if (newLifeSet.has(newKey)) continue;
+
+                        // 目标格子的原始颜色（在移动前）
+                        const targetColor = getCell(nr, nc);
+
+                        // 执行移动：原格子清除（只清除生命体颜色，但如果用户在该格子画了其他颜色？生命体移动后原格子应该变为空，因为生命体占据了格子，移动后格子空出）
+                        // 为了体验，生命体移动后原格子变为空（null）—— 这会擦除用户画作，但这是生命体的特性。
+                        // 如果原格子是生命体，我们清除它。但如果是用户后来画上的？因为我们把生命体格子设置成了生命色，用户如果再画会覆盖。我们就这样。
+                        setCell(row, col, null);
+                        // 新格子设置为生命颜色 (不管原来是什么，覆盖)
+                        setCell(nr, nc, LIFE_COLOR);
+                        // 加入新生命集合
+                        newLifeSet.add(newKey);
+                        moved = true;
+                        break;
+                    }
+
+                    if (!moved) {
+                        // 无法移动，则留在原地
+                        const stayKey = `${row},${col}`;
+                        // 原格子颜色可能被清除了？如果之前没有清除的话，保留。但上面如果没有移动成功，原格子没被清除。
+                        // 但要确保原格子颜色仍是生命色（可能被用户改变？但生命体存在时我们强制生命色）
+                        // 为了安全，设置生命色
+                        setCell(row, col, LIFE_COLOR);
+                        newLifeSet.add(stayKey);
+                    }
+                }
+
+                // 更新lifeCells
+                lifeCells = newLifeSet;
+
+                // 重新渲染
+                render();
+            }
+
+            // 动画循环 (基于时间)
+            function animationLoop(timestamp) {
+                if (!lastMoveTime) lastMoveTime = timestamp;
+                const elapsed = timestamp - lastMoveTime;
+                if (elapsed >= MOVE_INTERVAL) {
+                    moveLifeForms();
+                    lastMoveTime = timestamp;
+                }
+                animationFrame = requestAnimationFrame(animationLoop);
+            }
+
+            // ---------- 创造生命 ----------
+            function createLife(row, col) {
+                if (!isValidCell(row, col)) return false;
+                if (essence < 5) {
+                    alert('精华不足！需要5精华才能创造生命。');
+                    return false;
+                }
+
+                const key = `${row},${col}`;
+                if (lifeCells.has(key)) {
+                    // 已经存在生命体，不再重复创造，但可以消耗精华？不，提示。
+                    return false;
+                }
+
+                // 扣精华
+                essence -= 5;
+                updateEssenceDisplay();
+
+                // 设置格子为生命颜色
+                setCell(row, col, LIFE_COLOR);
+                // 加入生命集合
+                lifeCells.add(key);
+
+                render();
+                return true;
+            }
+
+            // ---------- 重置世界 ----------
+            function resetWorld() {
+                // 清空世界
+                world = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+                lifeCells.clear();
+                essence = 500;
+                updateEssenceDisplay();
+                // 重置后当前颜色保留，但色板激活状态不变
+                render();
+            }
+
+            // ---------- 交互事件 ----------
+            function getGridFromEvent(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;   // canvas物理像素比
+                const scaleY = canvas.height / rect.height;
+
+                let clientX, clientY;
+                if (e.touches) {
+                    // 触摸事件
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                    e.preventDefault(); // 防止滚动
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                const canvasX = (clientX - rect.left) * scaleX;
+                const canvasY = (clientY - rect.top) * scaleY;
+
+                if (canvasX < 0 || canvasY < 0 || canvasX >= canvas.width || canvasY >= canvas.height) {
+                    return null;
+                }
+
+                const col = Math.floor(canvasX / GRID_SIZE);
+                const row = Math.floor(canvasY / GRID_SIZE);
+                if (!isValidCell(row, col)) return null;
+                return { row, col };
+            }
+
+            // 绘制 (用当前颜色)
+            function paintAt(row, col) {
+                if (!isValidCell(row, col)) return;
+                const key = `${row},${col}`;
+                // 如果该格是生命体，则不能绘制? 我们允许绘制覆盖生命体，但是生命体标记还在？这会导致冲突。
+                // 决定：如果格子是生命体，则不允许绘制，以免破坏生命体。或者绘制会移除生命体标记？但这样生命体消失但不扣精华。
+                // 为了简单，如果点击生命体格子，不绘制，保持原样。
+                if (lifeCells.has(key)) {
+                    // 可选: 提示或忽略
+                    return;
+                }
+                // 绘制颜色
+                setCell(row, col, currentColor);
+                render();
+            }
+
+            // 绑定事件
+            function setupEvents() {
+                let isDrawing = false;
+
+                // 鼠标
+                canvas.addEventListener('mousedown', (e) => {
+                    const grid = getGridFromEvent(e);
+                    if (!grid) return;
+                    // 检查是否创造生命 (通过按钮模式? 但这里我们用生命按钮单独)
+                    // 普通绘制
+                    paintAt(grid.row, grid.col);
+                    isDrawing = true;
+                    e.preventDefault();
+                });
+
+                canvas.addEventListener('mousemove', (e) => {
+                    if (!isDrawing) return;
+                    const grid = getGridFromEvent(e);
+                    if (!grid) return;
+                    paintAt(grid.row, grid.col);
+                    e.preventDefault();
+                });
+
+                canvas.addEventListener('mouseup', () => {
+                    isDrawing = false;
+                });
+
+                canvas.addEventListener('mouseleave', () => {
+                    isDrawing = false;
+                });
+
+                // 触摸
+                canvas.addEventListener('touchstart', (e) => {
+                    const grid = getGridFromEvent(e);
+                    if (!grid) return;
+                    paintAt(grid.row, grid.col);
+                    isDrawing = true;
+                    e.preventDefault();
+                }, { passive: false });
+
+                canvas.addEventListener('touchmove', (e) => {
+                    if (!isDrawing) return;
+                    const grid = getGridFromEvent(e);
+                    if (!grid) return;
+                    paintAt(grid.row, grid.col);
+                    e.preventDefault();
+                }, { passive: false });
+
+                canvas.addEventListener('touchend', (e) => {
+                    isDrawing = false;
+                    e.preventDefault();
+                });
+
+                canvas.addEventListener('touchcancel', (e) => {
+                    isDrawing = false;
+                    e.preventDefault();
+                });
+
+                // 阻止右键菜单
+                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            // ---------- 生命按钮: 点击画布创造生命, 但为了不混淆, 我们让按钮激活“生命创造模式”? 
+            // 但是为了直观, 点击"创造生命"按钮后，下一次点击画布会创造生命？但更简单: 直接点击按钮就在随机位置创造生命? 
+            // 但题目要求是点击或拖拽创造，生命按钮点击后可以在画布上点击创造生命？这样交互复杂。
+            // 为了易用: 生命按钮点击后，鼠标点击画布创造生命（消耗精华）。但这样和绘制冲突。
+            // 改为: 生命按钮点击后，在画布上随机位置创造一个生命体？不够创造感。
+            // 更合理: 生命按钮点击后，进入“生命模式”，此时点击画布创造生命；再点按钮退出生命模式。但为了简单，我们采用直接点击按钮消耗精华在随机位置创造生命。
+            // 但用户可能想指定位置。所以最终决定: 生命按钮点击后，在画布中央或者随机5个位置创造生命？但可能重叠。
+            // 再思考: 也许更好: 点击生命按钮，然后在画布任意位置点击就创造生命（代替绘制），但那样会干扰绘制。
+            // 我们使用一个简单的方案：生命按钮点击后，在随机空位置创建一个生命体（消耗精华）。这样也能体现“创造”且不干扰绘制。 
+            // 并且用户可以看到生命体出现并移动。这样最直观。
+            // 所以修改生命按钮行为：随机在空白格子（没有生命体）创造生命。
+            function createLifeRandom() {
+                if (essence < 5) {
+                    alert('精华不足！需要5精华才能创造生命。');
+                    return;
+                }
+                // 寻找空白格子 (没有生命体, 且没有颜色? 可以覆盖颜色，但为了友好，优先找空颜色)
+                const emptyCells = [];
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const key = `${r},${c}`;
+                        if (!lifeCells.has(key) && world[r][c] === null) {
+                            emptyCells.push({ row: r, col: c });
+                        }
+                    }
+                }
+                if (emptyCells.length === 0) {
+                    // 如果没有空位，尝试找非生命体的格子
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const key = `${r},${c}`;
+                            if (!lifeCells.has(key)) {
+                                emptyCells.push({ row: r, col: c });
+                            }
+                        }
+                    }
+                }
+                if (emptyCells.length === 0) {
+                    alert('世界太拥挤了，无法创造新生命！');
+                    return;
+                }
+                const pos = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                createLife(pos.row, pos.col);
+            }
+
+            // 色板初始化
+            const COLORS = [
+                '#ff7b89', // 粉红
+                '#ffb86b', // 橙
+                '#f9f871', // 黄
+                '#a0ff9e', // 绿
+                '#6bc9ff', // 蓝
+                '#c78aff', // 紫
+                '#ff9ee0', // 粉紫
+                '#ffffff'  // 白
+            ];
+
+            function initPalette() {
+                const palette = document.getElementById('palette');
+                palette.innerHTML = '';
+                COLORS.forEach((color, index) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'color-btn';
+                    btn.style.backgroundColor = color;
+                    btn.dataset.color = color;
+                    if (index === 0) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        // 移除所有激活状态
+                        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentColor = color;
+                    });
+                    palette.appendChild(btn);
+                });
+                currentColor = COLORS[0];
+            }
+
+            // ---------- 初始化 ----------
+            function init() {
+                initPalette();
+                updateEssenceDisplay();
+                // 绘制一些初始星星或空白? 无需
+                render();
+
+                // 事件绑定
+                setupEvents();
+
+                // 生命按钮
+                document.getElementById('lifeButton').addEventListener('click', () => {
+                    createLifeRandom();
+                });
+
+                // 重置按钮
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    resetWorld();
+                });
+
+                // 启动动画
+                if (animationFrame) cancelAnimationFrame(animationFrame);
+                lastMoveTime = 0;
+                animationFrame = requestAnimationFrame(animationLoop);
+            }
+
+            // 页面卸载时取消动画
+            window.addEventListener('beforeunload', () => {
+                if (animationFrame) cancelAnimationFrame(animationFrame);
+            });
+
+            init();
+        })();
+    </script>
+</body>
+</html>
