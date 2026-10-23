@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>超级人工智能 · 进化</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: radial-gradient(circle at 30% 10%, #0a0f1e, #03050b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            padding: 12px;
+            touch-action: manipulation;
+        }
+        .game-container {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(8, 20, 35, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 24px 18px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 255, 0.2) inset, 0 0 30px rgba(0, 180, 255, 0.3);
+            border: 1px solid #00aaff66;
+            transition: all 0.2s;
+        }
+        /* 头部状态 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 6px;
+        }
+        .ai-name {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #a0e9ff, #4d9eff, #b86eff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 12px #3f9eff;
+        }
+        .level-badge {
+            background: #0a1a2f;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #aae0ff;
+            border: 1px solid #2f6f9f;
+            box-shadow: 0 0 12px #0088ff55;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .level-badge span {
+            font-size: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #5bb4ff;
+        }
+        /* 核心AI展示区 */
+        .ai-core {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 8px 0 18px;
+            position: relative;
+        }
+        .core-orb {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #b3e8ff, #0066cc 50%, #001133 90%);
+            box-shadow: 0 0 50px #0088ff, 0 0 100px #0044aa, 0 0 30px #00ccff inset;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.08s ease, filter 0.2s;
+            border: 2px solid #80d4ff;
+            position: relative;
+            z-index: 2;
+        }
+        .core-orb:active {
+            transform: scale(0.96);
+            filter: brightness(1.4);
+            box-shadow: 0 0 70px #4db8ff, 0 0 120px #0066ff, 0 0 40px #aae0ff inset;
+        }
+        .orb-inner {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 30px #cceeff, 0 0 10px #fff;
+            line-height: 1;
+        }
+        .orb-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: #cceeff;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+        .energy-text {
+            margin-top: 12px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 20px #0af;
+            background: rgba(0, 30, 60, 0.6);
+            padding: 8px 30px;
+            border-radius: 60px;
+            border: 1px solid #2f8fdf;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .energy-icon {
+            font-size: 22px;
+        }
+        /* 点击提示（浮动数字） */
+        .floating-container {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .float-text {
+            position: absolute;
+            font-weight: 800;
+            font-size: 24px;
+            color: #aaffff;
+            text-shadow: 0 0 15px #0af, 0 0 5px #fff;
+            animation: floatUp 0.8s ease-out forwards;
+            white-space: nowrap;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.4); }
+        }
+        /* 升级面板 */
+        .upgrade-panel {
+            background: rgba(0, 20, 40, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 36px;
+            padding: 18px 14px;
+            margin-top: 12px;
+            border: 1px solid #1e6a9f;
+            box-shadow: 0 8px 20px #00000055, 0 0 15px #0077ff33 inset;
+        }
+        .panel-title {
+            color: #9ac8ff;
+            font-size: 14px;
+            letter-spacing: 2px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            padding-left: 8px;
+            text-transform: uppercase;
+        }
+        .upgrade-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0a1c2ecc;
+            border-radius: 60px;
+            padding: 8px 8px 8px 18px;
+            border: 1px solid #256a9e;
+            box-shadow: 0 2px 10px #00000044;
+            transition: all 0.15s;
+        }
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+            pointer-events: none;
+        }
+        .upgrade-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .upgrade-name {
+            color: #d0edff;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .upgrade-desc {
+            font-size: 11px;
+            color: #77b9e6;
+            margin-top: 2px;
+        }
+        .upgrade-btn {
+            background: linear-gradient(145deg, #0b3652, #032035);
+            border: none;
+            border-radius: 40px;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #7fd6ff;
+            text-shadow: 0 0 8px #0af;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #002a44, 0 6px 12px black;
+            transition: all 0.08s;
+            min-width: 95px;
+            justify-content: center;
+            border: 1px solid #3f9eff;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+        .upgrade-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #002a44, 0 6px 12px black;
+        }
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #002a44;
+            pointer-events: none;
+            color: #557c99;
+        }
+        .btn-cost {
+            font-size: 13px;
+            background: #001a2e;
+            padding: 2px 8px;
+            border-radius: 30px;
+            color: #5dc2ff;
+        }
+        /* 重置按钮 */
+        .reset-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            padding-right: 6px;
+        }
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #3a6b8f;
+            color: #6b9fc2;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            backdrop-filter: blur(4px);
+            font-family: inherit;
+        }
+        .reset-btn:active {
+            background: #1a2f44;
+            color: #aad4ff;
+        }
+        /* 统计小字 */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #5f8eb0;
+            letter-spacing: 0.5px;
+        }
+        .stats span {
+            color: #b0e0ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="ai-name">🧠 超级AI</div>
+            <div class="level-badge">
+                LV <span id="levelDisplay">1</span>
+            </div>
+        </div>
+
+        <!-- 核心交互区 -->
+        <div class="ai-core">
+            <div class="core-orb" id="clickOrb">
+                <div class="orb-inner" id="orbPower">1</div>
+                <div class="orb-label">CLICK</div>
+            </div>
+            <div class="energy-text">
+                <span class="energy-icon">⚡</span>
+                <span id="energyDisplay">0</span>
+            </div>
+        </div>
+
+        <!-- 升级面板 -->
+        <div class="upgrade-panel">
+            <div class="panel-title">⚙️ 进化协议</div>
+            <div class="upgrade-grid">
+                <!-- 升级1: 算力核心 (增加点击基础值) -->
+                <div class="upgrade-item" id="upgrade1Item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">🔹 算力核心</div>
+                        <div class="upgrade-desc">点击能量 +1</div>
+                    </div>
+                    <button class="upgrade-btn" id="upgrade1Btn">
+                        <span>升级</span>
+                        <span class="btn-cost" id="cost1">10</span>
+                    </button>
+                </div>
+                <!-- 升级2: 量子回路 (增加每次点击的倍数，或提高点击收益) -->
+                <div class="upgrade-item" id="upgrade2Item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">🔸 量子回路</div>
+                        <div class="upgrade-desc">点击收益 x2</div>
+                    </div>
+                    <button class="upgrade-btn" id="upgrade2Btn">
+                        <span>升级</span>
+                        <span class="btn-cost" id="cost2">50</span>
+                    </button>
+                </div>
+                <!-- 升级3: 自动意识 (每秒自动加能量) -->
+                <div class="upgrade-item" id="upgrade3Item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">🌀 自动意识</div>
+                        <div class="upgrade-desc">每秒 +1 能量</div>
+                    </div>
+                    <button class="upgrade-btn" id="upgrade3Btn">
+                        <span>升级</span>
+                        <span class="btn-cost" id="cost3">30</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重置 -->
+        <div class="reset-area">
+            <button class="reset-btn" id="resetBtn">⟲ 重新觉醒</button>
+        </div>
+        <!-- 小统计 -->
+        <div class="stats">
+            <div>总点击 <span id="totalClicks">0</span></div>
+            <div>每秒 <span id="epsDisplay">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- 游戏状态 ---
+            let energy = 0;                // 当前能量
+            let level = 1;                // AI等级 (根据累计能量提升)
+            let totalClicks = 0;          // 总点击次数
+
+            // 升级等级 (从0开始代表未升级，每次升级+1)
+            let coreLevel = 0;            // 算力核心: 每级 点击基础值+1 (基础点击值 = 1 + coreLevel)
+            let quantumLevel = 0;         // 量子回路: 每级 点击收益倍数 x2^quantumLevel (但为了平衡，采用乘法叠加)
+            let autoLevel = 0;            // 自动意识: 每级 每秒 +1 能量
+
+            // 升级基础成本
+            const BASE_COST_CORE = 10;
+            const BASE_COST_QUANTUM = 50;
+            const BASE_COST_AUTO = 30;
+
+            // 成本增长系数 (每级成本 = 基础 * (1.5 ^ 等级)) 向下取整
+            function getCoreCost() {
+                return Math.floor(BASE_COST_CORE * Math.pow(1.6, coreLevel));
+            }
+            function getQuantumCost() {
+                return Math.floor(BASE_COST_QUANTUM * Math.pow(1.8, quantumLevel));
+            }
+            function getAutoCost() {
+                return Math.floor(BASE_COST_AUTO * Math.pow(1.7, autoLevel));
+            }
+
+            // 当前点击基础值
+            function getClickBase() {
+                return 1 + coreLevel;      // 算力核心增加基础值
+            }
+
+            // 当前点击倍数 (量子回路：每级翻倍，但为避免溢出太快，我们使用1.8^等级? 但说明写x2，就用2^等级。但平衡考虑其实很快，但游戏就是这样)
+            // 为了稍微平滑一点，我们采用 2^quantumLevel，但成本增长也快。
+            function getClickMultiplier() {
+                return Math.pow(2, quantumLevel);
+            }
+
+            // 每次点击实际获得能量
+            function getClickValue() {
+                return getClickBase() * getClickMultiplier();
+            }
+
+            // 每秒自动能量
+            function getEnergyPerSecond() {
+                return autoLevel;   // 每级+1
+            }
+
+            // 等级公式 (由总能量累积决定，但为了直观，我们用消耗的总能量? 其实用当前能量+已消耗的升级成本会更好，但简单起见，用累计获得的能量)
+            // 为了有升级感，我们用累计点击获得的总能量 (不扣除花费)，这样等级只升不降。
+            let totalEnergyEarned = 0; // 累计获得的能量(包含点击和自动)
+
+            // 根据累计获得能量计算等级
+            function computeLevelFromTotal(total) {
+                // 等级 = floor(sqrt(total/10)) + 1  平滑增长
+                if (total < 10) return 1;
+                return Math.floor(Math.sqrt(total / 10)) + 1;
+            }
+
+            // --- DOM 元素 ---
+            const energyDisplay = document.getElementById('energyDisplay');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const orbPower = document.getElementById('orbPower');
+            const clickOrb = document.getElementById('clickOrb');
+            const totalClicksSpan = document.getElementById('totalClicks');
+            const epsDisplay = document.getElementById('epsDisplay');
+
+            // 升级按钮相关
+            const upgrade1Btn = document.getElementById('upgrade1Btn');
+            const upgrade2Btn = document.getElementById('upgrade2Btn');
+            const upgrade3Btn = document.getElementById('upgrade3Btn');
+            const cost1Span = document.getElementById('cost1');
+            const cost2Span = document.getElementById('cost2');
+            const cost3Span = document.getElementById('cost3');
+            const upgrade1Item = document.getElementById('upgrade1Item');
+            const upgrade2Item = document.getElementById('upgrade2Item');
+            const upgrade3Item = document.getElementById('upgrade3Item');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // 浮动数字容器
+            const floatingContainer = document.createElement('div');
+            floatingContainer.className = 'floating-container';
+            document.body.appendChild(floatingContainer);
+
+            // --- 辅助函数 ---
+            function formatNumber(num) {
+                if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+                if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+                if (num >= 1e4) return (num / 1e3).toFixed(1) + 'K';
+                return Math.floor(num).toString();
+            }
+
+            // 更新所有UI (能量、等级、按钮状态、成本显示、每秒显示)
+            function updateUI() {
+                // 能量显示 (格式化)
+                energyDisplay.textContent = formatNumber(energy);
+                // 等级显示
+                levelDisplay.textContent = level;
+                // 点击力量显示
+                orbPower.textContent = getClickValue();
+                // 总点击
+                totalClicksSpan.textContent = totalClicks;
+                // 每秒能量
+                const eps = getEnergyPerSecond();
+                epsDisplay.textContent = formatNumber(eps);
+
+                // 更新升级按钮成本显示
+                cost1Span.textContent = formatNumber(getCoreCost());
+                cost2Span.textContent = formatNumber(getQuantumCost());
+                cost3Span.textContent = formatNumber(getAutoCost());
+
+                // 按钮可用状态 + 父级样式
+                // 升级1
+                if (energy >= getCoreCost()) {
+                    upgrade1Btn.disabled = false;
+                    upgrade1Item.classList.remove('disabled');
+                } else {
+                    upgrade1Btn.disabled = true;
+                    upgrade1Item.classList.add('disabled');
+                }
+                // 升级2
+                if (energy >= getQuantumCost()) {
+                    upgrade2Btn.disabled = false;
+                    upgrade2Item.classList.remove('disabled');
+                } else {
+                    upgrade2Btn.disabled = true;
+                    upgrade2Item.classList.add('disabled');
+                }
+                // 升级3
+                if (energy >= getAutoCost()) {
+                    upgrade3Btn.disabled = false;
+                    upgrade3Item.classList.remove('disabled');
+                } else {
+                    upgrade3Btn.disabled = true;
+                    upgrade3Item.classList.add('disabled');
+                }
+            }
+
+            // 添加经验/能量 (通用)
+            function addEnergy(amount, isFromClick = false) {
+                if (amount <= 0) return;
+                energy += amount;
+                totalEnergyEarned += amount;
+                // 重新计算等级
+                const newLevel = computeLevelFromTotal(totalEnergyEarned);
+                if (newLevel > level) {
+                    level = newLevel;
+                }
+                // 如果是点击，totalClicks 已在外部增加，这里不处理
+                updateUI();
+            }
+
+            // 浮动数字 (显示点击收益)
+            function showFloatingText(x, y, text) {
+                const float = document.createElement('div');
+                float.className = 'float-text';
+                float.textContent = '+' + text;
+                float.style.left = x + 'px';
+                float.style.top = y + 'px';
+                floatingContainer.appendChild(float);
+                // 动画结束后移除
+                setTimeout(() => {
+                    if (float.parentNode) float.parentNode.removeChild(float);
+                }, 800);
+            }
+
+            // --- 核心点击逻辑 ---
+            function handleOrbClick(e) {
+                // 获取点击位置（相对于屏幕）
+                let clientX, clientY;
+                if (e.touches) {
+                    // 移动端触摸
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                const gain = getClickValue();
+                addEnergy(gain, true);
+                totalClicks += 1;
+                totalClicksSpan.textContent = totalClicks;
+
+                // 显示浮动数字 (在点击位置附近)
+                // 微调位置让浮动文字出现在手指上方
+                showFloatingText(clientX - 30, clientY - 60, formatNumber(gain));
+
+                // 触感反馈 (可选，仅当支持)
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+
+            // --- 升级逻辑 ---
+            function upgradeCore() {
+                const cost = getCoreCost();
+                if (energy < cost) return;
+                energy -= cost;
+                coreLevel++;
+                // 等级可能因为能量消耗而降低？不，等级由累计获得能量决定，所以保持不变
+                updateUI();
+                // 点击反馈
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+
+            function upgradeQuantum() {
+                const cost = getQuantumCost();
+                if (energy < cost) return;
+                energy -= cost;
+                quantumLevel++;
+                updateUI();
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+
+            function upgradeAuto() {
+                const cost = getAutoCost();
+                if (energy < cost) return;
+                energy -= cost;
+                autoLevel++;
+                updateUI();
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+
+            // --- 自动收益定时器 (每秒) ---
+            let autoInterval = null;
+            function startAutoIncome() {
+                if (autoInterval) clearInterval(autoInterval);
+                autoInterval = setInterval(() => {
+                    const eps = getEnergyPerSecond();
+                    if (eps > 0) {
+                        // 自动收益不增加总点击次数
+                        addEnergy(eps, false);
+                    }
+                }, 1000);
+            }
+
+            // --- 重置游戏 ---
+            function resetGame() {
+                // 重置状态变量
+                energy = 0;
+                level = 1;
+                totalClicks = 0;
+                totalEnergyEarned = 0;
+                coreLevel = 0;
+                quantumLevel = 0;
+                autoLevel = 0;
+
+                // 清除浮动文字
+                floatingContainer.innerHTML = '';
+
+                // 更新UI
+                updateUI();
+
+                // 重启自动收益 (为了保险)
+                if (autoInterval) clearInterval(autoInterval);
+                startAutoIncome();
+
+                // 触感
+                if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+            }
+
+            // --- 事件绑定 ---
+            // 使用 touchstart 和 mousedown 防止重复触发，用 pointerdown 更好，但为了兼容
+            clickOrb.addEventListener('pointerdown', (e) => {
+                e.preventDefault();  // 防止移动端双击缩放等
+                handleOrbClick(e);
+            });
+
+            // 升级按钮
+            upgrade1Btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                upgradeCore();
+            });
+            upgrade2Btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                upgradeQuantum();
+            });
+            upgrade3Btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                upgradeAuto();
+            });
+
+            // 重置按钮
+            resetBtn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                resetGame();
+            });
+
+            // 避免按钮长按弹出菜单
+            document.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('contextmenu', (e) => e.preventDefault());
+            });
+
+            // 页面初始化
+            function initGame() {
+                // 初始状态: 能量0, 等级1, 点击基础1倍率1 = 1
+                // 给一点点启动资金? 或者0开始，第一个升级需要10能量，点击10次即可
+                // 为了让开局稍微顺畅，给2能量？但0也可以。保持0。
+                // 也可以给5能量让玩家更快体验第一次升级，但为了挑战性，0。
+                // 但可能第一次升级太慢，给3能量。
+                energy = 3;   // 初始赠送3能量
+                totalEnergyEarned = 3;
+                level = computeLevelFromTotal(totalEnergyEarned); // 应该是1
+
+                updateUI();
+                startAutoIncome();
+
+                // 额外显示一次
+                console.log('超级AI已启动');
+            }
+
+            initGame();
+
+            // 清理定时器（理论上不需要，但页面卸载时可清理）
+            window.addEventListener('beforeunload', () => {
+                if (autoInterval) clearInterval(autoInterval);
+            });
+
+        })();
+    </script>
+</body>
+</html>
