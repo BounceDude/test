@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>游戏·创新 | 3D 隧道</title>
+    <style>
+        /* 全局重置与字体 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #05070a;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: none; /* 隐藏默认鼠标，使用自定义准心 */
+        }
+
+        /* 覆盖层：标语与准心 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(0, 180, 255, 0.5);
+            z-index: 10;
+        }
+
+        .overlay h1 {
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #a0f0ff, #5fa8ff, #c46eff, #6effb4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glowPulse 2.5s infinite alternate;
+            margin-bottom: 0.2em;
+            text-align: center;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
+            white-space: nowrap;
+        }
+
+        .overlay p {
+            font-size: clamp(0.8rem, 3vw, 1.4rem);
+            font-weight: 300;
+            letter-spacing: 0.6em;
+            color: #b8e2ff;
+            text-transform: uppercase;
+            opacity: 0.85;
+            animation: fadeSlide 2s ease-out;
+            margin-left: 0.6em;
+        }
+
+        /* 自定义准心 (由JS更新位置) */
+        .crosshair {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(100, 220, 255, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 12px rgba(0, 255, 255, 0.3);
+            pointer-events: none;
+            z-index: 100;
+            transform: translate(-50%, -50%);
+            transition: width 0.15s, height 0.15s, border-color 0.15s;
+            opacity: 0.9;
+            will-change: left, top;
+        }
+
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #aaf0ff;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #6cf;
+        }
+
+        /* 右下角提示 */
+        .hint {
+            position: absolute;
+            bottom: 25px;
+            right: 30px;
+            color: rgba(180, 230, 255, 0.7);
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            z-index: 20;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            background: rgba(0, 20, 30, 0.3);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 200, 255, 0.25);
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hint i {
+            font-style: normal;
+            display: inline-block;
+            animation: blink 2s infinite;
+            color: #6cf;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes glowPulse {
+            0% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.6)); }
+            100% { filter: drop-shadow(0 0 60px rgba(120, 200, 255, 1)); }
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 0.85; transform: translateY(0); }
+        }
+
+        /* 移动端调整 */
+        @media (max-width: 600px) {
+            .overlay h1 {
+                letter-spacing: 0.08em;
+                white-space: normal;
+                font-size: clamp(2rem, 12vw, 4rem);
+            }
+            .overlay p {
+                letter-spacing: 0.3em;
+                font-size: 0.7rem;
+            }
+            .crosshair {
+                width: 30px;
+                height: 30px;
+            }
+            .hint {
+                font-size: 0.6rem;
+                right: 15px;
+                bottom: 15px;
+                padding: 5px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="crosshair" id="crosshair"></div>
+
+    <div class="overlay">
+        <h1>游戏创新</h1>
+        <p>隧道 · 穿梭 · 未来</p>
+    </div>
+
+    <div class="hint">
+        <i>◈</i> 移动鼠标 控制视角 <i>◈</i>
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const crosshair = document.getElementById('crosshair');
+
+            // ========== 配置参数 ==========
+            const CONFIG = {
+                // 隧道基本参数
+                TUNNEL_RADIUS: 380,          // 隧道半径（基础值）
+                TUNNEL_SEGMENTS: 32,         // 隧道环的边数（多边形精度）
+                RINGS_COUNT: 28,             // 同时存在的环数
+                RING_SPACING: 1.8,           // 环之间的基础间隔（用于透视计算）
+                BASE_SPEED: 0.022,           // 环前进的基础速度
+                
+                // 透视参数
+                FOV: 600,                    // 焦距（透视强度）
+                NEAR_CLIP: 1.5,              // 近裁剪距离
+                FAR_CLIP: 42,                // 远裁剪距离
+                
+                // 交互
+                MOUSE_SENSITIVITY_X: 0.00012, // 鼠标X影响视角偏移系数
+                MOUSE_SENSITIVITY_Y: 0.0001,  // 鼠标Y影响视角偏移系数
+                
+                // 颜色主题
+                HUE_BASE: 190,               // 基础色相（青蓝）
+                HUE_RANGE: 60,               // 色相变化范围
+            };
+
+            // ========== 状态变量 ==========
+            let width, height;
+            
+            // 鼠标/触摸位置（归一化 -1..1 范围，中心为0）
+            let targetLookX = 0;    // 左右偏移 (-1..1)
+            let targetLookY = 0;    // 上下偏移 (-1..1)
+            
+            // 实际平滑后的视角偏移（用于平滑插值）
+            let lookX = 0;
+            let lookY = 0;
+            
+            // 环数组
+            let rings = [];
+            
+            // 时间与速度控制
+            let time = 0;
+            let globalSpeed = CONFIG.BASE_SPEED;
+            
+            // 鼠标是否在画布内（用于激活交互）
+            let mouseActive = false;
+
+            // ========== 工具函数 ==========
+            const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+            
+            // 获取环在Z轴上的分布范围
+            const getZRange = () => ({
+                near: CONFIG.NEAR_CLIP,
+                far: CONFIG.FAR_CLIP
+            });
+
+            // ========== 初始化环 ==========
+            function initRings() {
+                rings = [];
+                const { near, far } = getZRange();
+                const totalZ = far - near;
+                
+                // 均匀分布环在Z轴上，并给予随机属性
+                for (let i = 0; i < CONFIG.RINGS_COUNT; i++) {
+                    // Z位置从 near 到 far 均匀分布，加一点随机抖动
+                    const z = near + (i / CONFIG.RINGS_COUNT) * totalZ + (Math.random() - 0.5) * 0.6;
+                    
+                    // 随机旋转角度（用于环的初始旋转）
+                    const rotation = Math.random() * Math.PI * 2;
+                    
+                    // 随机半径变化因子 (0.8 ~ 1.2)
+                    const radiusFactor = 0.9 + Math.random() * 0.3;
+                    
+                    // 随机色相偏移
+                    const hueOffset = (Math.random() - 0.5) * CONFIG.HUE_RANGE;
+                    
+                    // 每个环的亮度/透明度系数
+                    const brightness = 0.7 + Math.random() * 0.5;
+                    
+                    // 小概率产生一个"光晕环"（更亮）
+                    const isGlow = Math.random() < 0.2;
+                    
+                    rings.push({
+                        z,
+                        rotation,
+                        radiusFactor,
+                        hueOffset,
+                        brightness,
+                        isGlow,
+                        // 用于轻微脉冲动画
+                        pulsePhase: Math.random() * Math.PI * 2,
+                        // 存储该环的顶点（在旋转后计算，每帧更新）
+                        vertices: null,
+                    });
+                }
+                
+                // 按照Z轴排序（从近到远），确保渲染顺序正确
+                rings.sort((a, b) => a.z - b.z);
+            }
+
+            // ========== 调整画布尺寸 ==========
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 清空并重新初始化环（因为环的Z轴与透视相关，不需要按比例，但需要重新计算投影中心等）
+                // 不过环本身不受宽高比影响，只需要更新中心点即可，但为了简单我们保持环不变
+                // 只需更新画布尺寸，绘制时会使用新的width/height
+            }
+
+            // ========== 计算环的顶点投影坐标 ==========
+            function computeRingVertices(ring) {
+                const segments = CONFIG.TUNNEL_SEGMENTS;
+                const baseRadius = CONFIG.TUNNEL_RADIUS * ring.radiusFactor;
+                
+                // 应用脉冲效果：半径轻微变化
+                const pulse = 1 + Math.sin(time * 2.5 + ring.pulsePhase) * 0.06;
+                const radius = baseRadius * pulse;
+                
+                const vertices = [];
+                
+                // 视角偏移影响：将隧道中心进行偏移（模拟摄像机转动）
+                // 偏移量: 将 -1..1 的lookX映射为像素偏移
+                const offsetX = lookX * width * 0.25;   // 左右最大偏移25%屏幕宽度
+                const offsetY = lookY * height * 0.25;  // 上下最大偏移25%屏幕高度
+                
+                // 环的旋转（整体绕Z轴旋转）
+                const rot = ring.rotation + time * 0.03; // 缓慢旋转
+                
+                for (let i = 0; i < segments; i++) {
+                    // 角度
+                    const angle = (i / segments) * Math.PI * 2;
+                    
+                    // 在环平面上的坐标（未考虑透视）
+                    // 这里使用圆环
+                    const x3d = Math.cos(angle + rot) * radius;
+                    const y3d = Math.sin(angle + rot) * radius;
+                    
+                    // Z坐标 (环所在位置)
+                    const z3d = ring.z;
+                    
+                    // 透视投影: 焦距 / (z + 偏移) 
+                    // 注意：z 范围是 near..far，都是正数，焦距要大一些
+                    const perspective = CONFIG.FOV / (z3d + 0.001);
+                    
+                    // 投影到2D (加上视角偏移)
+                    // 中心点位于屏幕中心 (width/2, height/2) 加上视角偏移
+                    const centerX = width / 2 + offsetX;
+                    const centerY = height / 2 + offsetY;
+                    
+                    // 投影坐标
+                    const projX = centerX + x3d * perspective;
+                    const projY = centerY + y3d * perspective;
+                    
+                    vertices.push({
+                        x: projX,
+                        y: projY,
+                        // 保存3D信息用于颜色等 (可选)
+                    });
+                }
+                
+                return vertices;
+            }
+
+            // ========== 更新环的位置和顶点 ==========
+            function updateRings(deltaTime) {
+                // 速度基于全局速度，并稍微受鼠标Y轴影响（可选，这里保持稳定）
+                const speed = globalSpeed * (1 + Math.abs(lookY) * 0.2); // 上下看时略微加速
+                
+                const { near, far } = getZRange();
+                const totalZ = far - near;
+                
+                for (let ring of rings) {
+                    // 向前移动（Z减小，因为Z越小越近）
+                    ring.z -= speed * deltaTime * 30; // 调整系数使速度合适
+                    
+                    // 如果环已经移动到近裁剪面之前，则重置到远端
+                    if (ring.z < near) {
+                        // 重置到远端，并给予新的随机属性
+                        ring.z = far - Math.random() * 0.5;
+                        
+                        // 随机新的旋转角度
+                        ring.rotation = Math.random() * Math.PI * 2;
+                        // 随机半径因子
+                        ring.radiusFactor = 0.9 + Math.random() * 0.3;
+                        // 随机色相偏移
+                        ring.hueOffset = (Math.random() - 0.5) * CONFIG.HUE_RANGE;
+                        // 随机亮度
+                        ring.brightness = 0.7 + Math.random() * 0.5;
+                        // 随机是否发光环
+                        ring.isGlow = Math.random() < 0.2;
+                        // 随机脉冲相位
+                        ring.pulsePhase = Math.random() * Math.PI * 2;
+                    }
+                    
+                    // 计算当前顶点（投影后）
+                    ring.vertices = computeRingVertices(ring);
+                }
+                
+                // 重新排序（从近到远），确保远环先绘制，近环后绘制覆盖
+                rings.sort((a, b) => b.z - a.z); // 远的在前（Z大）
+            }
+
+            // ========== 绘制场景 ==========
+            function draw() {
+                // 清空画布 (使用深色，带一点渐变)
+                const gradient = ctx.createRadialGradient(
+                    width / 2, height / 2, 0,
+                    width / 2, height / 2, Math.max(width, height) * 0.8
+                );
+                gradient.addColorStop(0, '#0a0e14');
+                gradient.addColorStop(0.7, '#05070a');
+                gradient.addColorStop(1, '#010101');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                // 绘制一些背景星星/粒子效果 (简单点缀)
+                // 不做了，保持简洁，让隧道更突出
+
+                // 绘制所有环 (从远到近)
+                for (let i = 0; i < rings.length; i++) {
+                    const ring = rings[i];
+                    const vertices = ring.vertices;
+                    if (!vertices || vertices.length < 3) continue;
+                    
+                    // 根据Z距离计算透明度 (越远越暗)
+                    const { near, far } = getZRange();
+                    const zNorm = clamp((ring.z - near) / (far - near), 0, 1); // 0近 1远
+                    
+                    // 距离越近越亮，越远越暗，但也受ring.brightness影响
+                    let alpha = (1 - zNorm * 0.9) * ring.brightness;
+                    if (ring.isGlow) alpha = Math.min(alpha * 1.4, 0.95);
+                    
+                    // 色相: 基础色相 + ring偏移 + 时间微移
+                    const hue = (CONFIG.HUE_BASE + ring.hueOffset + time * 5) % 360;
+                    
+                    // 饱和度与亮度
+                    const sat = 80 + Math.sin(time * 3 + ring.pulsePhase) * 15;
+                    const light = 65 + Math.sin(time * 2 + ring.pulsePhase) * 10;
+                    
+                    // 绘制环的多边形连线 (使用路径)
+                    ctx.beginPath();
+                    
+                    // 移动到第一个顶点
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    
+                    // 连线到其他顶点
+                    for (let j = 1; j < vertices.length; j++) {
+                        ctx.lineTo(vertices[j].x, vertices[j].y);
+                    }
+                    
+                    // 闭合路径
+                    ctx.closePath();
+                    
+                    // 填充 (半透明，产生体积感)
+                    if (ring.isGlow) {
+                        // 发光环使用更亮的填充
+                        ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.15})`;
+                        ctx.fill();
+                    } else {
+                        // 普通环使用微弱填充
+                        ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.05})`;
+                        ctx.fill();
+                    }
+                    
+                    // 描边
+                    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`;
+                    ctx.lineWidth = ring.isGlow ? 2.5 : 1.8;
+                    
+                    // 添加发光效果
+                    ctx.shadowColor = `hsla(${hue}, 100%, 70%, 0.8)`;
+                    ctx.shadowBlur = ring.isGlow ? 30 : 15;
+                    
+                    ctx.stroke();
+                    
+                    // 重置阴影避免影响其他绘制
+                    ctx.shadowBlur = 0;
+                    
+                    // 对于特别近的环，额外增加一些高光点 (可选)
+                    if (ring.z < near + 4 && ring.isGlow) {
+                        // 绘制一些亮点在顶点上
+                        for (let v of vertices) {
+                            ctx.beginPath();
+                            ctx.arc(v.x, v.y, 2.5, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsla(${hue}, 100%, 85%, 0.9)`;
+                            ctx.shadowBlur = 20;
+                            ctx.shadowColor = '#aaf0ff';
+                            ctx.fill();
+                        }
+                        ctx.shadowBlur = 0;
+                    }
+                }
+
+                // 绘制中心的微弱光晕 (增强深邃感)
+                const centerGlow = ctx.createRadialGradient(
+                    width / 2 + lookX * width * 0.25,
+                    height / 2 + lookY * height * 0.25,
+                    0,
+                    width / 2 + lookX * width * 0.25,
+                    height / 2 + lookY * height * 0.25,
+                    200
+                );
+                centerGlow.addColorStop(0, 'rgba(80, 200, 255, 0.06)');
+                centerGlow.addColorStop(0.6, 'rgba(40, 100, 200, 0.02)');
+                centerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = centerGlow;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // ========== 动画循环 ==========
+            let lastTime = performance.now();
+            
+            function animate(currentTime) {
+                // 计算时间差（毫秒），转换为秒，并限制最大值避免跳跃
+                let deltaTime = (currentTime - lastTime) / 1000;
+                lastTime = currentTime;
+                
+                // 限制deltaTime，避免切换标签页后回来跳跃太大
+                deltaTime = Math.min(deltaTime, 0.1);
+                
+                // 更新全局时间
+                time += deltaTime;
+                
+                // 平滑视角偏移 (插值)
+                const smoothFactor = 0.08;
+                lookX += (targetLookX - lookX) * smoothFactor;
+                lookY += (targetLookY - lookY) * smoothFactor;
+                
+                // 更新环
+                updateRings(deltaTime);
+                
+                // 绘制
+                draw();
+                
+                // 更新准心位置 (如果鼠标活跃)
+                if (mouseActive) {
+                    // 准心位置就是鼠标位置，但通过targetLookX计算不太合适，我们直接使用鼠标在窗口中的坐标
+                    // 由于准心需要跟随鼠标，我们需要另一个变量记录鼠标在屏幕上的像素坐标
+                    // 我们在 mousemove 中更新 crosshairX/Y
+                    // 这里使用全局变量
+                    if (window.crosshairX !== undefined) {
+                        crosshair.style.left = window.crosshairX + 'px';
+                        crosshair.style.top = window.crosshairY + 'px';
+                        crosshair.style.opacity = '0.9';
+                    }
+                } else {
+                    crosshair.style.opacity = '0.3';
+                }
+                
+                requestAnimationFrame(animate);
+            }
+
+            // ========== 事件处理 ==========
+            function onMouseMove(e) {
+                // 获取鼠标在窗口中的坐标
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                
+                // 计算归一化坐标 (-1..1)，相对于屏幕中心
+                // 注意：为了更好的体验，使用相对于屏幕宽高的比例
+                const normX = (mouseX / width) * 2 - 1;  // -1..1
+                const normY = (mouseY / height) * 2 - 1; // -1..1
+                
+                // 应用灵敏度与符号
+                targetLookX = clamp(normX * CONFIG.MOUSE_SENSITIVITY_X * 1000, -1, 1) * 0.5; 
+                targetLookY = clamp(normY * CONFIG.MOUSE_SENSITIVITY_Y * 1000, -1, 1) * 0.5;
+                
+                // 更新准心位置
+                window.crosshairX = mouseX;
+                window.crosshairY = mouseY;
+                mouseActive = true;
+                
+                // 更新准心样式（稍微变大）
+                crosshair.style.width = '48px';
+                crosshair.style.height = '48px';
+                crosshair.style.borderColor = 'rgba(180, 240, 255, 1)';
+            }
+
+            function onMouseLeave() {
+                // 鼠标离开窗口时，视角回归中心
+                targetLookX = 0;
+                targetLookY = 0;
+                mouseActive = false;
+                
+                // 准心淡出
+                crosshair.style.opacity = '0.3';
+                crosshair.style.width = '36px';
+                crosshair.style.height = '36px';
+            }
+
+            // 触摸支持
+            function onTouchMove(e) {
+                e.preventDefault();
+                if (e.touches.length > 0) {
+                    const touch = e.touches[0];
+                    const mouseX = touch.clientX;
+                    const mouseY = touch.clientY;
+                    
+                    const normX = (mouseX / width) * 2 - 1;
+                    const normY = (mouseY / height) * 2 - 1;
+                    
+                    targetLookX = clamp(normX * CONFIG.MOUSE_SENSITIVITY_X * 1000, -1, 1) * 0.5;
+                    targetLookY = clamp(normY * CONFIG.MOUSE_SENSITIVITY_Y * 1000, -1, 1) * 0.5;
+                    
+                    // 更新准心（触摸时也显示准心）
+                    window.crosshairX = mouseX;
+                    window.crosshairY = mouseY;
+                    mouseActive = true;
+                    
+                    crosshair.style.left = mouseX + 'px';
+                    crosshair.style.top = mouseY + 'px';
+                    crosshair.style.opacity = '0.9';
+                    crosshair.style.width = '48px';
+                    crosshair.style.height = '48px';
+                }
+            }
+
+            function onTouchEnd(e) {
+                targetLookX = 0;
+                targetLookY = 0;
+                mouseActive = false;
+                crosshair.style.opacity = '0.3';
+                crosshair.style.width = '36px';
+                crosshair.style.height = '36px';
+            }
+
+            // 窗口大小改变
+            function onResize() {
+                resizeCanvas();
+                // 环的Z位置不需要重新计算，但投影中心变化，会自然适应
+                // 但为了视角偏移适应新的尺寸，lookX/Y是归一化的，所以无需额外处理
+            }
+
+            // ========== 初始化 ==========
+            function init() {
+                // 设置画布尺寸
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 初始化环
+                initRings();
+                
+                // 设置准心初始位置到中心
+                window.crosshairX = width / 2;
+                window.crosshairY = height / 2;
+                crosshair.style.left = width / 2 + 'px';
+                crosshair.style.top = height / 2 + 'px';
+                crosshair.style.opacity = '0.3';
+                crosshair.style.width = '36px';
+                crosshair.style.height = '36px';
+                
+                // 事件绑定
+                window.addEventListener('resize', onResize);
+                canvas.addEventListener('mousemove', onMouseMove);
+                canvas.addEventListener('mouseleave', onMouseLeave);
+                
+                // 触摸事件
+                canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+                canvas.addEventListener('touchend', onTouchEnd);
+                canvas.addEventListener('touchcancel', onTouchEnd);
+                
+                // 启动动画
+                requestAnimationFrame(animate);
+            }
+
+            // 启动一切
+            init();
+        })();
+    </script>
+</body>
+</html>
