@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>PECAN · 移动版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f5f7fa;
+            font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #1e1e2f;
+            padding: 0 0.8rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ---- 顶部导航栏（移动优化） ---- */
+        .top-bar {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 0.6rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            padding: 0.5rem 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid #e9eef3;
+            position: sticky;
+            top: 0.4rem;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-item {
+            position: relative;
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #3d2c3a;
+            cursor: pointer;
+            padding: 0.45rem 0.3rem;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex: 0 1 auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .nav-item.active {
+            color: #7f1146;
+            border-bottom-color: #c12872;
+        }
+
+        .nav-item:hover {
+            color: #a1004e;
+        }
+
+        .dropdown-icon {
+            font-size: 0.6rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .nav-item.open .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 下拉菜单（移动优化） */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e9eef3;
+            min-width: 160px;
+            padding: 0.4rem 0;
+            display: none;
+            z-index: 200;
+            flex-direction: column;
+        }
+
+        .nav-item.open .dropdown {
+            display: flex;
+        }
+
+        .dropdown-item {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 400;
+            color: #2d2d3a;
+            padding: 0.55rem 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:active {
+            background: #faf0f4;
+            color: #7f1146;
+        }
+
+        .dropdown-item.active {
+            background: #fdf2f7;
+            color: #7f1146;
+            font-weight: 600;
+            border-left-color: #c12872;
+        }
+
+        /* ---- 内容区域（移动优化） ---- */
+        .content {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            padding: 1.4rem 1.2rem;
+            margin-top: 0.8rem;
+            border: 1px solid #e9eef3;
+        }
+
+        .page-card {
+            display: none;
+        }
+
+        .page-card.active {
+            display: block;
+        }
+
+        .sub-page {
+            display: none;
+        }
+
+        .sub-page.active {
+            display: block;
+        }
+
+        /* 标题样式（移动优化） */
+        h1 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            color: #7f1146;
+            margin-bottom: 0.3rem;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .subhead {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #4a4a5a;
+            margin-top: 0.2rem;
+            font-style: italic;
+            font-weight: 400;
+            border-bottom: 1px solid #e0d6db;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.4;
+        }
+
+        .authors {
+            text-align: center;
+            font-size: 0.82rem;
+            color: #2c2c3a;
+            background: #faf7f9;
+            padding: 0.6rem 0.8rem;
+            border-radius: 30px;
+            display: inline-block;
+            margin: 0 auto 0.4rem;
+            letter-spacing: 0.2px;
+            line-height: 1.4;
+        }
+
+        .affiliations {
+            text-align: center;
+            font-size: 0.78rem;
+            color: #5e5e6e;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin: 1rem 0 1.4rem;
+        }
+
+        .links a {
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #a1004e;
+            background: #fff0f5;
+            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            border: 1px solid #f0c0d0;
+            transition: 0.2s;
+            display: inline-block;
+        }
+
+        .links a:hover,
+        .links a:active {
+            background: #a1004e;
+            color: white;
+            border-color: #a1004e;
+        }
+
+        h2 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #7f1146;
+            margin: 1.4rem 0 0.6rem;
+            border-left: 4px solid #c12872;
+            padding-left: 0.8rem;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-family: 'PT Sans', 'Arial', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #3d2c3a;
+            margin: 1.2rem 0 0.4rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 0.92rem;
+            color: #2d2d3a;
+            text-align: justify;
+            line-height: 1.65;
+            word-break: break-word;
+        }
+
+        .abstract {
+            background: #faf8fa;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            border-left: 5px solid #c12872;
+            font-size: 0.9rem;
+            color: #252535;
+            margin-bottom: 1.4rem;
+            text-align: justify;
+            line-height: 1.65;
+        }
+
+        .figure {
+            background: #f1f4f9;
+            border-radius: 12px;
+            padding: 1rem 0.8rem;
+            text-align: center;
+            margin: 1.2rem 0;
+            border: 1px dashed #bcc9d9;
+            color: #5e6e82;
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .figure strong {
+            display: block;
+            color: #7f1146;
+            font-size: 0.92rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 1.2rem 0;
+        }
+
+        .two-col .figure {
+            margin: 0;
+        }
+
+        .demo-video-placeholder {
+            background: #1e1e2f;
+            color: #b0b8d0;
+            padding: 1rem 0.8rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.85rem;
+            margin-bottom: 0.6rem;
+            min-height: 80px;
+        }
+
+        .demo-video-placeholder span {
+            font-size: 1.3rem;
+        }
+
+        .caption {
+            font-size: 0.82rem;
+            color: #6e6e80;
+            font-style: italic;
+            text-align: center;
+            margin-top: 0.3rem;
+            line-height: 1.5;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #eaeef5;
+            padding: 0.1rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: 'PT Sans', sans-serif;
+            color: #3a4a5a;
+            margin-right: 0.4rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .note-box {
+            font-size: 0.88rem;
+            color: #3a3a4a;
+            background: #f6f2f5;
+            padding: 0.7rem 1rem;
+            border-radius: 30px;
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+
+        footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0d6db;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6e6e80;
+            font-family: 'PT Sans', sans-serif;
+        }
+
+        /* 超小屏适配 */
+        @media (max-width: 380px) {
+            .nav-item {
+                font-size: 0.78rem;
+                padding: 0.4rem 0.2rem;
+            }
+            .top-bar {
+                gap: 0.3rem;
+                padding: 0.4rem 0.6rem;
+            }
+            .content {
+                padding: 1rem 0.8rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+            .links a {
+                font-size: 0.72rem;
+                padding: 0.35rem 0.8rem;
+            }
+            .dropdown {
+                min-width: 140px;
+            }
+            .dropdown-item {
+                font-size: 0.78rem;
+                padding: 0.5rem 0.8rem;
+            }
+        }
+
+        /* 平板适配 */
+        @media (min-width: 600px) {
+            .two-col {
+                grid-template-columns: 1fr 1fr;
+            }
+            .nav-item {
+                font-size: 0.95rem;
+                padding: 0.45rem 0.6rem;
+            }
+            .top-bar {
+                gap: 1.2rem;
+                padding: 0.6rem 1.2rem;
+            }
+            .content {
+                padding: 2rem 1.8rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .links a {
+                font-size: 0.9rem;
+                padding: 0.5rem 1.2rem;
+            }
+        }
+
+        /* 防止点击穿透 */
+        .dropdown {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 顶部导航栏 ========== -->
+<div class="top-bar" id="topBar">
+    <div class="nav-item active" data-page="abstract" id="nav-abstract">
+        Abstract
+    </div>
+
+    <div class="nav-item" data-page="experiments" id="nav-experiments">
+        Experiments <span class="dropdown-icon">▼</span>
+        <div class="dropdown" id="dropdown-experiments">
+            <div class="dropdown-item active" data-sub="task">Task</div>
+            <div class="dropdown-item" data-sub="procedure">Procedure</div>
+            <div class="dropdown-item" data-sub="results">Results</div>
+            <div class="dropdown-item" data-sub="ablation">Ablation Study</div>
+            <div class="dropdown-item" data-sub="real-humans">Real Humans</div>
+        </div>
+    </div>
+
+    <div class="nav-item" data-page="demo" id="nav-demo">
+        Demo Videos <span class="dropdown-icon">▼</span>
+        <div class="dropdown" id="dropdown-demo">
+            <div class="dropdown-item active" data-sub="cramped">Cramped Room</div>
+            <div class="dropdown-item" data-sub="asymmetric">Asymmetric Advantages</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 内容区 ========== -->
+<div class="content">
+
+    <!-- ---------- 页面：Abstract ---------- -->
+    <div class="page-card active" id="page-abstract">
+        <h1>PECAN</h1>
+        <div class="subhead">Leveraging Policy Ensemble for Context-Aware Zero-Shot Human-AI Coordination</div>
+
+        <div style="text-align: center;">
+            <div class="authors">
+                Xingzhou Lou · Jiaxian Guo · Junge Zhang · Jun Wang · Kaiqi Huang · Yali Du
+            </div>
+            <div class="affiliations">
+                CASIA · The University of Sydney · UCL · KCL
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="#" target="_blank">📄 Paper</a>
+            <a href="#" target="_blank">💻 Human-AI Code</a>
+            <a href="#" target="_blank">🧠 PECAN Code</a>
+        </div>
+
+        <h2>Abstract</h2>
+        <div class="abstract">
+            Zero-shot human-AI coordination holds the promise of collaborating with humans without human data.
+            Prevailing methods try to train the ego agent with a population of partners via self-play. However,
+            this kind of method suffers from two problems: 1) The diversity of a population with finite partners is
+            limited, thereby limiting the capacity of the trained ego agent to collaborate with a novel human;
+            2) Current methods only provide a common best response for every partner in the population, which
+            may result in poor zero-shot coordination performance with a novel partner or humans.
+            To address these issues, we first propose the policy ensemble method to increase the diversity of
+            partners in the population, and then develop a context-aware method enabling the ego agent to analyze
+            and identify the partner's potential policy primitives so that it can take different actions accordingly.
+            In this way, the ego agent is able to learn more universal cooperative behaviors for collaborating with
+            diverse partners. We conduct experiments on Overcooked environment, and evaluate the zero-shot human-AI
+            coordination performance of our method with both behavior-cloned human proxies and real humans.
+            The results demonstrate that our method significantly increases the diversity of partners and enables
+            ego agents to learn more diverse behaviors than baselines, thus achieving state-of-the-art performance
+            in all scenarios.
+        </div>
+
+        <div class="figure">
+            <strong>图 1：不同训练范式对比</strong>
+            (a) Self-play training (SP) — 与自身副本训练。<br>
+            (b) Population-based training (PBT) — 与一组伙伴训练，每轮采样一个伙伴。<br>
+            (c) PECAN — 每轮生成一个策略集成伙伴，ego agent 通过预训练的上下文感知模块在回合开始时识别伙伴的等级上下文。
+            <div class="caption">对比传统自对弈与群体训练，PECAN 引入策略集成与上下文感知</div>
+        </div>
+    </div>
+
+    <!-- ---------- 页面：Experiments ---------- -->
+    <div class="page-card" id="page-experiments">
+        <div class="sub-page active" id="sub-task">
+            <h2>Task</h2>
+            <p>
+                我们采用 Overcooked 中的五个布局（Cramped Room, Asymmetric Advantages, Coordination Ring,
+                Forced Coordination, Counter Circuit）来评估 ego agent 与新颖伙伴的协作能力。
+            </p>
+            <div class="figure">
+                <strong>五个 Overcooked 布局</strong>
+                Cramped Room · Asymmetric Advantages · Coordination Ring · Forced Coordination · Counter Circuit
+                <div class="caption">覆盖不同协作难度的任务场景</div>
+            </div>
+        </div>
+
+        <div class="sub-page" id="sub-procedure">
+            <h2>Procedure</h2>
+            <h3>1. 与人类代理模型</h3>
+            <p>
+                使用行为克隆代理模型（behavior-cloned human proxy）测试协作表现，并进行消融实验。
+                此外，设计实验验证策略集成提升伙伴多样性，以及 PECAN 学习到上下文感知策略。
+            </p>
+            <h3>2. 与真实人类</h3>
+            <p>
+                招募真实玩家评估 PECAN 的人机协作能力，要求玩家对智能体进行主观评分。
+                最后通过两个案例研究展示 PECAN 在人机协作中的自适应能力。
+            </p>
+        </div>
+
+        <div class="sub-page" id="sub-results">
+            <h2>Results</h2>
+            <div class="figure">
+                <strong>📊 与人类代理模型的协作结果</strong>
+                PECAN 在五个布局上均超越基线。在 Asymmetric Advantages 中提升尤为显著（+26.8%）。
+                <div class="caption">PECAN 有效提升协作能力，而非单纯完成任务</div>
+            </div>
+            <div class="figure">
+                <strong>👥 真实人类协作表现</strong>
+                PECAN 在人类-AI 协作中优于基线。人类玩家对 PECAN 的自适应性和偏好评分更高。
+                <div class="caption">PECAN 在真实人机协作中表现更优</div>
+            </div>
+        </div>
+
+        <div class="sub-page" id="sub-ablation">
+            <h2>Ablation Study</h2>
+            <div class="figure">
+                <strong>📉 消融实验结果</strong>
+                移除策略集成（e）或上下文编码器（c）后性能下降，部分布局甚至低于基线。
+                <div class="caption">两个组件对性能均有重要贡献</div>
+            </div>
+            <p>
+                下图展示了策略集成与上下文感知模块的效果：
+            </p>
+            <div class="figure">
+                <strong>🔍 组件效果分析</strong>
+                (a) t-SNE 显示策略集成提升了伙伴多样性。<br>
+                (b) 当输入随机上下文或错误上下文时性能下降，表明 ego agent 的策略是上下文感知的。
+                <div class="caption">策略集成增加多样性，上下文感知使 ego agent 灵活调整</div>
+            </div>
+        </div>
+
+        <div class="sub-page" id="sub-real-humans">
+            <h2>Real Humans</h2>
+            <div class="figure">
+                <strong>📋 主观评分</strong>
+                人类玩家认为 PECAN 更具适应性，且更愿意与 PECAN 合作。
+                <div class="caption">主观评价进一步验证 PECAN 的优势</div>
+            </div>
+            <div class="figure">
+                <strong>🎮 案例研究</strong>
+                通过两个案例（Cramped Room 与 Asymmetric Advantages）展示 PECAN 的自适应行为。
+                <div class="caption">详见 Demo Videos 部分</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------- 页面：Demo Videos ---------- -->
+    <div class="page-card" id="page-demo">
+        <div class="sub-page active" id="sub-cramped">
+            <h2>Demo 1: Cramped Room</h2>
+            <p>
+                人类玩家控制 <span style="color: #0000ff; font-weight: 700;">蓝色</span> 厨师，
+                AI 控制 <span style="color: #00aa00; font-weight: 700;">绿色</span> 厨师。
+            </p>
+            <div class="two-col">
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> MEP 演示
+                    </div>
+                    <div class="caption">MEP：当人类阻挡时，AI 停滞等待</div>
+                </div>
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> PECAN 演示
+                    </div>
+                    <div class="caption">PECAN：人类阻挡时立即调整路线，从另一侧取洋葱</div>
+                </div>
+            </div>
+            <div class="note-box">
+                💡 人类有意阻挡 AI 前往洋葱的路线，PECAN 立即调整，而 MEP 则原地等待。
+            </div>
+        </div>
+
+        <div class="sub-page" id="sub-asymmetric">
+            <h2>Demo 2: Asymmetric Advantages</h2>
+            <p>
+                人类玩家控制 <span style="color: #0000ff; font-weight: 700;">蓝色</span> 厨师，
+                AI 控制 <span style="color: #00aa00; font-weight: 700;">绿色</span> 厨师。
+            </p>
+            <div class="two-col">
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> MEP 演示
+                    </div>
+                    <div class="caption">MEP：偏向从 1 号锅取菜，忽略 2 号锅</div>
+                </div>
+                <div>
+                    <div class="demo-video-placeholder">
+                        <span>▶️</span> PECAN 演示
+                    </div>
+                    <div class="caption">PECAN：从两个锅取菜，上菜更多，策略更多样</div>
+                </div>
+            </div>
+            <div class="note-box">
+                💡 该布局的技巧在于 AI 应从两个锅中取菜并上菜。MEP 强烈偏好 1 号锅，而 PECAN 无此偏好，上菜数量更多。
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Accepted by AAMAS 2023 · 简化自 PECAN 演示页面 · 移动版
+    </footer>
+</div>
+
+<!-- ========== 交互脚本（移动优化） ========== -->
+<script>
+    (function() {
+        let currentPage = 'abstract';
+        let currentSub = {
+            experiments: 'task',
+            demo: 'cramped'
+        };
+
+        const navAbstract = document.getElementById('nav-abstract');
+        const navExperiments = document.getElementById('nav-experiments');
+        const navDemo = document.getElementById('nav-demo');
+
+        const pageAbstract = document.getElementById('page-abstract');
+        const pageExperiments = document.getElementById('page-experiments');
+        const pageDemo = document.getElementById('page-demo');
+
+        const dropdownExperiments = document.getElementById('dropdown-experiments');
+        const dropdownDemo = document.getElementById('dropdown-demo');
+
+        const expItems = dropdownExperiments.querySelectorAll('.dropdown-item');
+        const demoItems = dropdownDemo.querySelectorAll('.dropdown-item');
+
+        const subPages = {
+            task: document.getElementById('sub-task'),
+            procedure: document.getElementById('sub-procedure'),
+            results: document.getElementById('sub-results'),
+            ablation: document.getElementById('sub-ablation'),
+            'real-humans': document.getElementById('sub-real-humans'),
+            cramped: document.getElementById('sub-cramped'),
+            asymmetric: document.getElementById('sub-asymmetric')
+        };
+
+        function closeAllDropdowns() {
+            navExperiments.classList.remove('open');
+            navDemo.classList.remove('open');
+        }
+
+        function hideAllPages() {
+            pageAbstract.classList.remove('active');
+            pageExperiments.classList.remove('active');
+            pageDemo.classList.remove('active');
+        }
+
+        function hideAllSubPages() {
+            Object.values(subPages).forEach(el => {
+                if (el) el.classList.remove('active');
+            });
+        }
+
+        function showPage(page) {
+            hideAllPages();
+            if (page === 'abstract') {
+                pageAbstract.classList.add('active');
+            } else if (page === 'experiments') {
+                pageExperiments.classList.add('active');
+                hideAllSubPages();
+                const subId = currentSub.experiments;
+                if (subPages[subId]) subPages[subId].classList.add('active');
+            } else if (page === 'demo') {
+                pageDemo.classList.add('active');
+                hideAllSubPages();
+                const subId = currentSub.demo;
+                if (subPages[subId]) subPages[subId].classList.add('active');
+            }
+            currentPage = page;
+            updateNavActive();
+        }
+
+        function updateNavActive() {
+            navAbstract.classList.remove('active');
+            navExperiments.classList.remove('active');
+            navDemo.classList.remove('active');
+
+            if (currentPage === 'abstract') {
+                navAbstract.classList.add('active');
+            } else if (currentPage === 'experiments') {
+                navExperiments.classList.add('active');
+            } else if (currentPage === 'demo') {
+                navDemo.classList.add('active');
+            }
+
+            expItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.sub === currentSub.experiments);
+            });
+            demoItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.sub === currentSub.demo);
+            });
+        }
+
+        function showSub(page, sub) {
+            if (page === 'experiments') {
+                currentSub.experiments = sub;
+            } else if (page === 'demo') {
+                currentSub.demo = sub;
+            }
+            showPage(page);
+            hideAllSubPages();
+            if (subPages[sub]) subPages[sub].classList.add('active');
+            closeAllDropdowns();
+            updateNavActive();
+        }
+
+        // 触摸/点击事件
+        navAbstract.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPage('abstract');
+            closeAllDropdowns();
+        });
+
+        navExperiments.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navExperiments.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) {
+                navExperiments.classList.add('open');
+            }
+            if (currentPage !== 'experiments') {
+                showPage('experiments');
+            }
+        });
+
+        navDemo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navDemo.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) {
+                navDemo.classList.add('open');
+            }
+            if (currentPage !== 'demo') {
+                showPage('demo');
+            }
+        });
+
+        expItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sub = item.dataset.sub;
+                showSub('experiments', sub);
+            });
+        });
+
+        demoItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sub = item.dataset.sub;
+                showSub('demo', sub);
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.nav-item')) {
+                closeAllDropdowns();
+            }
+        });
+
+        dropdownExperiments.addEventListener('click', (e) => e.stopPropagation());
+        dropdownDemo.addEventListener('click', (e) => e.stopPropagation());
+
+        // 初始化
+        showPage('abstract');
+        updateNavActive();
+
+        // 防止双击缩放（移动端优化）
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    })();
+</script>
+
+</body>
+</html>
