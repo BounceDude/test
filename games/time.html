@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>时间回响 · 与过去的自己合作</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #08080f;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            height: 100dvh;
+            color: white;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            background: #08080f;
+            touch-action: none;
+            border-radius: 16px;
+        }
+
+        /* HUD */
+        .hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-box {
+            background: rgba(0, 0, 0, 0.55);
+            padding: 8px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(120, 200, 255, 0.25);
+            backdrop-filter: blur(8px);
+        }
+
+        .hud-label {
+            font-size: 9px;
+            color: #88ccff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #66ddff;
+            text-shadow: 0 0 20px rgba(100, 220, 255, 0.5);
+            line-height: 1.1;
+        }
+
+        .hud-value.timeline {
+            color: #ffaa66;
+            text-shadow: 0 0 20px rgba(255, 170, 100, 0.5);
+            font-size: 16px;
+        }
+
+        /* 时间线指示器 */
+        .timeline-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+            pointer-events: none;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 30px;
+            border: 1px solid rgba(120, 200, 255, 0.2);
+            backdrop-filter: blur(6px);
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .timeline-dot.active {
+            background: #66ddff;
+            border-color: #66ddff;
+            box-shadow: 0 0 15px rgba(100, 220, 255, 0.6);
+        }
+
+        .timeline-dot.recorded {
+            background: #ffaa66;
+            border-color: #ffaa66;
+            box-shadow: 0 0 10px rgba(255, 170, 100, 0.4);
+        }
+
+        .timeline-dot.playing {
+            background: #66ffaa;
+            border-color: #66ffaa;
+            box-shadow: 0 0 15px rgba(100, 255, 170, 0.6);
+            animation: dotPulse 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes dotPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.3); }
+        }
+
+        /* 遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 8, 15, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.4s;
+            padding: 24px;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay h1 {
+            font-size: 28px;
+            color: #66ddff;
+            text-shadow: 0 0 40px rgba(100, 220, 255, 0.5);
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .overlay .subtitle {
+            font-size: 13px;
+            color: #8899bb;
+            margin-bottom: 32px;
+            text-align: center;
+            line-height: 2;
+            max-width: 320px;
+        }
+
+        .overlay .subtitle strong {
+            color: #66ddff;
+        }
+
+        .overlay .subtitle .orange {
+            color: #ffaa66;
+        }
+
+        .overlay .subtitle .green {
+            color: #66ffaa;
+        }
+
+        .overlay .final-score {
+            font-size: 52px;
+            font-weight: 300;
+            color: #ffcc00;
+            text-shadow: 0 0 40px rgba(255, 204, 0, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .overlay .final-label {
+            font-size: 12px;
+            color: #8899bb;
+            letter-spacing: 3px;
+            margin-bottom: 28px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            background: transparent;
+            color: #66ddff;
+            border: 1.5px solid #66ddff;
+            padding: 16px 56px;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(100, 220, 255, 0.1);
+        }
+
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 68px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #445566;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+        }
+
+        /* 得分弹出 */
+        .score-pop {
+            position: fixed;
+            font-size: 18px;
+            font-weight: 300;
+            color: #66ffaa;
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 0 0 20px rgba(100, 255, 170, 0.8);
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            30% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
+        /* 录制指示 */
+        .record-indicator {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ffaa66;
+            letter-spacing: 2px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 170, 100, 0.3);
+            backdrop-filter: blur(6px);
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        .record-indicator.active {
+            opacity: 1;
+            animation: recordBlink 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes recordBlink {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 400px) {
+            .overlay h1 {
+                font-size: 22px;
+            }
+            .overlay .subtitle {
+                font-size: 12px;
+            }
+            .timeline-indicator {
+                bottom: 12px;
+                padding: 6px 12px;
+            }
+            .timeline-dot {
+                width: 10px;
+                height: 10px;
+            }
+            .hint {
+                bottom: 56px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="scoreDisplay">0</div>
+        </div>
+        <div class="hud-box" style="text-align: center;">
+            <div class="hud-label">Timeline</div>
+            <div class="hud-value timeline" id="timelineDisplay">1/3</div>
+        </div>
+        <div class="hud-box" style="text-align: right;">
+            <div class="hud-label">Best</div>
+            <div class="hud-value" id="bestDisplay" style="font-size: 18px;">0</div>
+        </div>
+    </div>
+
+    <!-- 录制指示 -->
+    <div class="record-indicator" id="recordIndicator">● 录制中</div>
+
+    <!-- 画布 -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 时间线指示器 -->
+    <div class="timeline-indicator" id="timelineIndicator">
+        <div class="timeline-dot active" data-index="0"></div>
+        <div class="timeline-dot" data-index="1"></div>
+        <div class="timeline-dot" data-index="2"></div>
+    </div>
+
+    <!-- 提示 -->
+    <div class="hint" id="hintEl">拖动控制 · 松手录制这条时间线</div>
+
+    <!-- 开始遮罩 -->
+    <div class="overlay" id="startOverlay">
+        <h1>时间回响</h1>
+        <div class="subtitle">
+            你无法同时出现在两个地方<br>
+            但你可以<strong>录制</strong>一条时间线<br>
+            <span class="orange">过去的你</span>会不断重演<br>
+            与<span class="green">现在的你</span>协作，一起触碰终点
+        </div>
+        <button class="btn" id="startBtn">开始回响</button>
+    </div>
+
+    <!-- 结束遮罩 -->
+    <div class="overlay hidden" id="overOverlay">
+        <h1 style="color: #ff66aa;">时间断裂</h1>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-label">回响深度</div>
+        <button class="btn" id="restartBtn">再试一次</button>
+    </div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ==================== 配置 ====================
+        const CONFIG = {
+            maxTimelines: 3,          // 最多3条时间线
+            timelineDuration: 4000,   // 每条时间线录制 4 秒
+            ballRadius: 12,           // 玩家半径
+            goalRadius: 20,           // 终点半径
+            moveSpeed: 2.8,           // 移动速度
+            friction: 0.92,           // 摩擦
+            gridSize: 40,             // 网格大小（用于墙壁）
+            // 颜色
+            colors: {
+                player: '#66ddff',
+                playerGlow: 'rgba(100, 220, 255, 0.6)',
+                recorded: '#ffaa66',
+                recordedGlow: 'rgba(255, 170, 100, 0.4)',
+                playing: '#66ffaa',
+                playingGlow: 'rgba(100, 255, 170, 0.6)',
+                goal: '#ffcc00',
+                goalGlow: 'rgba(255, 204, 0, 0.6)',
+                wall: '#1a1a2e',
+                wallEdge: '#3a3a5e',
+                background: '#08080f',
+                grid: 'rgba(100, 200, 255, 0.03)'
+            }
+        };
+
+        // ==================== 画布 ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timelineDisplay = document.getElementById('timelineDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const startOverlay = document.getElementById('startOverlay');
+        const overOverlay = document.getElementById('overOverlay');
+        const finalScoreEl = document.getElementById('finalScore');
+        const hintEl = document.getElementById('hintEl');
+        const recordIndicator = document.getElementById('recordIndicator');
+        const timelineDots = document.querySelectorAll('.timeline-dot');
+
+        let W, H;
+        let gridOffsetX, gridOffsetY;
+
+        // 最佳分数
+        let bestScore = parseInt(localStorage.getItem('time_echo_best') || '0', 10);
+        bestDisplay.textContent = bestScore;
+
+        // ==================== 游戏状态 ====================
+        const game = {
+            running: false,
+            score: 0,
+            // 当前玩家
+            player: {
+                x: 0, y: 0,
+                vx: 0, vy: 0,
+                radius: CONFIG.ballRadius
+            },
+            // 终点
+            goal: { x: 0, y: 0 },
+            // 墙壁
+            walls: [],
+            wallCells: [],
+            // 录制
+            recording: false,
+            recordStartTime: 0,
+            recordData: [],          // 当前录制的帧数据 [{x, y}, ...]
+            // 时间线
+            timelines: [],           // [{data: [...], startTime, playing, playIndex}]
+            currentTimelineIndex: 0, // 当前正在录制/回放的时间线索引
+            // 物理
+            gravity: { x: 0, y: 0 },
+            // 粒子
+            particles: [],
+            stars: [],
+            // 视觉
+            frame: 0,
+            lastTime: 0,
+            deathFlash: 0,
+            goalPulse: 0,
+            // 状态
+            phase: 'idle',           // idle | recording | replaying | completed
+            phaseTimer: 0,
+            // 触摸
+            touchActive: false,
+            touchX: 0, touchY: 0,
+            touchStartX: 0, touchStartY: 0
+        };
+
+        // 初始化星星
+        function initStars() {
+            game.stars = [];
+            for (let i = 0; i < 70; i++) {
+                game.stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    size: Math.random() * 1.5 + 0.3,
+                    speed: Math.random() * 0.15 + 0.03,
+                    opacity: Math.random() * 0.4 + 0.1
+                });
+            }
+        }
+
+        // ==================== 尺寸适配 ====================
+        function resize() {
+            const padding = 30;
+            const maxW = Math.min(window.innerWidth, 460);
+            const maxH = window.innerHeight;
+
+            W = maxW;
+            H = maxH;
+
+            canvas.width = W;
+            canvas.height = H;
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+
+            gridOffsetX = padding;
+            gridOffsetY = padding + 50;
+
+            initStars();
+
+            if (game.running) {
+                rebuildCollisionRects();
+            }
+        }
+        window.addEventListener('resize', resize);
+
+        // ==================== 迷宫生成 ====================
+        function generateMaze(cols, rows) {
+            const grid = [];
+            for (let y = 0; y < rows; y++) {
+                const row = [];
+                for (let x = 0; x < cols; x++) {
+                    row.push(1);
+                }
+                grid.push(row);
+            }
+
+            const stack = [];
+            const startX = 1;
+            const startY = 1;
+            grid[startY][startX] = 0;
+            stack.push([startX, startY]);
+
+            const directions = [[0, -2], [0, 2], [-2, 0], [2, 0]];
+
+            while (stack.length > 0) {
+                const [cx, cy] = stack[stack.length - 1];
+                const neighbors = [];
+
+                for (const [dx, dy] of directions) {
+                    const nx = cx + dx;
+                    const ny = cy + dy;
+                    if (nx > 0 && nx < cols - 1 && ny > 0 && ny < rows - 1) {
+                        if (grid[ny][nx] === 1) {
+                            neighbors.push([nx, ny, cx + dx / 2, cy + dy / 2]);
+                        }
+                    }
+                }
+
+                if (neighbors.length > 0) {
+                    const [nx, ny, wx, wy] = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    grid[wy][wx] = 0;
+                    grid[ny][nx] = 0;
+                    stack.push([nx, ny]);
+                } else {
+                    stack.pop();
+                }
+            }
+
+            grid[1][1] = 0;
+            grid[rows - 2][cols - 2] = 0;
+
+            // 额外开口
+            const extraOpenings = Math.floor(cols * rows * 0.06);
+            for (let i = 0; i < extraOpenings; i++) {
+                const x = 1 + Math.floor(Math.random() * (cols - 2));
+                const y = 1 + Math.floor(Math.random() * (rows - 2));
+                if (grid[y][x] === 1) {
+                    let openCount = 0;
+                    if (grid[y - 1] && grid[y - 1][x] === 0) openCount++;
+                    if (grid[y + 1] && grid[y + 1][x] === 0) openCount++;
+                    if (grid[y] && grid[y][x - 1] === 0) openCount++;
+                    if (grid[y] && grid[y][x + 1] === 0) openCount++;
+                    if (openCount >= 2) {
+                        grid[y][x] = 0;
+                    }
+                }
+            }
+
+            return grid;
+        }
+
+        // ==================== 构建碰撞矩形 ====================
+        function rebuildCollisionRects() {
+            const cellSize = Math.min(
+                (W - 60) / CONFIG.cols || 40,
+                (H - 140) / CONFIG.rows || 40
+            );
+
+            game.cellSize = Math.max(20, Math.min(cellSize, 48));
+
+            game.walls = [];
+
+            for (let y = 0; y < CONFIG.rows; y++) {
+                for (let x = 0; x < CONFIG.cols; x++) {
+                    if (game.wallCells[y][x] === 1) {
+                        game.walls.push({
+                            x: gridOffsetX + x * game.cellSize,
+                            y: gridOffsetY + y * game.cellSize,
+                            w: game.cellSize,
+                            h: game.cellSize
+                        });
+                    }
+                }
+            }
+
+            // 更新终点位置
+            const goalPixel = cellToPixel(game.goal.x, game.goal.y);
+            game.goalPixel = goalPixel;
+        }
+
+        // ==================== 坐标转换 ====================
+        function cellToPixel(cx, cy) {
+            return {
+                x: gridOffsetX + cx * game.cellSize + game.cellSize / 2,
+                y: gridOffsetY + cy * game.cellSize + game.cellSize / 2
+            };
+        }
+
+        // ==================== 生成关卡 ====================
+        function generateLevel() {
+            const cols = CONFIG.cols || 9;
+            const rows = CONFIG.rows || 9;
+
+            game.wallCells = generateMaze(cols, rows);
+            game.goal = { x: cols - 2, y: rows - 2 };
+            game.wallCells[game.goal.y][game.goal.x] = 0;
+
+            rebuildCollisionRects();
+
+            // 重置玩家
+            const startPixel = cellToPixel(1, 1);
+            game.player.x = startPixel.x;
+            game.player.y = startPixel.y;
+            game.player.vx = 0;
+            game.player.vy = 0;
+
+            // 重置时间线
+            game.timelines = [];
+            game.currentTimelineIndex = 0;
+            game.recordData = [];
+            game.recording = false;
+            game.phase = 'idle';
+            game.phaseTimer = 0;
+
+            updateTimelineDots();
+        }
+
+        // ==================== 时间线指示器更新 ====================
+        function updateTimelineDots() {
+            timelineDots.forEach((dot, i) => {
+                dot.classList.remove('active', 'recorded', 'playing');
+
+                if (i < game.timelines.length) {
+                    if (game.timelines[i].playing) {
+                        dot.classList.add('playing');
+                    } else {
+                        dot.classList.add('recorded');
+                    }
+                } else if (i === game.timelines.length) {
+                    dot.classList.add('active');
+                }
+            });
+
+            timelineDisplay.textContent = `${game.timelines.length}/${CONFIG.maxTimelines}`;
+        }
+
+        // ==================== 录制逻辑 ====================
+        function startRecording() {
+            if (game.timelines.length >= CONFIG.maxTimelines) {
+                return;
+            }
+
+            game.recording = true;
+            game.recordData = [];
+            game.recordStartTime = Date.now();
+            game.phase = 'recording';
+
+            recordIndicator.classList.add('active');
+            hintEl.textContent = '录制中 · 移动玩家 · 结束后自动重演';
+
+            // 录制第一帧
+            game.recordData.push({
+                x: game.player.x,
+                y: game.player.y
+            });
+        }
+
+        function stopRecording() {
+            game.recording = false;
+            recordIndicator.classList.remove('active');
+
+            if (game.recordData.length > 2) {
+                // 保存时间线
+                game.timelines.push({
+                    data: game.recordData.slice(),
+                    playing: true,
+                    playIndex: 0,
+                    playFrame: 0
+                });
+
+                game.currentTimelineIndex = game.timelines.length;
+                game.phase = 'replaying';
+                game.phaseTimer = 0;
+
+                // 重置玩家位置
+                const startPixel = cellToPixel(1, 1);
+                game.player.x = startPixel.x;
+                game.player.y = startPixel.y;
+                game.player.vx = 0;
+                game.player.vy = 0;
+
+                hintEl.textContent = '过去的你在重演 · 拖动控制现在的你';
+            }
+
+            updateTimelineDots();
+
+            // 检查是否所有时间线都录制完毕
+            if (game.timelines.length >= CONFIG.maxTimelines) {
+                // 最后一条时间线播放完后检查胜利
+            }
+        }
+
+        // ==================== 更新回放 ====================
+        function updateReplay(dt) {
+            for (let i = 0; i < game.timelines.length; i++) {
+                const tl = game.timelines[i];
+                if (!tl.playing) continue;
+
+                tl.playFrame += dt / 16.67;
+                const frameIndex = Math.floor(tl.playFrame);
+
+                if (frameIndex >= tl.data.length) {
+                    // 回放结束
+                    tl.playing = false;
+                    continue;
+                }
+
+                const point = tl.data[frameIndex];
+
+                // 检查回放点是否碰到终点
+                const distToGoal = Math.sqrt(
+                    (point.x - game.goalPixel.x) ** 2 +
+                    (point.y - game.goalPixel.y) ** 2
+                );
+
+                if (distToGoal < CONFIG.goalRadius + CONFIG.ballRadius) {
+                    // 过去的自己到达终点，也算完成
+                    if (game.phase !== 'completed') {
+                        completeLevel();
+                    }
+                }
+            }
+        }
+
+        // ==================== 完成关卡 ====================
+        function completeLevel() {
+            if (game.phase === 'completed') return;
+            game.phase = 'completed';
+            game.score += 100;
+            game.score += game.timelines.length * 50;
+            updateScoreUI();
+
+            hintEl.textContent = '时间线汇聚！ +' + (100 + game.timelines.length * 50) + ' 分';
+
+            // 粒子爆发
+            for (let i = 0; i < 40; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                game.particles.push({
+                    x: game.goalPixel.x,
+                    y: game.goalPixel.y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 0.8 + Math.random() * 0.5,
+                    maxLife: 1.3,
+                    size: Math.random() * 4 + 2,
+                    color: '#ffcc00'
+                });
+            }
+
+            // 延迟后生成新关卡
+            setTimeout(() => {
+                if (game.running) {
+                    generateLevel();
+                    game.phase = 'idle';
+                    hintEl.textContent = '拖动控制 · 松手录制这条时间线';
+                }
+            }, 2000);
+        }
+
+        // ==================== 玩家移动 ====================
+        function updatePlayer(dt) {
+            if (game.phase === 'completed') return;
+            if (game.recording) {
+                // 录制期间也移动
+            } else if (game.timelines.length > 0 && game.phase === 'replaying') {
+                // 回放期间玩家也可以移动
+            }
+
+            const player = game.player;
+            const frameFactor = dt / 16.67;
+            const speed = CONFIG.moveSpeed;
+
+            // 触摸拖动控制
+            if (game.touchActive) {
+                const dx = game.touchX - player.x;
+                const dy = game.touchY - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > 5) {
+                    player.vx = (dx / dist) * speed;
+                    player.vy = (dy / dist) * speed;
+                } else {
+                    player.vx *= CONFIG.friction;
+                    player.vy *= CONFIG.friction;
+                }
+            } else {
+                player.vx *= CONFIG.friction;
+                player.vy *= CONFIG.friction;
+            }
+
+            // 限制速度
+            const currentSpeed = Math.sqrt(player.vx * player.vx + player.vy * player.vy);
+            if (currentSpeed > speed) {
+                player.vx = (player.vx / currentSpeed) * speed;
+                player.vy = (player.vy / currentSpeed) * speed;
+            }
+
+            // 移动
+            player.x += player.vx * frameFactor;
+            player.y += player.vy * frameFactor;
+
+            // 碰撞检测
+            resolveCollisions();
+
+            // 录制数据
+            if (game.recording) {
+                const elapsed = Date.now() - game.recordStartTime;
+                if (elapsed < CONFIG.timelineDuration) {
+                    game.recordData.push({
+                        x: player.x,
+                        y: player.y
+                    });
+                } else {
+                    stopRecording();
+                }
+            }
+
+            // 检查当前玩家是否碰到终点
+            const distToGoal = Math.sqrt(
+                (player.x - game.goalPixel.x) ** 2 +
+                (player.y - game.goalPixel.y) ** 2
+            );
+            if (distToGoal < CONFIG.goalRadius + CONFIG.ballRadius && game.phase !== 'completed') {
+                completeLevel();
+            }
+        }
+
+        // ==================== 碰撞解析 ====================
+        function resolveCollisions() {
+            const player = game.player;
+            const r = player.radius;
+
+            for (const wall of game.walls) {
+                const closestX = Math.max(wall.x, Math.min(player.x, wall.x + wall.w));
+                const closestY = Math.max(wall.y, Math.min(player.y, wall.y + wall.h));
+
+                const dx = player.x - closestX;
+                const dy = player.y - closestY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < r) {
+                    if (dist === 0) {
+                        const leftDist = Math.abs(player.x - wall.x);
+                        const rightDist = Math.abs(player.x - (wall.x + wall.w));
+                        const topDist = Math.abs(player.y - wall.y);
+                        const bottomDist = Math.abs(player.y - (wall.y + wall.h));
+                        const minDist = Math.min(leftDist, rightDist, topDist, bottomDist);
+
+                        if (minDist === leftDist) {
+                            player.x = wall.x - r;
+                            player.vx = -Math.abs(player.vx) * 0.3;
+                        } else if (minDist === rightDist) {
+                            player.x = wall.x + wall.w + r;
+                            player.vx = Math.abs(player.vx) * 0.3;
+                        } else if (minDist === topDist) {
+                            player.y = wall.y - r;
+                            player.vy = -Math.abs(player.vy) * 0.3;
+                        } else {
+                            player.y = wall.y + wall.h + r;
+                            player.vy = Math.abs(player.vy) * 0.3;
+                        }
+                    } else {
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        const overlap = r - dist;
+                        player.x += nx * overlap;
+                        player.y += ny * overlap;
+
+                        const dot = player.vx * nx + player.vy * ny;
+                        if (dot < 0) {
+                            player.vx -= 1.3 * dot * nx;
+                            player.vy -= 1.3 * dot * ny;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==================== 更新 ====================
+        function update(dt) {
+            if (!game.running) return;
+
+            game.frame++;
+            const frameFactor = dt / 16.67;
+
+            // 更新回放
+            updateReplay(dt);
+
+            // 更新玩家
+            updatePlayer(dt);
+
+            // 更新粒子
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const p = game.particles[i];
+                p.x += p.vx * frameFactor;
+                p.y += p.vy * frameFactor;
+                p.vx *= 0.97;
+                p.vy *= 0.97;
+                p.life -= dt / 1000;
+                if (p.life <= 0) {
+                    game.particles.splice(i, 1);
+                }
+            }
+
+            // 更新星星
+            game.stars.forEach(s => {
+                s.y += s.speed * frameFactor;
+                if (s.y > H) {
+                    s.y = -5;
+                    s.x = Math.random() * W;
+                }
+            });
+
+            // 终点脉冲
+            game.goalPulse += dt / 1000 * 3;
+
+            // 死亡闪屏衰减
+            if (game.deathFlash > 0) {
+                game.deathFlash -= dt / 1000;
+            }
+
+            // 录制超时检查
+            if (game.recording) {
+                const elapsed = Date.now() - game.recordStartTime;
+                if (elapsed >= CONFIG.timelineDuration) {
+                    stopRecording();
+                }
+            }
+        }
+
+        // ==================== 绘制 ====================
+        function draw() {
+            // 背景
+            const bgGrad = ctx.createRadialGradient(
+                W / 2, H / 2, 0,
+                W / 2, H / 2, Math.max(W, H) * 0.6
+            );
+            bgGrad.addColorStop(0, '#0a0a1a');
+            bgGrad.addColorStop(1, '#05050f');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // 星星
+            game.stars.forEach(s => {
+                ctx.globalAlpha = s.opacity;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // 绘制网格
+            drawGrid();
+
+            // 绘制墙壁
+            for (const wall of game.walls) {
+                ctx.fillStyle = CONFIG.colors.wall;
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+
+                ctx.strokeStyle = CONFIG.colors.wallEdge;
+                ctx.lineWidth = 1;
+                ctx.shadowColor = CONFIG.colors.wallEdge;
+                ctx.shadowBlur = 4;
+                ctx.strokeRect(wall.x + 0.5, wall.y + 0.5, wall.w - 1, wall.h - 1);
+                ctx.shadowBlur = 0;
+            }
+
+            // 绘制终点
+            drawGoal();
+
+            // 绘制回放中的时间线
+            drawTimelines();
+
+            // 绘制录制路径预览
+            if (game.recording) {
+                drawRecordingPath();
+            }
+
+            // 绘制当前玩家
+            drawPlayer();
+
+            // 绘制粒子
+            drawParticles();
+
+            // 绘制录制进度条
+            if (game.recording) {
+                drawRecordingProgress();
+            }
+
+            // 顶部装饰
+            drawTopBar();
+        }
+
+        function drawGrid() {
+            const cellSize = game.cellSize;
+            const cols = CONFIG.cols || 9;
+            const rows = CONFIG.rows || 9;
+
+            ctx.strokeStyle = CONFIG.colors.grid;
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i <= cols; i++) {
+                const x = gridOffsetX + i * cellSize;
+                ctx.beginPath();
+                ctx.moveTo(x, gridOffsetY);
+                ctx.lineTo(x, gridOffsetY + rows * cellSize);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= rows; i++) {
+                const y = gridOffsetY + i * cellSize;
+                ctx.beginPath();
+                ctx.moveTo(gridOffsetX, y);
+                ctx.lineTo(gridOffsetX + cols * cellSize, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawGoal() {
+            const goalPixel = game.goalPixel;
+            const pulse = 1 + Math.sin(game.goalPulse) * 0.15;
+            const radius = CONFIG.goalRadius * pulse;
+
+            ctx.shadowColor = CONFIG.colors.goalGlow;
+            ctx.shadowBlur = 25 + Math.sin(game.goalPulse) * 15;
+
+            // 外圈
+            ctx.fillStyle = 'rgba(255, 204, 0, 0.1)';
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius * 1.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 主体
+            ctx.fillStyle = CONFIG.colors.goal;
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 高光
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(goalPixel.x - radius * 0.3, goalPixel.y - radius * 0.3, radius * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 旋转光环
+            ctx.strokeStyle = 'rgba(255, 204, 0, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 8]);
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius * 2.2, game.goalPulse, game.goalPulse + Math.PI * 1.5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawTimelines() {
+            for (let i = 0; i < game.timelines.length; i++) {
+                const tl = game.timelines[i];
+
+                if (tl.playing) {
+                    // 正在回放
+                    const frameIndex = Math.floor(tl.playFrame);
+                    const endIndex = Math.min(frameIndex, tl.data.length - 1);
+
+                    // 绘制路径轨迹
+                    if (endIndex > 0) {
+                        ctx.strokeStyle = `rgba(100, 255, 170, ${0.15 + 0.1 * Math.sin(Date.now() * 0.003)})`;
+                        ctx.lineWidth = 2;
+                        ctx.shadowColor = CONFIG.colors.playingGlow;
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.moveTo(tl.data[0].x, tl.data[0].y);
+                        for (let j = 1; j <= endIndex; j++) {
+                            ctx.lineTo(tl.data[j].x, tl.data[j].y);
+                        }
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                    }
+
+                    // 绘制回放位置
+                    if (endIndex < tl.data.length) {
+                        const point = tl.data[endIndex];
+
+                        ctx.shadowColor = CONFIG.colors.playingGlow;
+                        ctx.shadowBlur = 18;
+
+                        ctx.fillStyle = CONFIG.colors.playing;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, CONFIG.ballRadius * 0.7, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // 高光
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.beginPath();
+                        ctx.arc(point.x - 3, point.y - 3, CONFIG.ballRadius * 0.2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    // 已录制但未回放（静止显示）
+                    const point = tl.data[0];
+                    ctx.shadowColor = CONFIG.colors.recordedGlow;
+                    ctx.shadowBlur = 12;
+
+                    ctx.fillStyle = CONFIG.colors.recorded;
+                    ctx.globalAlpha = 0.4;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, CONFIG.ballRadius * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        function drawRecordingPath() {
+            if (game.recordData.length < 2) return;
+
+            ctx.strokeStyle = `rgba(255, 170, 100, ${0.3 + Math.sin(Date.now() * 0.01) * 0.15})`;
+            ctx.lineWidth = 2;
+            ctx.shadowColor = CONFIG.colors.recordedGlow;
+            ctx.shadowBlur = 8;
+
+            ctx.beginPath();
+            ctx.moveTo(game.recordData[0].x, game.recordData[0].y);
+            for (let i = 1; i < game.recordData.length; i++) {
+                ctx.lineTo(game.recordData[i].x, game.recordData[i].y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawPlayer() {
+            const player = game.player;
+
+            // 录制时颜色不同
+            const isRecording = game.recording;
+            const hue = isRecording ? 'orange' : 'cyan';
+
+            // 光晕
+            ctx.shadowColor = isRecording ? CONFIG.colors.recordedGlow : CONFIG.colors.playerGlow;
+            ctx.shadowBlur = 20;
+
+            // 主体
+            ctx.fillStyle = isRecording ? CONFIG.colors.recorded : CONFIG.colors.player;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, CONFIG.ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 高光
+            ctx.shadowBlur = 0;
+            const gradient = ctx.createRadialGradient(
+                player.x - 4, player.y - 4, 2,
+                player.x, player.y, CONFIG.ballRadius
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, CONFIG.ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 录制时外圈脉冲
+            if (isRecording) {
+                ctx.strokeStyle = `rgba(255, 170, 100, ${0.5 + Math.sin(Date.now() * 0.008) * 0.3})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, CONFIG.ballRadius + 6, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function drawRecordingProgress() {
+            const elapsed = Date.now() - game.recordStartTime;
+            const progress = Math.min(1, elapsed / CONFIG.timelineDuration);
+
+            const barWidth = 120;
+            const barHeight = 3;
+            const barX = W / 2 - barWidth / 2;
+            const barY = H - 45;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, barWidth, barHeight, 2);
+            ctx.fill();
+
+            ctx.fillStyle = CONFIG.colors.recorded;
+            ctx.shadowColor = CONFIG.colors.recordedGlow;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, barWidth * progress, barHeight, 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawParticles() {
+            game.particles.forEach(p => {
+                const alpha = Math.max(0, p.life / p.maxLife);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        function drawTopBar() {
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, 8);
+            ctx.lineTo(W, 8);
+            ctx.stroke();
+        }
+
+        // ==================== UI 更新 ====================
+        function updateScoreUI() {
+            scoreDisplay.textContent = game.score;
+        }
+
+        // ==================== 游戏开始/结束 ====================
+        function startGame() {
+            resize();
+            initStars();
+
+            game.running = true;
+            game.score = 0;
+            game.particles = [];
+            game.deathFlash = 0;
+            game.lastTime = 0;
+            game.phase = 'idle';
+            game.phaseTimer = 0;
+
+            // 设置网格尺寸
+            CONFIG.cols = 9;
+            CONFIG.rows = 9;
+
+            generateLevel();
+
+            updateScoreUI();
+            bestDisplay.textContent = bestScore;
+
+            startOverlay.classList.add('hidden');
+            overOverlay.classList.add('hidden');
+
+            hintEl.style.opacity = '0.6';
+            hintEl.textContent = '拖动控制 · 松手录制这条时间线';
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            if (!game.running) return;
+            game.running = false;
+
+            if (game.score > bestScore) {
+                bestScore = game.score;
+                localStorage.setItem('time_echo_best', bestScore);
+                bestDisplay.textContent = bestScore;
+            }
+
+            finalScoreEl.textContent = game.score;
+            overOverlay.classList.remove('hidden');
+        }
+
+        // ==================== 触摸/鼠标控制 ====================
+        function getTouchPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) / rect.width * W,
+                y: (clientY - rect.top) / rect.height * H
+            };
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+
+            const pos = getTouchPos(e);
+            game.touchActive = true;
+            game.touchX = pos.x;
+            game.touchY = pos.y;
+
+            // 如果还没有开始录制，开始录制
+            if (!game.recording && game.timelines.length < CONFIG.maxTimelines && game.phase !== 'completed') {
+                startRecording();
+            }
+
+            hintEl.textContent = '录制中 · 移动到终点 · 松手结束录制';
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!game.running || !game.touchActive) return;
+
+            const pos = getTouchPos(e);
+            game.touchX = pos.x;
+            game.touchY = pos.y;
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+
+            game.touchActive = false;
+
+            if (game.recording) {
+                stopRecording();
+            }
+        }, { passive: false });
+
+        // 鼠标支持
+        canvas.addEventListener('mousedown', (e) => {
+            if (!game.running) return;
+            e.preventDefault();
+
+            const pos = getTouchPos(e);
+            game.touchActive = true;
+            game.touchX = pos.x;
+            game.touchY = pos.y;
+
+            if (!game.recording && game.timelines.length < CONFIG.maxTimelines && game.phase !== 'completed') {
+                startRecording();
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!game.running || !game.touchActive) return;
+            const pos = getTouchPos(e);
+            game.touchX = pos.x;
+            game.touchY = pos.y;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (!game.running) return;
+            game.touchActive = false;
+
+            if (game.recording) {
+                stopRecording();
+            }
+        });
+
+        // 键盘支持
+        window.addEventListener('keydown', (e) => {
+            if (!game.running) return;
+
+            const player = game.player;
+            const speed = CONFIG.moveSpeed;
+
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W':
+                    e.preventDefault();
+                    player.vy = -speed;
+                    break;
+                case 'ArrowDown': case 's': case 'S':
+                    e.preventDefault();
+                    player.vy = speed;
+                    break;
+                case 'ArrowLeft': case 'a': case 'A':
+                    e.preventDefault();
+                    player.vx = -speed;
+                    break;
+                case 'ArrowRight': case 'd': case 'D':
+                    e.preventDefault();
+                    player.vx = speed;
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (!game.recording && game.timelines.length < CONFIG.maxTimelines) {
+                        startRecording();
+                    } else if (game.recording) {
+                        stopRecording();
+                    }
+                    break;
+            }
+        });
+
+        // ==================== 主循环 ====================
+        function gameLoop(timestamp) {
+            if (!game.lastTime) game.lastTime = timestamp;
+            const dt = Math.min(timestamp - game.lastTime, 50);
+            game.lastTime = timestamp;
+
+            if (game.running) {
+                update(dt);
+                draw();
+                requestAnimationFrame(gameLoop);
+            } else {
+                draw();
+            }
+        }
+
+        // ==================== 事件绑定 ====================
+        document.getElementById('startBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        // 防止页面滚动
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === canvas) e.preventDefault();
+        }, { passive: false });
+
+        // 初始化
+        resize();
+        initStars();
+
+        // 预生成一个迷宫用于显示
+        CONFIG.cols = 9;
+        CONFIG.rows = 9;
+        game.wallCells = generateMaze(CONFIG.cols, CONFIG.rows);
+        game.goal = { x: CONFIG.cols - 2, y: CONFIG.rows - 2 };
+        game.wallCells[game.goal.y][game.goal.x] = 0;
+
+        // 设置初始 cellSize
+        game.cellSize = Math.min(
+            (W - 60) / CONFIG.cols,
+            (H - 140) / CONFIG.rows
+        );
+        game.cellSize = Math.max(20, Math.min(game.cellSize, 48));
+
+        rebuildCollisionRects();
+
+        const startPixel = cellToPixel(1, 1);
+        game.player.x = startPixel.x;
+        game.player.y = startPixel.y;
+
+        draw();
+
+        requestAnimationFrame(gameLoop);
+
+        // roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (r > w / 2) r = w / 2;
+                if (r > h / 2) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    })();
+</script>
+</body>
+</html>
