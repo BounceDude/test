@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>重力迷宫 · 平衡球</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #0b0e18;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    .game-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .canvas-container {
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 2px rgba(80, 220, 255, 0.2);
+      border-radius: 28px;
+      background: #0f1322;
+      padding: 6px;
+      transition: box-shadow 0.2s;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 22px;
+      background: radial-gradient(circle at 30% 30%, #1e263b, #0a0e17);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .info-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 16px;
+      padding: 0 8px;
+      color: #d0e4ff;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 5px rgba(0, 150, 255, 0.5);
+    }
+
+    .score-box {
+      background: rgba(20, 30, 50, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 8px 22px;
+      border-radius: 50px;
+      border: 1px solid rgba(100, 200, 255, 0.6);
+      box-shadow: 0 0 20px rgba(0, 180, 255, 0.3);
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-icon {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 0 6px #5ad0ff);
+    }
+
+    .btn-reset {
+      background: linear-gradient(145deg, #1e2a44, #101624);
+      border: 1px solid #3f6b9c;
+      color: #b8e2ff;
+      padding: 10px 26px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 0 #0a0f18, 0 10px 20px rgba(0, 0, 0, 0.6);
+      transition: all 0.08s linear;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-reset:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #0a0f18, 0 10px 20px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(145deg, #182338, #0d1320);
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #7e9fc7;
+      text-align: center;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      background: rgba(10, 20, 30, 0.7);
+      padding: 6px 18px;
+      border-radius: 30px;
+      backdrop-filter: blur(5px);
+      border: 1px solid #2a3e5a;
+    }
+
+    .hint i {
+      font-style: normal;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .permission-badge {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #0d1a2b;
+      color: #7ee0ff;
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      border: 1px solid #2e7a9c;
+      box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+      pointer-events: none;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+<div class="game-wrapper">
+  <div class="canvas-container">
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+  </div>
+
+  <div class="info-panel">
+    <div class="score-box">
+      <span class="score-icon">✨</span>
+      <span id="scoreDisplay">0</span>
+    </div>
+    <button class="btn-reset" id="resetBtn">↻ 重置</button>
+  </div>
+
+  <div class="hint">
+    <i>📱 倾斜手机 / 拖动屏幕 控制小球</i>
+  </div>
+</div>
+<div class="permission-badge" id="sensorBadge">🌀 重力感应已启用</div>
+
+<script>
+  (function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreSpan = document.getElementById('scoreDisplay');
+    const resetBtn = document.getElementById('resetBtn');
+    const badge = document.getElementById('sensorBadge');
+
+    // 固定尺寸（逻辑分辨率） 600x600，方便手机适配
+    const SIZE = 600;
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+
+    // ---------- 游戏配置 ----------
+    const BALL_RADIUS = 14;          // 小球半径
+    const TARGET_RADIUS = 18;        // 目标点半径
+    const WALL_THICKNESS = 12;       // 墙壁厚度(用于视觉与碰撞)
+    const INNER_MARGIN = WALL_THICKNESS + 4; // 有效区域边界内边距
+    const MAX_SPEED = 11;            // 最大移动速度 (每帧)
+    const ACCEL_FACTOR = 0.9;        // 加速度系数 (重力/倾斜)
+    const FRICTION = 0.96;           // 摩擦系数 (速度衰减)
+
+    // 边界 (内边界: 小球可移动范围)
+    const LEFT_BOUND = INNER_MARGIN + BALL_RADIUS;
+    const RIGHT_BOUND = SIZE - INNER_MARGIN - BALL_RADIUS;
+    const TOP_BOUND = INNER_MARGIN + BALL_RADIUS;
+    const BOTTOM_BOUND = SIZE - INNER_MARGIN - BALL_RADIUS;
+
+    // ---------- 游戏状态 ----------
+    let ball = {
+      x: SIZE / 2,
+      y: SIZE / 2,
+      vx: 0,
+      vy: 0
+    };
+
+    let target = {
+      x: 150,
+      y: 150,
+      active: true
+    };
+
+    let score = 0;
+
+    // 设备方向 (倾斜) 值范围 -1..1, 默认无倾斜
+    let tiltX = 0;
+    let tiltY = 0;
+
+    // 是否正在触摸拖动 (触摸模拟重力方向)
+    let touchActive = false;
+    let touchX = 0, touchY = 0;     // 触摸偏移量, 范围 -1..1 (相对画布中心)
+
+    // 是否已请求传感器权限 (iOS 13+)
+    let sensorPermissionGranted = false;
+    let usingSensor = false;        // 是否真正启用了传感器
+
+    // ---------- 辅助函数 ----------
+    function updateScoreDisplay() {
+      scoreSpan.textContent = score;
+    }
+
+    // 生成新的随机目标点 (确保与球距离不小于120，避免太容易)
+    function spawnTarget() {
+      const minDist = 120;
+      let attempts = 0;
+      let newX, newY, dist;
+      do {
+        // 确保目标在有效区域内 (留出目标半径)
+        newX = Math.random() * (RIGHT_BOUND - LEFT_BOUND) + LEFT_BOUND;
+        newY = Math.random() * (BOTTOM_BOUND - TOP_BOUND) + TOP_BOUND;
+        const dx = newX - ball.x;
+        const dy = newY - ball.y;
+        dist = Math.sqrt(dx * dx + dy * dy);
+        attempts++;
+        if (attempts > 100) break; // 防止极端情况无限循环
+      } while (dist < minDist);
+
+      target.x = newX;
+      target.y = newY;
+      target.active = true;
+    }
+
+    // 重置游戏 (保留分数，但重新放置球和目标)
+    function resetGame(fullResetScore = false) {
+      ball.x = SIZE / 2;
+      ball.y = SIZE / 2;
+      ball.vx = 0;
+      ball.vy = 0;
+
+      if (fullResetScore) {
+        score = 0;
+        updateScoreDisplay();
+      }
+
+      // 重置倾斜/触摸状态
+      tiltX = 0;
+      tiltY = 0;
+      touchActive = false;
+      touchX = 0;
+      touchY = 0;
+
+      // 生成目标 (确保与球位置不会太近，但reset后球在中心，直接生成)
+      const minDist = 120;
+      let attempts = 0;
+      let newX, newY, dist;
+      do {
+        newX = Math.random() * (RIGHT_BOUND - LEFT_BOUND) + LEFT_BOUND;
+        newY = Math.random() * (BOTTOM_BOUND - TOP_BOUND) + TOP_BOUND;
+        const dx = newX - ball.x;
+        const dy = newY - ball.y;
+        dist = Math.sqrt(dx * dx + dy * dy);
+        attempts++;
+        if (attempts > 100) break;
+      } while (dist < minDist);
+
+      target.x = newX;
+      target.y = newY;
+      target.active = true;
+    }
+
+    // ---------- 处理传感器 (重力感应) ----------
+    function handleOrientation(event) {
+      // 获取倾斜数据 (beta: x轴倾斜, gamma: y轴倾斜)
+      let beta = event.beta;   // -180 ~ 180 (前后倾斜)
+      let gamma = event.gamma; // -90 ~ 90 (左右倾斜)
+
+      // 如果设备不支持，beta/gamma 为 null
+      if (beta === null || gamma === null) return;
+
+      // 限制范围，并将数值映射到 -1..1 之间
+      // 左右倾斜 gamma: -90..90 → -1..1 (手机向左倾斜为负)
+      // 前后倾斜 beta: -180..180 → -1..1 (手机向前倾斜为正)
+      // 但游戏坐标Y轴向下为正，所以倾斜方向要取反 (向前倾斜球向下)
+      let rawX = Math.max(-1, Math.min(1, gamma / 45));   // 将±45度映射到±1
+      let rawY = Math.max(-1, Math.min(1, beta / 45));
+
+      // 坐标转换: 游戏y轴向下为正，而beta向前倾斜(屏幕顶部向下)为正，希望球向y正方向移动，所以直接使用beta?
+      // 测试: 手机向前倾斜(beta为正) → 球应该向下(y正方向)移动 → 所以 rawY 正对应 y正。
+      // 但常规beta: 屏幕顶部向上倾斜为正(向后仰)，向前倾斜为负。需要取反：
+      // 实际测试习惯: 向前倾斜(屏幕顶部朝下) → beta为负 → 希望球向下(y正)移动 → 所以 rawY = -beta / 45。
+      // 为了直观，我们取反beta，使得向前倾斜(手机顶部向下)产生正的y方向加速度。
+      // 但每个设备方向可能不同，这里采用标准: beta>0表示顶部向后倾斜(用户看向屏幕时)，所以要让球向上移动？不，我们希望倾斜控制方向如同重力。
+      // 更好的体验: 向哪边倾斜，球就向哪边滚。手机向左倾斜(gamma负) → 球向左(x负)。这个是正确的。
+      // 前后: 手机向前倾斜(顶部远离用户，即用户低头看手机，顶部朝下)通常beta为负 → 我们希望球向下(y正) → 所以 rawY = -beta / 45。
+      let mappedX = rawX;
+      let mappedY = -rawY;  // 取反beta值
+
+      // 进一步限制范围 -1..1
+      tiltX = Math.max(-1, Math.min(1, mappedX));
+      tiltY = Math.max(-1, Math.min(1, mappedY));
+
+      // 如果触摸激活，优先使用触摸数据，传感器数据可忽略 (但保留用于回退)
+      if (touchActive) {
+        // 触摸优先，不覆盖tilt，但我们可以把tilt当作基础？为了不混淆，触摸时直接使用触摸数据
+        // 具体逻辑在更新时处理
+      }
+    }
+
+    // 启用传感器（需要用户手势触发权限）
+    function enableSensors() {
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+ 需要请求权限
+        DeviceOrientationEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              sensorPermissionGranted = true;
+              usingSensor = true;
+              badge.textContent = '🌀 重力感应已启用';
+              badge.style.color = '#7ee0ff';
+            } else {
+              badge.textContent = '⚠️ 传感器被拒绝，使用触摸';
+              badge.style.color = '#ffb86b';
+              usingSensor = false;
+            }
+          })
+          .catch(err => {
+            console.warn('传感器权限错误:', err);
+            badge.textContent = '⚠️ 传感器不可用，触摸控制';
+            badge.style.color = '#ffb86b';
+            usingSensor = false;
+          });
+      } else {
+        // 非iOS或不需要权限
+        window.addEventListener('deviceorientation', handleOrientation);
+        sensorPermissionGranted = true;
+        usingSensor = true;
+        badge.textContent = '🌀 重力感应已启用';
+      }
+    }
+
+    // 检查是否移动端
+    function isMobile() {
+      return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // 尝试自动启用传感器 (在用户第一次触摸/点击时)
+    let sensorAttempted = false;
+    function tryEnableSensorsOnce() {
+      if (sensorAttempted) return;
+      sensorAttempted = true;
+      // 如果是移动端，尝试启用传感器
+      if (isMobile()) {
+        enableSensors();
+      } else {
+        // 桌面端一般没有方向传感器，但可能有，不报错
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientation);
+          // 桌面几乎总是null, 但不影响
+          usingSensor = true;
+          badge.textContent = '💻 桌面重力模拟(无传感器)';
+        } else {
+          badge.textContent = '📱 触摸拖动控制';
+        }
+      }
+    }
+
+    // ---------- 触摸控制 (拖动屏幕产生倾斜效果) ----------
+    function handleTouchStart(e) {
+      e.preventDefault();
+      tryEnableSensorsOnce();   // 首次触摸尝试启用传感器
+      touchActive = true;
+
+      // 获取触摸点相对于画布的位置，并转换为 -1..1 的倾斜量
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const canvasX = touch.clientX - rect.left;
+      const canvasY = touch.clientY - rect.top;
+
+      // 映射到 -1..1 : 以画布中心为原点，左右上下范围 -1..1
+      let rawX = (canvasX / rect.width) * 2 - 1;   // -1(左) .. 1(右)
+      let rawY = (canvasY / rect.height) * 2 - 1;  // -1(上) .. 1(下)
+
+      // 反转Y? 触摸上方应该是球向上移动，即y负方向。倾斜量我们定义为正时向正方向加速。
+      // 所以触摸屏幕上方(点击点偏上) → 球向上(y负) → 倾斜量y为负。正好对应 rawY 本来就是负(上)，
+      // 但我们的倾斜坐标y正代表向下，所以 rawY 直接使用即可。
+      touchX = Math.max(-1, Math.min(1, rawX));
+      touchY = Math.max(-1, Math.min(1, rawY));
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      if (!touchActive) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const canvasX = touch.clientX - rect.left;
+      const canvasY = touch.clientY - rect.top;
+
+      // 限制在画布范围内
+      const clampedX = Math.max(0, Math.min(rect.width, canvasX));
+      const clampedY = Math.max(0, Math.min(rect.height, canvasY));
+
+      let rawX = (clampedX / rect.width) * 2 - 1;
+      let rawY = (clampedY / rect.height) * 2 - 1;
+
+      touchX = Math.max(-1, Math.min(1, rawX));
+      touchY = Math.max(-1, Math.min(1, rawY));
+    }
+
+    function handleTouchEnd(e) {
+      e.preventDefault();
+      touchActive = false;
+      touchX = 0;
+      touchY = 0;
+    }
+
+    // 注册触摸事件
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
+    canvas.addEventListener('touchcancel', handleTouchEnd);
+
+    // 鼠标拖动支持 (方便测试) - 模拟触摸类似效果，但不影响传感器
+    let mouseDown = false;
+    canvas.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      tryEnableSensorsOnce();
+      mouseDown = true;
+      touchActive = true;  // 复用touchActive变量
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      let rawX = (mouseX / rect.width) * 2 - 1;
+      let rawY = (mouseY / rect.height) * 2 - 1;
+      touchX = Math.max(-1, Math.min(1, rawX));
+      touchY = Math.max(-1, Math.min(1, rawY));
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (!mouseDown) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const clampedX = Math.max(0, Math.min(rect.width, mouseX));
+      const clampedY = Math.max(0, Math.min(rect.height, mouseY));
+      let rawX = (clampedX / rect.width) * 2 - 1;
+      let rawY = (clampedY / rect.height) * 2 - 1;
+      touchX = Math.max(-1, Math.min(1, rawX));
+      touchY = Math.max(-1, Math.min(1, rawY));
+    });
+    canvas.addEventListener('mouseup', (e) => {
+      e.preventDefault();
+      mouseDown = false;
+      touchActive = false;
+      touchX = 0;
+      touchY = 0;
+    });
+    canvas.addEventListener('mouseleave', (e) => {
+      if (mouseDown) {
+        mouseDown = false;
+        touchActive = false;
+        touchX = 0;
+        touchY = 0;
+      }
+    });
+
+    // 重置按钮
+    resetBtn.addEventListener('click', () => {
+      tryEnableSensorsOnce();  // 点击时也可启用传感器
+      resetGame(true);         // 重置分数
+    });
+
+    // ---------- 物理更新 ----------
+    function updatePhysics() {
+      // 决定使用哪个倾斜/重力值
+      let accelX = 0;
+      let accelY = 0;
+
+      if (touchActive) {
+        // 触摸优先
+        accelX = touchX;
+        accelY = touchY;
+      } else {
+        // 使用传感器倾斜值
+        accelX = tiltX;
+        accelY = tiltY;
+      }
+
+      // 应用加速度 (模拟重力)
+      ball.vx += accelX * ACCEL_FACTOR;
+      ball.vy += accelY * ACCEL_FACTOR;
+
+      // 摩擦力 (速度衰减)
+      ball.vx *= FRICTION;
+      ball.vy *= FRICTION;
+
+      // 限制最大速度
+      const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      if (speed > MAX_SPEED) {
+        ball.vx = (ball.vx / speed) * MAX_SPEED;
+        ball.vy = (ball.vy / speed) * MAX_SPEED;
+      }
+
+      // 更新位置
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // 边界碰撞 (反弹并损失能量)
+      if (ball.x < LEFT_BOUND) {
+        ball.x = LEFT_BOUND;
+        ball.vx = -ball.vx * 0.5;
+      }
+      if (ball.x > RIGHT_BOUND) {
+        ball.x = RIGHT_BOUND;
+        ball.vx = -ball.vx * 0.5;
+      }
+      if (ball.y < TOP_BOUND) {
+        ball.y = TOP_BOUND;
+        ball.vy = -ball.vy * 0.5;
+      }
+      if (ball.y > BOTTOM_BOUND) {
+        ball.y = BOTTOM_BOUND;
+        ball.vy = -ball.vy * 0.5;
+      }
+
+      // 防止球在边界卡住微小抖动
+      if (Math.abs(ball.vx) < 0.02) ball.vx = 0;
+      if (Math.abs(ball.vy) < 0.02) ball.vy = 0;
+    }
+
+    // 检测目标收集
+    function checkTargetCollision() {
+      if (!target.active) return;
+
+      const dx = ball.x - target.x;
+      const dy = ball.y - target.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // 如果距离小于球半径+目标半径，视为收集 (稍微宽容一点)
+      if (dist < BALL_RADIUS + TARGET_RADIUS - 2) {
+        // 增加分数
+        score += 1;
+        updateScoreDisplay();
+        target.active = false;
+
+        // 生成新目标
+        spawnTarget();
+      }
+    }
+
+    // ---------- 渲染 ----------
+    function draw() {
+      ctx.clearRect(0, 0, SIZE, SIZE);
+
+      // ---- 绘制内场背景 (动态网格/科技感) ----
+      ctx.save();
+      // 内边界区域 (游戏实际区域)
+      const innerLeft = INNER_MARGIN;
+      const innerTop = INNER_MARGIN;
+      const innerWidth = SIZE - INNER_MARGIN * 2;
+      const innerHeight = SIZE - INNER_MARGIN * 2;
+
+      // 发光内圈
+      const gradient = ctx.createRadialGradient(SIZE/2, SIZE/2, 50, SIZE/2, SIZE/2, 400);
+      gradient.addColorStop(0, '#1a2b3f');
+      gradient.addColorStop(1, '#0e141f');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(innerLeft, innerTop, innerWidth, innerHeight);
+
+      // 网格线 (科技感)
+      ctx.strokeStyle = '#2d4f6e';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i <= 10; i++) {
+        const x = innerLeft + (innerWidth / 10) * i;
+        const y = innerTop + (innerHeight / 10) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, innerTop);
+        ctx.lineTo(x, innerTop + innerHeight);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(innerLeft, y);
+        ctx.lineTo(innerLeft + innerWidth, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // ---- 绘制墙壁/边界 (边框) ----
+      ctx.lineWidth = WALL_THICKNESS;
+      ctx.strokeStyle = '#4b7aa1';
+      ctx.shadowColor = '#2f9eff';
+      ctx.shadowBlur = 18;
+      ctx.strokeRect(INNER_MARGIN - WALL_THICKNESS/2, INNER_MARGIN - WALL_THICKNESS/2,
+                     SIZE - INNER_MARGIN*2 + WALL_THICKNESS, SIZE - INNER_MARGIN*2 + WALL_THICKNESS);
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+
+      // 内壁高光
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#a0d0ff';
+      ctx.globalAlpha = 0.3;
+      ctx.strokeRect(INNER_MARGIN, INNER_MARGIN, innerWidth, innerHeight);
+      ctx.globalAlpha = 1;
+
+      // ---- 绘制目标点 ----
+      if (target.active) {
+        // 光晕
+        ctx.shadowColor = '#ffd966';
+        ctx.shadowBlur = 30;
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS + 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 220, 100, 0.25)';
+        ctx.fill();
+
+        // 外圈
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffc857';
+        ctx.fill();
+
+        // 内核
+        ctx.shadowBlur = 30;
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff5cc';
+        ctx.fill();
+
+        // 中心亮点
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(target.x - 3, target.y - 3, TARGET_RADIUS * 0.25, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // 脉冲环
+        const pulse = (Date.now() % 800) / 800; // 0..1
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS + 6 + pulse * 10, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 220, 100, ${0.5 * (1 - pulse)})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      // ---- 绘制小球 ----
+      // 阴影/光晕
+      ctx.shadowColor = '#3f9eff';
+      ctx.shadowBlur = 30;
+      // 球体渐变
+      const ballGradient = ctx.createRadialGradient(
+        ball.x - 5, ball.y - 5, BALL_RADIUS * 0.2,
+        ball.x + 5, ball.y + 5, BALL_RADIUS * 1.5
+      );
+      ballGradient.addColorStop(0, '#d6f0ff');
+      ballGradient.addColorStop(0.7, '#5aa9ff');
+      ballGradient.addColorStop(1, '#1f5fa0');
+
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+      ctx.fillStyle = ballGradient;
+      ctx.fill();
+
+      // 高光
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(ball.x - 4, ball.y - 4, BALL_RADIUS * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffffd0';
+      ctx.fill();
+
+      // 边缘发光
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = '#6ec8ff';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, BALL_RADIUS - 1, 0, Math.PI * 2);
+      ctx.strokeStyle = '#b0e0ff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 重置阴影
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+      ctx.restore();
+
+      // 绘制当前倾斜指示器 (小幅)
+      const indicatorX = 30 + (touchActive ? touchX : tiltX) * 20;
+      const indicatorY = SIZE - 40 + (touchActive ? touchY : tiltY) * 20;
+      ctx.beginPath();
+      ctx.arc(indicatorX, indicatorY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#7ae0ff';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#2f9eff';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // ---------- 游戏循环 ----------
+    function gameLoop() {
+      updatePhysics();
+      checkTargetCollision();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 初始化
+    function init() {
+      resetGame(true);  // 重置分数、球位置、目标
+      updateScoreDisplay();
+
+      // 尝试检测移动端，自动启用传感器 (如果不需要权限)
+      if (isMobile() && !(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')) {
+        // 旧版安卓/iOS 12- 直接启用
+        window.addEventListener('deviceorientation', handleOrientation);
+        usingSensor = true;
+        badge.textContent = '🌀 重力感应已启用';
+      } else if (isMobile()) {
+        // iOS 13+ 需要手势，等待用户触摸
+        badge.textContent = '📱 点击屏幕启用重力感应';
+      } else {
+        // 桌面
+        badge.textContent = '🖱️ 拖动屏幕控制小球';
+      }
+
+      // 启动循环
+      gameLoop();
+    }
+
+    init();
+
+    // 窗口大小改变时保持画布比例 (CSS处理)
+    // 额外防止触摸滚动
+    window.addEventListener('touchmove', (e) => {
+      if (e.target === canvas) e.preventDefault();
+    }, { passive: false });
+  })();
+</script>
+</body>
+</html>
