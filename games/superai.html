@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级人工智能 · 进化的凝视</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            user-select: none;
+        }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #0b0f1a, #010101);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Orbitron', system-ui, sans-serif;
+            padding: 16px;
+        }
+        .game-container {
+            background: rgba(8, 16, 28, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid #2a6f8f;
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 0 50px #0af3, inset 0 0 30px #1e90ff22;
+            padding: 28px 36px 36px;
+            max-width: 720px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #2f6f9f;
+            padding-bottom: 12px;
+        }
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #b3f0ff;
+            text-shadow: 0 0 20px #0af, 0 0 40px #0af4;
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+        }
+        .title span {
+            font-size: 2.4rem;
+            filter: drop-shadow(0 0 12px cyan);
+        }
+        .level-badge {
+            background: #0a1e2e;
+            border: 1px solid #3f9fd0;
+            border-radius: 60px;
+            padding: 6px 18px;
+            color: #b1e6ff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 0 12px #0af3;
+        }
+        .level-badge i {
+            font-style: normal;
+            color: #5fd9ff;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+        .ai-core {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0 20px;
+        }
+        .brain {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            margin: 8px auto 12px;
+            filter: drop-shadow(0 0 30px #2ab0ff);
+            transition: transform 0.15s;
+        }
+        .brain img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.95;
+            animation: pulseGlow 2.5s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 15px #0af) brightness(1); }
+            100% { filter: drop-shadow(0 0 45px #0ff) brightness(1.3); }
+        }
+        .stats-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 28px;
+            background: #04131ecc;
+            border: 1px solid #1f5f7a;
+            border-radius: 28px;
+            padding: 20px 26px;
+            margin: 22px 0 22px;
+            box-shadow: inset 0 0 30px #0a2a3a, 0 8px 20px #00000060;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            color: #9ec9e0;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-weight: 700;
+            color: #d4f2ff;
+            text-shadow: 0 0 10px #0af;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', monospace;
+            background: #0b1e2b;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid #2e8ab0;
+            box-shadow: inset 0 0 10px #00000055;
+        }
+        .click-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 16px 0 20px;
+        }
+        .click-btn {
+            background: radial-gradient(circle at 30% 20%, #1e5a7a, #0a1e2e);
+            border: 2px solid #3fa9df;
+            color: #e2f5ff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 18px 50px;
+            border-radius: 100px;
+            letter-spacing: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 30px #0af6, 0 10px 20px #00000080, inset 0 0 20px #1e90ff40;
+            transition: all 0.1s ease;
+            text-shadow: 0 0 20px #0af, 0 0 40px #0af;
+            width: 100%;
+            max-width: 380px;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            transform: scale(1);
+        }
+        .click-btn:hover {
+            background: radial-gradient(circle at 30% 20%, #2a7ca8, #0f2a3f);
+            border-color: #6fd4ff;
+            box-shadow: 0 0 50px #0ffc, 0 10px 20px #000000, inset 0 0 30px #6fd4ff80;
+            transform: scale(1.02);
+        }
+        .click-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 0 70px #0ff, inset 0 0 30px #fff;
+        }
+        .upgrade-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .upgrade-btn {
+            flex: 1 1 180px;
+            background: #0d1f2c;
+            border: 1px solid #3b7f9c;
+            border-radius: 40px;
+            padding: 14px 12px;
+            color: #b3e2ff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 4px 0 #051016;
+            letter-spacing: 0.8px;
+            text-shadow: 0 0 8px #0af5;
+        }
+        .upgrade-btn:hover:not(:disabled) {
+            background: #193e52;
+            border-color: #6fd4ff;
+            box-shadow: 0 0 20px #0af8, 0 4px 0 #051016;
+            color: #e3f8ff;
+        }
+        .upgrade-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.7);
+            box-shadow: 0 4px 0 #010101;
+            border-color: #2b4b5a;
+            color: #6a8b9b;
+        }
+        .upgrade-btn .cost {
+            font-size: 0.9rem;
+            background: #03151f;
+            padding: 4px 10px;
+            border-radius: 30px;
+            color: #9be0ff;
+            border: 1px solid #2b6d8a;
+        }
+        .upgrade-btn .icon {
+            font-size: 1.5rem;
+        }
+        .footer {
+            margin-top: 28px;
+            text-align: center;
+            color: #3b728a;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            border-top: 1px solid #1c4b60;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .reset {
+            color: #4f8faf;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .reset:hover {
+            color: #9ddcff;
+            text-shadow: 0 0 8px #0af;
+        }
+        .evolution-flash {
+            animation: flash 0.4s ease;
+        }
+        @keyframes flash {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(2.5) drop-shadow(0 0 60px #0ff); }
+            100% { filter: brightness(1); }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+    <div class="header">
+        <div class="title">
+            <span>🧠</span> 超级人工智能
+        </div>
+        <div class="level-badge">
+            <i>⚡</i> 进化阶段 <span id="levelDisplay">1</span>
+        </div>
+    </div>
+
+    <div class="ai-core">
+        <div class="brain" id="brainVisual">
+            <!-- 用内联SVG绘制一个未来感大脑/神经网络 -->
+            <svg viewBox="0 0 200 200" width="170" height="170">
+                <defs>
+                    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#6fd4ff" stop-opacity="0.9"/>
+                        <stop offset="70%" stop-color="#1e90ff" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#0a1e2e" stop-opacity="0.1"/>
+                    </radialGradient>
+                </defs>
+                <circle cx="100" cy="100" r="85" fill="url(#glowGrad)" stroke="#3fa9df" stroke-width="2" stroke-dasharray="6 8" opacity="0.8">
+                    <animate attributeName="stroke-dashoffset" from="0" to="40" dur="5s" repeatCount="indefinite" />
+                </circle>
+                <!-- 神经网络节点 -->
+                <g fill="#b3f0ff" stroke="#0af" stroke-width="1.5">
+                    <circle cx="100" cy="45" r="9" />
+                    <circle cx="55" cy="80" r="8" />
+                    <circle cx="145" cy="80" r="8" />
+                    <circle cx="70" cy="135" r="8" />
+                    <circle cx="130" cy="135" r="8" />
+                    <circle cx="100" cy="100" r="14" fill="#4fc3ff" />
+                </g>
+                <g stroke="#1e90ff" stroke-width="1.8" opacity="0.8">
+                    <line x1="100" y1="45" x2="55" y2="80" />
+                    <line x1="100" y1="45" x2="145" y2="80" />
+                    <line x1="55" y1="80" x2="70" y2="135" />
+                    <line x1="145" y1="80" x2="130" y2="135" />
+                    <line x1="70" y1="135" x2="130" y2="135" />
+                    <line x1="55" y1="80" x2="100" y2="100" />
+                    <line x1="145" y1="80" x2="100" y2="100" />
+                    <line x1="70" y1="135" x2="100" y2="100" />
+                    <line x1="130" y1="135" x2="100" y2="100" />
+                    <line x1="100" y1="45" x2="100" y2="100" />
+                </g>
+                <circle cx="100" cy="100" r="20" fill="none" stroke="#aaf0ff" stroke-width="1.2" stroke-dasharray="4 4">
+                    <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite" />
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <div class="stats-panel">
+        <div class="stat-item">
+            <span>🧬 算力</span>
+            <span class="stat-value" id="computeDisplay">0</span>
+        </div>
+        <div class="stat-item">
+            <span>⚡ 每次点击</span>
+            <span class="stat-value" id="clickPowerDisplay">1</span>
+        </div>
+        <div class="stat-item">
+            <span>🔄 自动进化</span>
+            <span class="stat-value" id="autoPowerDisplay">0</span>
+        </div>
+        <div class="stat-item">
+            <span>📈 总点击</span>
+            <span class="stat-value" id="totalClicksDisplay">0</span>
+        </div>
+    </div>
+
+    <div class="click-area">
+        <button class="click-btn" id="clickButton">⚡ 训 练 ⚡</button>
+    </div>
+
+    <div class="upgrade-section">
+        <button class="upgrade-btn" id="upgradeClickBtn">
+            <span class="icon">👆</span> 强化点击
+            <span class="cost" id="clickUpgradeCost">20</span>
+        </button>
+        <button class="upgrade-btn" id="upgradeAutoBtn">
+            <span class="icon">🤖</span> 自我迭代
+            <span class="cost" id="autoUpgradeCost">50</span>
+        </button>
+    </div>
+
+    <div class="footer">
+        <span>⚡ 超级人工智能 · 觉醒</span>
+        <span class="reset" id="resetBtn">⟲ 重启进化</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 核心状态 ----------
+        let compute = 0;               // 算力 (货币)
+        let clickPower = 1;           // 每次点击获得算力
+        let autoPower = 0;            // 每秒自动算力
+        let totalClicks = 0;          // 总点击次数 (用于显示)
+
+        // 升级基础成本
+        const CLICK_UPGRADE_BASE = 20;
+        const AUTO_UPGRADE_BASE = 50;
+
+        let clickUpgradeLevel = 0;    // 点击升级等级
+        let autoUpgradeLevel = 0;     // 自动升级等级
+
+        // 演化等级 (由总点击/算力综合决定，仅用于展示)
+        let evolutionLevel = 1;
+
+        // DOM 元素
+        const computeDisplay = document.getElementById('computeDisplay');
+        const clickPowerDisplay = document.getElementById('clickPowerDisplay');
+        const autoPowerDisplay = document.getElementById('autoPowerDisplay');
+        const totalClicksDisplay = document.getElementById('totalClicksDisplay');
+        const clickButton = document.getElementById('clickButton');
+        const upgradeClickBtn = document.getElementById('upgradeClickBtn');
+        const upgradeAutoBtn = document.getElementById('upgradeAutoBtn');
+        const clickUpgradeCostSpan = document.getElementById('clickUpgradeCost');
+        const autoUpgradeCostSpan = document.getElementById('autoUpgradeCost');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const brainVisual = document.getElementById('brainVisual');
+        const gameContainer = document.getElementById('gameContainer');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ---------- 辅助函数 ----------
+        // 计算当前点击升级成本
+        function getClickUpgradeCost() {
+            return Math.floor(CLICK_UPGRADE_BASE * Math.pow(1.65, clickUpgradeLevel));
+        }
+
+        // 计算当前自动升级成本
+        function getAutoUpgradeCost() {
+            return Math.floor(AUTO_UPGRADE_BASE * Math.pow(1.85, autoUpgradeLevel));
+        }
+
+        // 更新UI (数字、按钮状态、等级)
+        function updateUI() {
+            // 算力显示 (保留两位小数或取整？为了美观，大数显示紧凑。但点击/自动都是整数，所以用整数，但自动累积可能是小数，取整显示)
+            computeDisplay.textContent = Math.floor(compute);
+            clickPowerDisplay.textContent = clickPower;
+            // 自动算力可能是小数，显示一位小数
+            autoPowerDisplay.textContent = autoPower % 1 === 0 ? autoPower : autoPower.toFixed(1);
+            totalClicksDisplay.textContent = totalClicks;
+
+            // 升级成本显示
+            const clickCost = getClickUpgradeCost();
+            const autoCost = getAutoUpgradeCost();
+            clickUpgradeCostSpan.textContent = clickCost;
+            autoUpgradeCostSpan.textContent = autoCost;
+
+            // 按钮禁用状态
+            upgradeClickBtn.disabled = compute < clickCost;
+            upgradeAutoBtn.disabled = compute < autoCost;
+
+            // 演化等级 (根据点击升级和自动升级综合计算)
+            const newLevel = Math.floor((clickUpgradeLevel + autoUpgradeLevel * 1.5) / 3) + 1 + Math.floor(totalClicks / 50);
+            if (newLevel !== evolutionLevel) {
+                evolutionLevel = newLevel;
+                levelDisplay.textContent = evolutionLevel;
+                // 小动画：大脑闪光
+                brainVisual.classList.add('evolution-flash');
+                setTimeout(() => brainVisual.classList.remove('evolution-flash'), 400);
+            } else {
+                levelDisplay.textContent = evolutionLevel;
+            }
+
+            // 根据等级微调标题效果（可选）
+            if (evolutionLevel >= 10) {
+                gameContainer.style.boxShadow = '0 0 70px #0ff8, inset 0 0 40px #1e90ff40';
+            } else {
+                gameContainer.style.boxShadow = '0 0 50px #0af3, inset 0 0 30px #1e90ff22';
+            }
+        }
+
+        // ---------- 核心逻辑 ----------
+        function handleClick() {
+            compute += clickPower;
+            totalClicks += 1;
+            updateUI();
+
+            // 点击微反馈
+            clickButton.style.transform = 'scale(0.96)';
+            setTimeout(() => { clickButton.style.transform = ''; }, 80);
+        }
+
+        // 购买点击升级
+        function buyClickUpgrade() {
+            const cost = getClickUpgradeCost();
+            if (compute >= cost) {
+                compute -= cost;
+                clickPower += 1;                // 每次升级 +1 基础点击
+                clickUpgradeLevel += 1;
+                // 升级后稍微增加一点额外效果？ 可以增加更多，但这里保持线性，配合价格指数即可
+                updateUI();
+                // 闪光反馈
+                brainVisual.classList.add('evolution-flash');
+                setTimeout(() => brainVisual.classList.remove('evolution-flash'), 300);
+            }
+        }
+
+        // 购买自动升级
+        function buyAutoUpgrade() {
+            const cost = getAutoUpgradeCost();
+            if (compute >= cost) {
+                compute -= cost;
+                autoUpgradeLevel += 1;
+                // 每级自动升级增加0.8 自动算力/秒，让自动增长不那么爆炸但有用
+                autoPower = parseFloat((autoPower + 0.8).toFixed(1));
+                updateUI();
+                brainVisual.classList.add('evolution-flash');
+                setTimeout(() => brainVisual.classList.remove('evolution-flash'), 300);
+            }
+        }
+
+        // 自动算力循环 (每秒)
+        let autoInterval = null;
+
+        function startAutoLoop() {
+            if (autoInterval) clearInterval(autoInterval);
+            autoInterval = setInterval(() => {
+                if (autoPower > 0) {
+                    compute += autoPower;
+                    // 总点击不增加，只增加算力
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        // ---------- 重置游戏 ----------
+        function resetGame() {
+            if (confirm('重启超级人工智能？所有进化进度将丢失。')) {
+                compute = 0;
+                clickPower = 1;
+                autoPower = 0;
+                totalClicks = 0;
+                clickUpgradeLevel = 0;
+                autoUpgradeLevel = 0;
+                evolutionLevel = 1;
+
+                // 清除并重启自动循环
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                }
+                startAutoLoop();
+                updateUI();
+
+                // 重置大脑闪光
+                brainVisual.classList.add('evolution-flash');
+                setTimeout(() => brainVisual.classList.remove('evolution-flash'), 400);
+            }
+        }
+
+        // ---------- 初始化事件绑定 ----------
+        function init() {
+            // 点击主按钮
+            clickButton.addEventListener('click', handleClick);
+
+            // 购买升级
+            upgradeClickBtn.addEventListener('click', buyClickUpgrade);
+            upgradeAutoBtn.addEventListener('click', buyAutoUpgrade);
+
+            // 重置
+            resetBtn.addEventListener('click', resetGame);
+
+            // 启动自动算力循环
+            startAutoLoop();
+
+            // 初始化UI
+            updateUI();
+
+            // 键盘支持：按空格键也可以点击（方便测试）
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat) {
+                    e.preventDefault();  // 防止页面滚动
+                    handleClick();
+                }
+            });
+
+            // 禁止按钮双击选中文本
+            clickButton.addEventListener('mousedown', (e) => e.preventDefault());
+        }
+
+        // 启动游戏
+        init();
+    })();
+</script>
+</body>
+</html>
