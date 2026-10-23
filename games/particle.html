@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏·创新 | 粒子网络</title>
+    <style>
+        /* 全局重置与字体 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0c0f;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+        }
+
+        /* 画布全屏 */
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        /* 覆盖文字 — 游戏创新标语 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none; /* 让鼠标穿透，与画布交互 */
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 40px rgba(0, 180, 255, 0.4);
+            user-select: none;
+            z-index: 10;
+        }
+
+        .overlay h1 {
+            font-size: clamp(3rem, 12vw, 7rem);
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #a0f0ff, #5fa8ff, #b46eff, #6effb4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glowPulse 3s infinite alternate;
+            margin-bottom: 0.2em;
+            filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.7));
+        }
+
+        .overlay p {
+            font-size: clamp(0.9rem, 3vw, 1.6rem);
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            color: #b8e2ff;
+            text-transform: uppercase;
+            opacity: 0.9;
+            animation: fadeSlide 2s ease-out;
+        }
+
+        /* 装饰性光晕 */
+        .overlay::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+            animation: rotateSlow 20s linear infinite;
+        }
+
+        /* 动画定义 */
+        @keyframes glowPulse {
+            0% { filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5)); }
+            100% { filter: drop-shadow(0 0 45px rgba(100, 200, 255, 0.9)); }
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 0.9; transform: translateY(0); }
+        }
+
+        @keyframes rotateSlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 右下角小提示 (游戏交互反馈) */
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: rgba(180, 230, 255, 0.6);
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            z-index: 20;
+            pointer-events: none;
+            backdrop-filter: blur(2px);
+            background: rgba(0, 20, 30, 0.3);
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 200, 255, 0.25);
+            font-weight: 300;
+            transition: opacity 0.3s;
+        }
+
+        .hint i {
+            font-style: normal;
+            display: inline-block;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* 响应式微调 */
+        @media (max-width: 600px) {
+            .hint {
+                font-size: 0.6rem;
+                right: 15px;
+                bottom: 15px;
+                padding: 5px 12px;
+            }
+            .overlay p {
+                letter-spacing: 0.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="overlay">
+        <h1>游戏创新</h1>
+        <p>粒子 · 链接 · 未来</p>
+    </div>
+
+    <div class="hint">
+        <i>✦</i> 移动鼠标 感受交互 <i>✦</i>
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 粒子系统配置
+            const PARTICLE_COUNT = 180;          // 粒子数量
+            const MAX_LINK_DIST = 130;           // 粒子间连线最大距离
+            const MOUSE_RADIUS = 160;            // 鼠标影响半径
+            const MOUSE_FORCE = 0.04;            // 鼠标吸引强度
+            const BASE_SPEED = 0.45;             // 基础速度系数
+            
+            // 存储粒子
+            let particles = [];
+            
+            // 鼠标坐标 (初始置于画布外，避免刚开始无意义的吸引)
+            let mouse = { x: -1000, y: -1000 };
+            
+            // 画布尺寸变量
+            let width, height;
+
+            // 工具函数: 限制值范围
+            const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
+
+            // 调整画布尺寸，并重新初始化粒子位置 (保持粒子相对比例)
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                // 设置画布实际像素尺寸
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 重新初始化粒子 (如果粒子已存在则重新分布，避免聚集在旧尺寸区域)
+                if (particles.length > 0) {
+                    // 重新映射粒子坐标到新画布比例
+                    particles.forEach(p => {
+                        p.x = (p.x / (canvas.prevWidth || width)) * width;
+                        p.y = (p.y / (canvas.prevHeight || height)) * height;
+                        // 边界修正
+                        p.x = clamp(p.x, 0, width);
+                        p.y = clamp(p.y, 0, height);
+                    });
+                } else {
+                    initParticles();
+                }
+                
+                // 存储当前尺寸用于下次比较 (但resize时prev已经是旧值)
+                canvas.prevWidth = width;
+                canvas.prevHeight = height;
+            }
+
+            // 初始化粒子
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    // 随机位置
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    
+                    // 随机速度方向与大小
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = (Math.random() * 0.8 + 0.4) * BASE_SPEED;
+                    const vx = Math.cos(angle) * speed;
+                    const vy = Math.sin(angle) * speed;
+                    
+                    // 粒子大小随机 (视觉层次)
+                    const size = Math.random() * 2.5 + 1.2;  // 1.2 ~ 3.7
+                    
+                    // 粒子颜色微调 (青蓝/紫/绿)
+                    const hue = Math.random() * 60 + 160;    // 160~220 青蓝到蓝紫范围
+                    const sat = Math.random() * 30 + 65;      // 65~95%
+                    const light = Math.random() * 25 + 65;    // 65~90%
+                    
+                    particles.push({
+                        x, y, vx, vy,
+                        size,
+                        baseSize: size,
+                        color: `hsl(${hue}, ${sat}%, ${light}%)`,
+                        // 用于微弱的闪烁效果
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            // 更新粒子位置 (包含鼠标交互)
+            function updateParticles() {
+                // 遍历所有粒子
+                for (let p of particles) {
+                    // 鼠标吸引力 (如果鼠标在画布内)
+                    if (mouse.x > 0 && mouse.y > 0) {
+                        const dx = mouse.x - p.x;
+                        const dy = mouse.y - p.y;
+                        const dist = Math.hypot(dx, dy);
+                        
+                        if (dist < MOUSE_RADIUS && dist > 0.5) {
+                            // 越靠近鼠标，吸引力越大 (但是要柔和)
+                            const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE;
+                            const directionX = dx / dist;
+                            const directionY = dy / dist;
+                            
+                            // 叠加速度 (吸引)
+                            p.vx += directionX * force;
+                            p.vy += directionY * force;
+                        }
+                    }
+                    
+                    // 速度限制，避免飞出太快 (最大速度)
+                    const maxSpeed = BASE_SPEED * 2.2;
+                    const currentSpeed = Math.hypot(p.vx, p.vy);
+                    if (currentSpeed > maxSpeed) {
+                        p.vx = (p.vx / currentSpeed) * maxSpeed;
+                        p.vy = (p.vy / currentSpeed) * maxSpeed;
+                    }
+                    
+                    // 应用速度移动
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    // 边界碰撞与反弹 (同时加入微小随机，防止卡边)
+                    if (p.x < 0) {
+                        p.x = 0;
+                        p.vx *= -0.95;
+                        p.vy += (Math.random() - 0.5) * 0.05;
+                    } else if (p.x > width) {
+                        p.x = width;
+                        p.vx *= -0.95;
+                        p.vy += (Math.random() - 0.5) * 0.05;
+                    }
+                    
+                    if (p.y < 0) {
+                        p.y = 0;
+                        p.vy *= -0.95;
+                        p.vx += (Math.random() - 0.5) * 0.05;
+                    } else if (p.y > height) {
+                        p.y = height;
+                        p.vy *= -0.95;
+                        p.vx += (Math.random() - 0.5) * 0.05;
+                    }
+                    
+                    // 轻微速度阻尼，让运动更自然 (避免持续加速)
+                    p.vx *= 0.998;
+                    p.vy *= 0.998;
+                    
+                    // 如果速度太小，给予一点随机扰动 (避免停住)
+                    if (Math.abs(p.vx) < 0.02 && Math.abs(p.vy) < 0.02) {
+                        p.vx += (Math.random() - 0.5) * 0.06;
+                        p.vy += (Math.random() - 0.5) * 0.06;
+                    }
+                    
+                    // 动态粒子大小 (基于速度轻微变化，产生呼吸感)
+                    const speedFactor = 1 + Math.hypot(p.vx, p.vy) * 0.2;
+                    p.size = p.baseSize * (0.9 + Math.sin(Date.now() * 0.002 + p.phase) * 0.1) * speedFactor;
+                    
+                    // 保证最小尺寸
+                    p.size = Math.max(0.8, p.size);
+                }
+            }
+
+            // 绘制所有粒子与连线
+            function draw() {
+                // 清空画布 (使用深色背景，带一点透明叠加效果，制造拖影感觉？但为了清晰，使用纯色填充)
+                // 使用 rgba 可以产生拖影，但更推荐直接填充以保持清晰，这里用清透的深色
+                ctx.fillStyle = '#0a0c0f';
+                ctx.fillRect(0, 0, width, height);
+                
+                // 绘制连线 (先绘制连线，让粒子在连线之上)
+                ctx.lineWidth = 1.2;
+                
+                // 遍历所有粒子对 (避免重复绘制)
+                for (let i = 0; i < particles.length; i++) {
+                    const p1 = particles[i];
+                    
+                    // 内层循环从 i+1 开始，避免重复绘制和自连
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const dist = Math.hypot(dx, dy);
+                        
+                        // 距离在阈值内则绘制连线
+                        if (dist < MAX_LINK_DIST) {
+                            // 透明度根据距离变化 (越近越亮)
+                            const alpha = (1 - dist / MAX_LINK_DIST) * 0.55;
+                            
+                            // 连线颜色使用青蓝色，带一点透明度
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            
+                            // 根据距离和位置微调颜色 (从青色到紫色)
+                            const hue = 185 + (1 - dist / MAX_LINK_DIST) * 40; // 185~225
+                            ctx.strokeStyle = `hsla(${hue}, 90%, 65%, ${alpha})`;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                
+                // 绘制所有粒子 (发光圆点)
+                for (let p of particles) {
+                    // 粒子主体
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    
+                    // 使用径向渐变制造光晕效果
+                    const gradient = ctx.createRadialGradient(
+                        p.x - p.size * 0.3, p.y - p.size * 0.3, p.size * 0.2,
+                        p.x, p.y, p.size * 2.5
+                    );
+                    
+                    // 颜色处理: 从粒子自身颜色到透明
+                    gradient.addColorStop(0, p.color);
+                    gradient.addColorStop(0.7, `hsla(${parseInt(p.color.slice(4, 7)) || 180}, 90%, 70%, 0.7)`);
+                    gradient.addColorStop(1, 'rgba(10, 20, 30, 0)');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.shadowColor = p.color;       // 阴影也发光
+                    ctx.shadowBlur = 12;             // 光晕大小
+                    ctx.fill();
+                    
+                    // 重置阴影避免影响其他绘制 (连线已经画完了)
+                    ctx.shadowBlur = 0;
+                    
+                    // 额外绘制一个高亮小点 (核心)
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 0.45, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#aaf0ff';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+                
+                // 绘制鼠标位置的特殊光晕 (增强交互感)
+                if (mouse.x > 0 && mouse.y > 0) {
+                    const gradient = ctx.createRadialGradient(
+                        mouse.x, mouse.y, 5,
+                        mouse.x, mouse.y, 60
+                    );
+                    gradient.addColorStop(0, 'rgba(100, 220, 255, 0.15)');
+                    gradient.addColorStop(0.6, 'rgba(80, 180, 255, 0.08)');
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, 60, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+            }
+
+            // 动画循环
+            function animate() {
+                updateParticles();
+                draw();
+                requestAnimationFrame(animate);
+            }
+
+            // ========== 事件监听 ==========
+
+            // 鼠标移动 (更新鼠标坐标)
+            function onMouseMove(e) {
+                // 获取鼠标在画布内的坐标
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;   // 通常为1，但以防有CSS缩放
+                const scaleY = canvas.height / rect.height;
+                
+                mouse.x = (e.clientX - rect.left) * scaleX;
+                mouse.y = (e.clientY - rect.top) * scaleY;
+            }
+
+            // 鼠标离开画布区域 -> 清除鼠标位置
+            function onMouseLeave() {
+                mouse.x = -1000;
+                mouse.y = -1000;
+            }
+
+            // 触摸事件支持 (移动端)
+            function onTouchMove(e) {
+                e.preventDefault(); // 防止滚动
+                if (e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    
+                    mouse.x = (touch.clientX - rect.left) * scaleX;
+                    mouse.y = (touch.clientY - rect.top) * scaleY;
+                }
+            }
+
+            function onTouchEnd(e) {
+                // 触摸结束后重置鼠标位置，避免持续吸引
+                mouse.x = -1000;
+                mouse.y = -1000;
+            }
+
+            // 窗口大小改变
+            function onResize() {
+                // 保存旧尺寸用于粒子位置映射
+                const oldWidth = width;
+                const oldHeight = height;
+                
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 将粒子按比例映射到新尺寸
+                if (particles.length > 0) {
+                    particles.forEach(p => {
+                        p.x = (p.x / oldWidth) * width;
+                        p.y = (p.y / oldHeight) * height;
+                        // 边界裁剪
+                        p.x = clamp(p.x, 0, width);
+                        p.y = clamp(p.y, 0, height);
+                    });
+                } else {
+                    initParticles();
+                }
+                
+                // 重置鼠标位置 (避免鼠标在新窗口外)
+                mouse.x = -1000;
+                mouse.y = -1000;
+            }
+
+            // ========== 初始化 ==========
+            function init() {
+                // 设置初始画布尺寸
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 创建粒子
+                initParticles();
+                
+                // 事件绑定
+                window.addEventListener('resize', onResize);
+                canvas.addEventListener('mousemove', onMouseMove);
+                canvas.addEventListener('mouseleave', onMouseLeave);
+                
+                // 触摸事件 (移动端)
+                canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+                canvas.addEventListener('touchend', onTouchEnd);
+                canvas.addEventListener('touchcancel', onTouchEnd);
+                
+                // 开始动画
+                animate();
+            }
+
+            // 启动
+            init();
+        })();
+    </script>
+</body>
+</html>
