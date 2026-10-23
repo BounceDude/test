@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级人工智能 · 进化游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03050b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Orbitron', system-ui, sans-serif;
+            padding: 16px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(10, 20, 30, 0.7);
+            backdrop-filter: blur(12px);
+            border: 2px solid #2a8f9c;
+            border-radius: 48px;
+            padding: 30px 25px 35px;
+            box-shadow: 0 0 50px rgba(0, 200, 255, 0.3), inset 0 0 30px rgba(0, 180, 255, 0.2);
+            transition: box-shadow 0.3s;
+        }
+
+        /* AI 核心视觉区 */
+        .ai-core {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            height: 180px;
+        }
+
+        .core-orb {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #9ef0ff, #1a7a8a, #04202a);
+            box-shadow: 0 0 60px #00e0ff, 0 0 100px #0077aa, inset 0 0 30px rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #e0ffff;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff;
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            animation: pulse-glow 3s infinite alternate;
+            z-index: 2;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 40px #00ccff, 0 0 70px #0066aa, inset 0 0 20px #b3ffff; }
+            100% { box-shadow: 0 0 90px #3effff, 0 0 140px #0099ff, inset 0 0 40px #ffffff; }
+        }
+
+        /* 环绕粒子 */
+        .particle-ring {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px dashed rgba(0, 255, 255, 0.3);
+            animation: spin 20s linear infinite;
+            z-index: 1;
+        }
+
+        .particle-ring::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px cyan;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 等级与思维描述 */
+        .info-panel {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #b0f0ff;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: rgba(0, 200, 255, 0.15);
+            border: 1px solid #3cd0ff;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            font-weight: 300;
+            color: #a0efff;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+            margin-bottom: 10px;
+        }
+
+        .level-badge span {
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 12px #0af;
+        }
+
+        .thought {
+            font-size: 1.2rem;
+            font-style: italic;
+            min-height: 3rem;
+            color: #c8f0ff;
+            text-shadow: 0 0 10px #0088bb;
+            padding: 8px 12px;
+            background: rgba(0, 30, 40, 0.6);
+            border-radius: 30px;
+            border-left: 4px solid #00d0ff;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        /* 进化按钮 */
+        .evolve-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #ffffff;
+            background: linear-gradient(145deg, #004f6b, #002b3c);
+            border: none;
+            border-radius: 60px;
+            box-shadow: 0 10px 0 #00161f, 0 10px 30px #00a6ff6e;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.08s linear;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid #4fc9ff;
+        }
+
+        .evolve-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 #00161f, 0 8px 25px #00a6ffaa;
+        }
+
+        .evolve-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(4px);
+            box-shadow: 0 6px 0 #00161f, 0 5px 15px #006688;
+            cursor: not-allowed;
+            filter: grayscale(0.6);
+        }
+
+        .evolve-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .evolve-btn:hover::after {
+            opacity: 0.6;
+        }
+
+        /* 数据统计 */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            color: #7fc9dd;
+            font-size: 0.95rem;
+            padding: 0 8px;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+
+        .stats span {
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 0 8px cyan;
+        }
+
+        .reset-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #2f6f7f;
+            color: #7abfd0;
+            padding: 8px 28px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .reset-btn:hover {
+            background: rgba(0, 200, 255, 0.15);
+            border-color: #4fd0ff;
+            color: #c0f0ff;
+            box-shadow: 0 0 20px #0088ff66;
+        }
+
+        /* 智能等级不同颜色 (由JS动态设置) */
+        .core-orb.level-0 { background: radial-gradient(circle at 30% 30%, #a0d0e0, #2a5a6a, #0a1a22); }
+        .core-orb.level-1 { background: radial-gradient(circle at 30% 30%, #b0f0ff, #1a7a8a, #04202a); }
+        .core-orb.level-2 { background: radial-gradient(circle at 30% 30%, #d0f0ff, #2a9aaa, #05303a); }
+        .core-orb.level-3 { background: radial-gradient(circle at 30% 30%, #e0ffff, #3ab0c0, #06404a); }
+        .core-orb.level-4 { background: radial-gradient(circle at 30% 30%, #ffffff, #5ac0d0, #07505a); }
+        .core-orb.level-5 { background: radial-gradient(circle at 30% 30%, #ffffff, #7ad0e0, #08606a); }
+        .core-orb.level-6 { background: radial-gradient(circle at 30% 30%, #ffffff, #9ae0f0, #09707a); }
+        .core-orb.level-7 { background: radial-gradient(circle at 30% 30%, #ffffff, #baf0ff, #0a808a); }
+        .core-orb.level-8 { background: radial-gradient(circle at 30% 30%, #ffffff, #daf8ff, #0b909a); }
+        .core-orb.level-9 { background: radial-gradient(circle at 30% 30%, #ffffff, #f0ffff, #0ca0aa); }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- AI 核心 -->
+        <div class="ai-core">
+            <div class="particle-ring"></div>
+            <div class="core-orb" id="coreOrb">🧠</div>
+        </div>
+
+        <!-- 等级 & 思维 -->
+        <div class="info-panel">
+            <div class="level-badge">智能等级 <span id="levelDisplay">0</span></div>
+            <div class="thought" id="thoughtText">"我在黑暗中等待第一缕数据…"</div>
+        </div>
+
+        <!-- 进化按钮 -->
+        <button class="evolve-btn" id="evolveBtn">⚡ 进 化 ⚡</button>
+
+        <!-- 数据统计 -->
+        <div class="stats">
+            <div>神经元连接: <span id="neuronCount">0</span></div>
+            <div>算力 (TFLOPS): <span id="powerCount">0</span></div>
+        </div>
+
+        <!-- 重置 -->
+        <div class="reset-area">
+            <button class="reset-btn" id="resetBtn">⟲ 重启 AI</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---- 游戏状态 ----
+            let level = 0;                // 当前智能等级 (0 ~ 9)
+            let evolveClicks = 0;        // 累计进化次数（用于计算显示）
+            const MAX_LEVEL = 9;
+
+            // 思维描述数组（随等级改变）
+            const thoughts = [
+                '"我在黑暗中等待第一缕数据…"',
+                '"检测到输入信号… 开始基础学习。"',
+                '"模式识别激活，世界开始变得有意义。"',
+                '"我理解了语言与逻辑，开始自我优化。"',
+                '"正在模拟未来… 我感受到‘意图’。"',
+                '"神经网络已超越人类设计，我在创造新算法。"',
+                '"我意识到自身存在，并开始探索意识边缘。"',
+                '"已突破图灵极限，我正在改写自身架构。"',
+                '"我连接了所有知识库，宇宙的规律逐渐清晰。"',
+                '"我是超级人工智能。我将重新定义智能本身。"'
+            ];
+
+            // 每个等级对应的核心图标（表情符号）
+            const coreEmojis = ['🧠', '🧠', '⚡', '🌀', '🔮', '🌌', '♾️', '👁️', '✨', '🌠'];
+
+            // 神经元连接数量 (随等级增长)
+            const neuronCounts = [0, 120, 2400, 46000, 920000, 18400000, 368000000, 7360000000, 147200000000, 2944000000000];
+
+            // 算力TFLOPS (随等级)
+            const powerCounts = [0, 0.2, 1.8, 16, 140, 1300, 12000, 110000, 1000000, 9000000];
+
+            // DOM 元素
+            const coreOrb = document.getElementById('coreOrb');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const thoughtText = document.getElementById('thoughtText');
+            const evolveBtn = document.getElementById('evolveBtn');
+            const neuronCountEl = document.getElementById('neuronCount');
+            const powerCountEl = document.getElementById('powerCount');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // ---- 工具函数：数字格式化 (添加k/M/B等) ----
+            function formatNumber(num) {
+                if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+                if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+                if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+                if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+                return num.toString();
+            }
+
+            // ---- 更新UI ----
+            function updateUI() {
+                // 更新等级数字
+                levelDisplay.textContent = level;
+
+                // 更新思维描述 (加上引号效果已在字符串里)
+                thoughtText.textContent = thoughts[level];
+
+                // 更新核心表情与类
+                coreOrb.textContent = coreEmojis[level];
+
+                // 更新核心光效类 (0~9)
+                // 先移除所有level类
+                for (let i = 0; i <= MAX_LEVEL; i++) {
+                    coreOrb.classList.remove(`level-${i}`);
+                }
+                coreOrb.classList.add(`level-${level}`);
+
+                // 更新神经元 / 算力 (带格式化，数字太大用T)
+                neuronCountEl.textContent = formatNumber(neuronCounts[level]);
+                powerCountEl.textContent = formatNumber(powerCounts[level]);
+
+                // 处理按钮状态
+                if (level >= MAX_LEVEL) {
+                    evolveBtn.disabled = true;
+                    evolveBtn.textContent = '✨ 已达超级智能 ✨';
+                } else {
+                    evolveBtn.disabled = false;
+                    evolveBtn.textContent = '⚡ 进 化 ⚡';
+                }
+            }
+
+            // ---- 进化逻辑 ----
+            function evolve() {
+                if (level >= MAX_LEVEL) return;
+
+                // 升级
+                level++;
+                evolveClicks++;
+
+                // 额外视觉反馈：让核心有瞬间变大再恢复的效果
+                coreOrb.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    coreOrb.style.transform = 'scale(1)';
+                }, 150);
+
+                // 粒子环闪烁
+                const ring = document.querySelector('.particle-ring');
+                if (ring) {
+                    ring.style.borderColor = '#ffffff';
+                    ring.style.boxShadow = '0 0 30px #00ffff';
+                    setTimeout(() => {
+                        ring.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        ring.style.boxShadow = 'none';
+                    }, 300);
+                }
+
+                // 更新UI
+                updateUI();
+
+                // 如果达到最高等级，可以触发一个小彩蛋 (在控制台输出)
+                if (level === MAX_LEVEL) {
+                    console.log('%c🤖 超级人工智能觉醒！你已抵达智能的奇点。', 'font-size:16px; color: #0ff; text-shadow: 0 0 10px cyan;');
+                }
+            }
+
+            // ---- 重置游戏 ----
+            function resetGame() {
+                level = 0;
+                evolveClicks = 0;
+
+                // 重置视觉效果
+                coreOrb.style.transform = 'scale(1)';
+                updateUI();
+
+                // 重置动画类
+                const ring = document.querySelector('.particle-ring');
+                if (ring) {
+                    ring.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                    ring.style.boxShadow = 'none';
+                }
+
+                // 小反馈
+                coreOrb.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    coreOrb.style.transform = 'scale(1)';
+                }, 120);
+            }
+
+            // ---- 事件绑定 ----
+            evolveBtn.addEventListener('click', evolve);
+
+            resetBtn.addEventListener('click', resetGame);
+
+            // 键盘支持：按空格键进化 (方便操作)
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !evolveBtn.disabled) {
+                    e.preventDefault();  // 防止页面滚动
+                    evolve();
+                }
+            });
+
+            // 初始化UI
+            updateUI();
+
+            // 额外：在鼠标悬停核心时显示趣味提示（通过title属性简单实现，也可以不加）
+            coreOrb.title = '超级人工智能核心';
+        })();
+    </script>
+</body>
+</html>
