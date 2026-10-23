@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>重力迷宫 · 倾斜世界</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #0a0a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            height: 100dvh;
+            color: white;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            background: #0a0a1a;
+            touch-action: none;
+            border-radius: 12px;
+            box-shadow: 0 0 60px rgba(130, 80, 255, 0.15);
+        }
+
+        /* HUD */
+        .hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(130, 80, 255, 0.35);
+            backdrop-filter: blur(6px);
+        }
+
+        .hud-label {
+            font-size: 10px;
+            color: #aa88ff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b388ff;
+            text-shadow: 0 0 15px rgba(179, 136, 255, 0.6);
+            line-height: 1.1;
+        }
+
+        .hud-value.level {
+            color: #66ddff;
+            text-shadow: 0 0 15px rgba(100, 220, 255, 0.5);
+            font-size: 20px;
+        }
+
+        /* 重力指示器 */
+        .gravity-indicator {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(130, 80, 255, 0.3);
+            backdrop-filter: blur(6px);
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .gravity-arrow {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            transition: transform 0.1s linear;
+        }
+
+        .gravity-arrow::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 14px solid #b388ff;
+            transform: translate(-50%, -50%);
+            filter: drop-shadow(0 0 6px rgba(179, 136, 255, 0.6));
+        }
+
+        .gravity-text {
+            font-size: 11px;
+            color: #aa88ff;
+            letter-spacing: 1px;
+        }
+
+        /* 遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 5, 20, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.4s;
+            padding: 24px;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay h1 {
+            font-size: 28px;
+            color: #b388ff;
+            text-shadow: 0 0 30px rgba(179, 136, 255, 0.5);
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .overlay .subtitle {
+            font-size: 14px;
+            color: #8899bb;
+            margin-bottom: 28px;
+            text-align: center;
+            line-height: 1.8;
+            max-width: 300px;
+        }
+
+        .overlay .subtitle strong {
+            color: #b388ff;
+        }
+
+        .overlay .final-score {
+            font-size: 52px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .overlay .final-label {
+            font-size: 13px;
+            color: #8899bb;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .overlay .new-record {
+            font-size: 16px;
+            color: #ff66aa;
+            text-shadow: 0 0 20px rgba(255, 100, 170, 0.6);
+            margin-bottom: 20px;
+            animation: recordPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes recordPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #7c4dff, #b388ff);
+            color: white;
+            border: none;
+            padding: 16px 52px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 30px rgba(124, 77, 255, 0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+        }
+
+        /* 分数弹出 */
+        .score-pop {
+            position: fixed;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffcc00;
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+            animation: floatUp 0.9s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            30% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-70px) scale(1); }
+        }
+
+        /* 关卡完成提示 */
+        .level-complete {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 32px;
+            font-weight: bold;
+            color: #66ffcc;
+            text-shadow: 0 0 30px rgba(100, 255, 200, 0.8);
+            z-index: 50;
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .level-complete.show {
+            animation: levelPop 1.5s ease-out forwards;
+        }
+
+        @keyframes levelPop {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        /* 粒子特效层 */
+        .particle-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #556688;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+
+        /* 重新开始按钮（小） */
+        .restart-small {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(130, 80, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b388ff;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 20;
+            pointer-events: auto;
+            backdrop-filter: blur(6px);
+            transition: background 0.2s;
+            touch-action: manipulation;
+        }
+
+        .restart-small:active {
+            background: rgba(130, 80, 255, 0.2);
+        }
+
+        @media (max-width: 400px) {
+            .overlay h1 {
+                font-size: 24px;
+            }
+            .overlay .subtitle {
+                font-size: 13px;
+            }
+            .gravity-indicator {
+                bottom: 12px;
+                padding: 6px 12px;
+            }
+            .hint {
+                bottom: 52px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="scoreDisplay">0</div>
+        </div>
+        <div class="hud-box" style="text-align: center;">
+            <div class="hud-label">Level</div>
+            <div class="hud-value level" id="levelDisplay">1</div>
+        </div>
+        <div class="hud-box" style="text-align: right;">
+            <div class="hud-label">Best</div>
+            <div class="hud-value level" id="bestDisplay">0</div>
+        </div>
+    </div>
+
+    <!-- 重新开始小按钮 -->
+    <div class="restart-small" id="restartSmall">↺</div>
+
+    <!-- 画布 -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 重力指示器 -->
+    <div class="gravity-indicator" id="gravityIndicator">
+        <div class="gravity-arrow" id="gravityArrow"></div>
+        <div class="gravity-text" id="gravityText">倾斜手机控制重力</div>
+    </div>
+
+    <!-- 提示 -->
+    <div class="hint" id="hintEl">倾斜手机 · 小球随重力滚动</div>
+
+    <!-- 关卡完成提示 -->
+    <div class="level-complete" id="levelComplete"></div>
+
+    <!-- 粒子层 -->
+    <div class="particle-layer" id="particleLayer"></div>
+
+    <!-- 开始遮罩 -->
+    <div class="overlay" id="startOverlay">
+        <h1>重力迷宫</h1>
+        <div class="subtitle">
+            <strong>倾斜手机</strong> 控制重力方向<br>
+            让小球滚入 <strong>绿色终点</strong><br>
+            避开红色陷阱和墙壁<br>
+            收集金币获得额外分数
+        </div>
+        <button class="btn" id="startBtn">开始游戏</button>
+    </div>
+
+    <!-- 结束遮罩 -->
+    <div class="overlay hidden" id="overOverlay">
+        <h1 style="color: #ff4466;">游戏结束</h1>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-label">得分</div>
+        <div class="new-record hidden" id="newRecord">🎉 新纪录！</div>
+        <button class="btn" id="restartBtn">再来一局</button>
+    </div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ==================== 配置 ====================
+        const CONFIG = {
+            // 物理
+            gravityStrength: 0.45,      // 重力基础强度
+            friction: 0.985,            // 摩擦力
+            bounceDamping: 0.55,        // 反弹阻尼
+            maxSpeed: 8,                // 最大速度
+            ballRadius: 9,              // 小球半径
+            // 网格
+            cellSize: 40,               // 迷宫格子大小
+            cols: 11,                   // 列数
+            rows: 11,                   // 行数
+            wallThickness: 4,           // 墙壁厚度
+            // 游戏
+            coinsPerLevel: 3,           // 每关金币数
+            trapSpeed: 0.6,             // 陷阱移动速度
+            // 颜色
+            colors: {
+                ball: '#b388ff',
+                ballGlow: 'rgba(179, 136, 255, 0.6)',
+                wall: '#2a1a4a',
+                wallEdge: '#7c4dff',
+                floor: '#0d0a18',
+                goal: '#00ffaa',
+                goalGlow: 'rgba(0, 255, 170, 0.6)',
+                trap: '#ff4466',
+                trapGlow: 'rgba(255, 68, 102, 0.6)',
+                coin: '#ffcc00',
+                coinGlow: 'rgba(255, 204, 0, 0.6)',
+                grid: 'rgba(130, 80, 255, 0.06)'
+            }
+        };
+
+        // ==================== 画布 ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const startOverlay = document.getElementById('startOverlay');
+        const overOverlay = document.getElementById('overOverlay');
+        const finalScoreEl = document.getElementById('finalScore');
+        const newRecordEl = document.getElementById('newRecord');
+        const hintEl = document.getElementById('hintEl');
+        const gravityArrow = document.getElementById('gravityArrow');
+        const gravityText = document.getElementById('gravityText');
+        const levelCompleteEl = document.getElementById('levelComplete');
+        const particleLayer = document.getElementById('particleLayer');
+
+        let W, H;
+        let gridOffsetX, gridOffsetY;
+
+        // 最佳分数
+        let bestScore = parseInt(localStorage.getItem('gravity_maze_best') || '0', 10);
+        bestDisplay.textContent = bestScore;
+
+        // ==================== 游戏状态 ====================
+        const game = {
+            running: false,
+            score: 0,
+            level: 1,
+            // 小球
+            ball: {
+                x: 0, y: 0,
+                vx: 0, vy: 0,
+                radius: CONFIG.ballRadius
+            },
+            // 重力方向（单位向量）
+            gravity: { x: 0, y: 0 },
+            gravityAngle: 0,
+            // 迷宫
+            walls: [],           // [{x, y, w, h}] 碰撞矩形
+            wallCells: [],       // 二维数组：0=空，1=墙
+            goal: { x: 0, y: 0 }, // 终点格子坐标
+            coins: [],           // [{x, y, collected}] 金币（格子坐标）
+            traps: [],           // [{x, y, vx, vy, radius}] 移动陷阱
+            // 粒子
+            particles: [],
+            stars: [],
+            // 状态
+            deathFlash: 0,
+            goalPulse: 0,
+            coinPulse: 0,
+            frame: 0,
+            lastTime: 0,
+            // 设备方向
+            deviceOrientation: { beta: 0, gamma: 0 },
+            orientationAvailable: false,
+            // 关卡完成
+            levelCompleting: false,
+            levelCompleteTimer: 0
+        };
+
+        // 初始化星星
+        function initStars() {
+            game.stars = [];
+            for (let i = 0; i < 60; i++) {
+                game.stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    size: Math.random() * 1.5 + 0.5,
+                    speed: Math.random() * 0.15 + 0.05,
+                    opacity: Math.random() * 0.4 + 0.1
+                });
+            }
+        }
+
+        // ==================== 尺寸适配 ====================
+        function resize() {
+            const padding = 20;
+            const maxW = Math.min(window.innerWidth, 460);
+            const maxH = window.innerHeight;
+
+            const availableW = maxW - padding * 2;
+            const availableH = maxH - 160;
+
+            const cellFromW = Math.floor(availableW / CONFIG.cols);
+            const cellFromH = Math.floor(availableH / CONFIG.rows);
+            const cellSize = Math.max(24, Math.min(cellFromW, cellFromH, 48));
+
+            W = cellSize * CONFIG.cols + padding * 2;
+            H = cellSize * CONFIG.rows + padding * 2 + 100;
+
+            canvas.width = W;
+            canvas.height = H;
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+
+            gridOffsetX = padding;
+            gridOffsetY = padding + 60;
+
+            // 更新 cellSize（存储到 game 对象）
+            game.cellSize = cellSize;
+
+            if (game.running) {
+                // 重新计算小球和墙壁位置
+                rebuildCollisionRects();
+            }
+
+            initStars();
+        }
+        window.addEventListener('resize', resize);
+
+        // ==================== 迷宫生成 ====================
+        // 使用深度优先搜索生成完美迷宫
+        function generateMaze(cols, rows) {
+            // 初始化所有格子为墙
+            const grid = [];
+            for (let y = 0; y < rows; y++) {
+                const row = [];
+                for (let x = 0; x < cols; x++) {
+                    row.push(1); // 1 = 墙
+                }
+                grid.push(row);
+            }
+
+            // DFS 挖路
+            const stack = [];
+            // 从 (1,1) 开始（保证索引有效）
+            const startX = 1;
+            const startY = 1;
+            grid[startY][startX] = 0; // 0 = 通路
+            stack.push([startX, startY]);
+
+            const directions = [
+                [0, -2], [0, 2], [-2, 0], [2, 0]
+            ];
+
+            while (stack.length > 0) {
+                const [cx, cy] = stack[stack.length - 1];
+
+                // 收集未访问的邻居（距离2）
+                const neighbors = [];
+                for (const [dx, dy] of directions) {
+                    const nx = cx + dx;
+                    const ny = cy + dy;
+                    if (nx > 0 && nx < cols - 1 && ny > 0 && ny < rows - 1) {
+                        if (grid[ny][nx] === 1) {
+                            neighbors.push([nx, ny, cx + dx / 2, cy + dy / 2]);
+                        }
+                    }
+                }
+
+                if (neighbors.length > 0) {
+                    // 随机选择一个
+                    const [nx, ny, wx, wy] = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    // 打通墙壁
+                    grid[wy][wx] = 0;
+                    grid[ny][nx] = 0;
+                    stack.push([nx, ny]);
+                } else {
+                    stack.pop();
+                }
+            }
+
+            // 确保起点和终点是通路
+            grid[1][1] = 0;
+            grid[rows - 2][cols - 2] = 0;
+
+            // 在某些位置增加一些额外的开口，让迷宫不那么死板
+            const extraOpenings = Math.floor(cols * rows * 0.08);
+            for (let i = 0; i < extraOpenings; i++) {
+                const x = 1 + Math.floor(Math.random() * (cols - 2));
+                const y = 1 + Math.floor(Math.random() * (rows - 2));
+                // 只打通墙，不破坏边界
+                if (grid[y][x] === 1) {
+                    // 检查是否是"内部墙"（周围至少有两个通路）
+                    let openCount = 0;
+                    if (grid[y - 1] && grid[y - 1][x] === 0) openCount++;
+                    if (grid[y + 1] && grid[y + 1][x] === 0) openCount++;
+                    if (grid[y] && grid[y][x - 1] === 0) openCount++;
+                    if (grid[y] && grid[y][x + 1] === 0) openCount++;
+                    if (openCount >= 2) {
+                        grid[y][x] = 0;
+                    }
+                }
+            }
+
+            return grid;
+        }
+
+        // ==================== 构建碰撞矩形 ====================
+        function rebuildCollisionRects() {
+            const cellSize = game.cellSize;
+            const cols = CONFIG.cols;
+            const rows = CONFIG.rows;
+            const wallCells = game.wallCells;
+
+            game.walls = [];
+
+            // 遍历所有墙格子，合并相邻的墙减少碰撞检测次数
+            // 简单做法：每个墙格子单独作为一个矩形
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (wallCells[y][x] === 1) {
+                        game.walls.push({
+                            x: gridOffsetX + x * cellSize,
+                            y: gridOffsetY + y * cellSize,
+                            w: cellSize,
+                            h: cellSize
+                        });
+                    }
+                }
+            }
+
+            // 更新终点位置
+            const goalPixel = cellToPixel(game.goal.x, game.goal.y);
+            game.goalPixel = goalPixel;
+
+            // 更新金币位置
+            for (const coin of game.coins) {
+                coin.pixelX = cellToPixel(coin.x, coin.y).x;
+                coin.pixelY = cellToPixel(coin.x, coin.y).y;
+            }
+
+            // 更新小球位置（如果还没初始化）
+            if (game.ball.x === 0 && game.ball.y === 0) {
+                const startPixel = cellToPixel(1, 1);
+                game.ball.x = startPixel.x;
+                game.ball.y = startPixel.y;
+            }
+        }
+
+        // ==================== 坐标转换 ====================
+        function cellToPixel(cx, cy) {
+            const cellSize = game.cellSize;
+            return {
+                x: gridOffsetX + cx * cellSize + cellSize / 2,
+                y: gridOffsetY + cy * cellSize + cellSize / 2
+            };
+        }
+
+        // ==================== 生成关卡 ====================
+        function generateLevel(level) {
+            const cols = CONFIG.cols;
+            const rows = CONFIG.rows;
+
+            // 生成迷宫
+            game.wallCells = generateMaze(cols, rows);
+
+            // 起点 (1,1) 终点 (cols-2, rows-2)
+            game.goal = { x: cols - 2, y: rows - 2 };
+
+            // 确保终点是通路
+            game.wallCells[game.goal.y][game.goal.x] = 0;
+
+            // 生成金币（在通路格子上）
+            game.coins = [];
+            const openCells = [];
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    if (game.wallCells[y][x] === 0 && !(x === 1 && y === 1) && !(x === game.goal.x && y === game.goal.y)) {
+                        openCells.push({ x, y });
+                    }
+                }
+            }
+
+            // 随机选择金币位置
+            for (let i = 0; i < Math.min(CONFIG.coinsPerLevel, openCells.length); i++) {
+                const idx = Math.floor(Math.random() * openCells.length);
+                const cell = openCells.splice(idx, 1)[0];
+                game.coins.push({
+                    x: cell.x,
+                    y: cell.y,
+                    collected: false,
+                    pixelX: 0,
+                    pixelY: 0
+                });
+            }
+
+            // 生成移动陷阱
+            game.traps = [];
+            const trapCount = Math.min(1 + level, 5);
+            for (let i = 0; i < trapCount; i++) {
+                // 在随机通路格子上生成
+                if (openCells.length > 0) {
+                    const idx = Math.floor(Math.random() * openCells.length);
+                    const cell = openCells[idx];
+                    const pixel = cellToPixel(cell.x, cell.y);
+                    game.traps.push({
+                        x: pixel.x,
+                        y: pixel.y,
+                        baseX: pixel.x,
+                        baseY: pixel.y,
+                        vx: (Math.random() - 0.5) * CONFIG.trapSpeed * 2,
+                        vy: (Math.random() - 0.5) * CONFIG.trapSpeed * 2,
+                        radius: 7,
+                        phase: Math.random() * Math.PI * 2,
+                        phaseSpeed: 0.02 + Math.random() * 0.03,
+                        amplitude: 15 + Math.random() * 25
+                    });
+                }
+            }
+
+            // 重建碰撞矩形
+            rebuildCollisionRects();
+
+            // 重置小球位置
+            const startPixel = cellToPixel(1, 1);
+            game.ball.x = startPixel.x;
+            game.ball.y = startPixel.y;
+            game.ball.vx = 0;
+            game.ball.vy = 0;
+
+            // 更新关卡显示
+            levelDisplay.textContent = level;
+
+            // 更新金币显示
+            updateCoinDisplay();
+        }
+
+        // ==================== 金币显示 ====================
+        function updateCoinDisplay() {
+            // 可以在HUD显示，暂时不显示
+        }
+
+        // ==================== 设备方向 ====================
+        function setupOrientation() {
+            // 检测是否支持 DeviceOrientationEvent
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+                game.orientationAvailable = true;
+                gravityText.textContent = '倾斜手机控制重力';
+            } else {
+                game.orientationAvailable = false;
+                gravityText.textContent = '触摸屏幕拖动控制重力';
+                hintEl.textContent = '触摸拖动 · 移动小球';
+            }
+        }
+
+        function handleOrientation(event) {
+            if (!game.running) return;
+
+            const beta = event.beta || 0;   // -180 到 180，前后倾斜
+            const gamma = event.gamma || 0; // -90 到 90，左右倾斜
+
+            game.deviceOrientation.beta = beta;
+            game.deviceOrientation.gamma = gamma;
+
+            // 将设备倾斜映射到重力方向
+            // beta: 0 = 水平，正 = 向前倾，负 = 向后倾
+            // gamma: 0 = 水平，正 = 向右倾，负 = 向左倾
+            // 我们使用 gamma 控制 X 轴，beta 控制 Y 轴
+            const maxTilt = 30; // 最大有效倾斜角度
+
+            let gx = Math.max(-1, Math.min(1, gamma / maxTilt));
+            let gy = Math.max(-1, Math.min(1, beta / maxTilt));
+
+            // 死区（小倾斜不触发）
+            if (Math.abs(gx) < 0.1) gx = 0;
+            if (Math.abs(gy) < 0.1) gy = 0;
+
+            // 归一化
+            const len = Math.sqrt(gx * gx + gy * gy);
+            if (len > 1) {
+                gx /= len;
+                gy /= len;
+            }
+
+            game.gravity.x = gx;
+            game.gravity.y = gy;
+            game.gravityAngle = Math.atan2(gy, gx);
+
+            // 更新重力指示器
+            updateGravityIndicator();
+        }
+
+        function updateGravityIndicator() {
+            // 旋转箭头
+            if (game.gravity.x !== 0 || game.gravity.y !== 0) {
+                const angle = Math.atan2(game.gravity.y, game.gravity.x);
+                gravityArrow.style.transform = `rotate(${angle + Math.PI / 2}rad)`;
+            }
+
+            // 更新文本
+            if (game.orientationAvailable) {
+                const magnitude = Math.sqrt(game.gravity.x ** 2 + game.gravity.y ** 2);
+                if (magnitude < 0.15) {
+                    gravityText.textContent = '保持水平';
+                } else {
+                    gravityText.textContent = '重力方向';
+                }
+            }
+        }
+
+        // ==================== 触摸控制（备用） ====================
+        let touchActive = false;
+        let touchStartX = 0, touchStartY = 0;
+        let touchCurrentX = 0, touchCurrentY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchStartX = touch.clientX - rect.left;
+            touchStartY = touch.clientY - rect.top;
+            touchCurrentX = touchStartX;
+            touchCurrentY = touchStartY;
+            touchActive = true;
+
+            // 如果设备方向不可用，使用触摸控制
+            if (!game.orientationAvailable) {
+                gravityText.textContent = '拖动控制重力';
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!game.running || !touchActive) return;
+
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchCurrentX = touch.clientX - rect.left;
+            touchCurrentY = touch.clientY - rect.top;
+
+            if (!game.orientationAvailable) {
+                // 根据拖动距离计算重力
+                const dx = touchCurrentX - touchStartX;
+                const dy = touchCurrentY - touchStartY;
+                const maxDist = 80;
+
+                let gx = Math.max(-1, Math.min(1, dx / maxDist));
+                let gy = Math.max(-1, Math.min(1, dy / maxDist));
+
+                // 死区
+                if (Math.abs(gx) < 0.1) gx = 0;
+                if (Math.abs(gy) < 0.1) gy = 0;
+
+                // 归一化
+                const len = Math.sqrt(gx * gx + gy * gy);
+                if (len > 1) {
+                    gx /= len;
+                    gy /= len;
+                }
+
+                game.gravity.x = gx;
+                game.gravity.y = gy;
+                game.gravityAngle = Math.atan2(gy, gx);
+
+                // 更新指示器
+                if (gx !== 0 || gy !== 0) {
+                    gravityArrow.style.transform = `rotate(${game.gravityAngle + Math.PI / 2}rad)`;
+                }
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!game.running) return;
+            touchActive = false;
+
+            if (!game.orientationAvailable) {
+                // 松手后重力归零
+                game.gravity.x = 0;
+                game.gravity.y = 0;
+                gravityArrow.style.transform = 'rotate(0rad)';
+                gravityText.textContent = '拖动控制重力';
+            }
+        }, { passive: false });
+
+        // 鼠标支持（桌面调试）
+        let mouseActive = false;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!game.running) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            touchStartX = e.clientX - rect.left;
+            touchStartY = e.clientY - rect.top;
+            touchCurrentX = touchStartX;
+            touchCurrentY = touchStartY;
+            mouseActive = true;
+
+            if (!game.orientationAvailable) {
+                gravityText.textContent = '拖动控制重力';
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!game.running || !mouseActive) return;
+            const rect = canvas.getBoundingClientRect();
+            touchCurrentX = e.clientX - rect.left;
+            touchCurrentY = e.clientY - rect.top;
+
+            if (!game.orientationAvailable) {
+                const dx = touchCurrentX - touchStartX;
+                const dy = touchCurrentY - touchStartY;
+                const maxDist = 80;
+
+                let gx = Math.max(-1, Math.min(1, dx / maxDist));
+                let gy = Math.max(-1, Math.min(1, dy / maxDist));
+
+                if (Math.abs(gx) < 0.1) gx = 0;
+                if (Math.abs(gy) < 0.1) gy = 0;
+
+                const len = Math.sqrt(gx * gx + gy * gy);
+                if (len > 1) {
+                    gx /= len;
+                    gy /= len;
+                }
+
+                game.gravity.x = gx;
+                game.gravity.y = gy;
+                game.gravityAngle = Math.atan2(gy, gx);
+
+                if (gx !== 0 || gy !== 0) {
+                    gravityArrow.style.transform = `rotate(${game.gravityAngle + Math.PI / 2}rad)`;
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (!game.running) return;
+            mouseActive = false;
+
+            if (!game.orientationAvailable) {
+                game.gravity.x = 0;
+                game.gravity.y = 0;
+                gravityArrow.style.transform = 'rotate(0rad)';
+                gravityText.textContent = '拖动控制重力';
+            }
+        });
+
+        // 键盘支持（桌面）
+        const keys = { up: false, down: false, left: false, right: false };
+        window.addEventListener('keydown', (e) => {
+            if (!game.running) return;
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W': keys.up = true; e.preventDefault(); break;
+                case 'ArrowDown': case 's': case 'S': keys.down = true; e.preventDefault(); break;
+                case 'ArrowLeft': case 'a': case 'A': keys.left = true; e.preventDefault(); break;
+                case 'ArrowRight': case 'd': case 'D': keys.right = true; e.preventDefault(); break;
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W': keys.up = false; break;
+                case 'ArrowDown': case 's': case 'S': keys.down = false; break;
+                case 'ArrowLeft': case 'a': case 'A': keys.left = false; break;
+                case 'ArrowRight': case 'd': case 'D': keys.right = false; break;
+            }
+        });
+
+        // ==================== 物理更新 ====================
+        function updatePhysics(dt) {
+            if (!game.running || game.levelCompleting) return;
+
+            const frameFactor = dt / 16.67;
+            const ball = game.ball;
+            const cellSize = game.cellSize;
+
+            // 键盘控制重力（桌面调试）
+            if (keys.up || keys.down || keys.left || keys.right) {
+                let gx = 0, gy = 0;
+                if (keys.left) gx -= 1;
+                if (keys.right) gx += 1;
+                if (keys.up) gy -= 1;
+                if (keys.down) gy += 1;
+                const len = Math.sqrt(gx * gx + gy * gy);
+                if (len > 0) {
+                    gx /= len;
+                    gy /= len;
+                }
+                game.gravity.x = gx;
+                game.gravity.y = gy;
+                game.gravityAngle = Math.atan2(gy, gx);
+
+                if (gx !== 0 || gy !== 0) {
+                    gravityArrow.style.transform = `rotate(${game.gravityAngle + Math.PI / 2}rad)`;
+                }
+            }
+
+            // 应用重力加速度
+            const gravityStrength = CONFIG.gravityStrength;
+            ball.vx += game.gravity.x * gravityStrength * frameFactor;
+            ball.vy += game.gravity.y * gravityStrength * frameFactor;
+
+            // 摩擦力
+            ball.vx *= Math.pow(CONFIG.friction, frameFactor);
+            ball.vy *= Math.pow(CONFIG.friction, frameFactor);
+
+            // 限制最大速度
+            const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+            if (speed > CONFIG.maxSpeed) {
+                ball.vx = (ball.vx / speed) * CONFIG.maxSpeed;
+                ball.vy = (ball.vy / speed) * CONFIG.maxSpeed;
+            }
+
+            // 移动
+            ball.x += ball.vx * frameFactor;
+            ball.y += ball.vy * frameFactor;
+
+            // 碰撞检测与响应
+            resolveCollisions();
+
+            // 检查终点
+            const goalPixel = game.goalPixel;
+            const distToGoal = Math.sqrt(
+                (ball.x - goalPixel.x) ** 2 + (ball.y - goalPixel.y) ** 2
+            );
+            if (distToGoal < cellSize * 0.4 + ball.radius) {
+                levelComplete();
+                return;
+            }
+
+            // 检查金币
+            for (const coin of game.coins) {
+                if (coin.collected) continue;
+                const dist = Math.sqrt(
+                    (ball.x - coin.pixelX) ** 2 + (ball.y - coin.pixelY) ** 2
+                );
+                if (dist < cellSize * 0.35 + ball.radius) {
+                    coin.collected = true;
+                    game.score += 50;
+                    updateScoreUI();
+                    showScorePop(coin.pixelX, coin.pixelY, '+50');
+                    // 金币粒子
+                    spawnParticles(coin.pixelX, coin.pixelY, CONFIG.colors.coin, 12);
+                }
+            }
+
+            // 检查陷阱
+            for (const trap of game.traps) {
+                const dist = Math.sqrt(
+                    (ball.x - trap.x) ** 2 + (ball.y - trap.y) ** 2
+                );
+                if (dist < trap.radius + ball.radius) {
+                    // 被陷阱击中
+                    gameOver('被陷阱击中了！');
+                    return;
+                }
+            }
+
+            // 边界检查（如果小球逃出迷宫区域）
+            const gridW = CONFIG.cols * cellSize;
+            const gridH = CONFIG.rows * cellSize;
+            if (ball.x < gridOffsetX - 20 || ball.x > gridOffsetX + gridW + 20 ||
+                ball.y < gridOffsetY - 20 || ball.y > gridOffsetY + gridH + 20) {
+                // 飞出边界，重置到起点
+                const startPixel = cellToPixel(1, 1);
+                ball.x = startPixel.x;
+                ball.y = startPixel.y;
+                ball.vx = 0;
+                ball.vy = 0;
+            }
+
+            // 更新陷阱位置（浮动动画）
+            for (const trap of game.traps) {
+                trap.phase += trap.phaseSpeed * frameFactor;
+                const offsetX = Math.sin(trap.phase) * trap.amplitude;
+                const offsetY = Math.cos(trap.phase * 0.7) * trap.amplitude * 0.6;
+                trap.x = trap.baseX + offsetX;
+                trap.y = trap.baseY + offsetY;
+            }
+
+            // 更新粒子
+            updateParticles(dt);
+
+            // 更新脉冲动画
+            game.goalPulse += dt / 1000 * 3;
+            game.coinPulse += dt / 1000 * 4;
+        }
+
+        // ==================== 碰撞解析 ====================
+        function resolveCollisions() {
+            const ball = game.ball;
+            const r = ball.radius;
+
+            // 对每个墙壁矩形进行碰撞检测
+            for (const wall of game.walls) {
+                const closestX = Math.max(wall.x, Math.min(ball.x, wall.x + wall.w));
+                const closestY = Math.max(wall.y, Math.min(ball.y, wall.y + wall.h));
+
+                const dx = ball.x - closestX;
+                const dy = ball.y - closestY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < r) {
+                    // 碰撞
+                    if (dist === 0) {
+                        // 球心在矩形内部，推出去
+                        const leftDist = Math.abs(ball.x - wall.x);
+                        const rightDist = Math.abs(ball.x - (wall.x + wall.w));
+                        const topDist = Math.abs(ball.y - wall.y);
+                        const bottomDist = Math.abs(ball.y - (wall.y + wall.h));
+
+                        const minDist = Math.min(leftDist, rightDist, topDist, bottomDist);
+
+                        if (minDist === leftDist) {
+                            ball.x = wall.x - r;
+                            ball.vx = -Math.abs(ball.vx) * CONFIG.bounceDamping;
+                        } else if (minDist === rightDist) {
+                            ball.x = wall.x + wall.w + r;
+                            ball.vx = Math.abs(ball.vx) * CONFIG.bounceDamping;
+                        } else if (minDist === topDist) {
+                            ball.y = wall.y - r;
+                            ball.vy = -Math.abs(ball.vy) * CONFIG.bounceDamping;
+                        } else {
+                            ball.y = wall.y + wall.h + r;
+                            ball.vy = Math.abs(ball.vy) * CONFIG.bounceDamping;
+                        }
+                    } else {
+                        // 法线方向
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+
+                        // 推出
+                        const overlap = r - dist;
+                        ball.x += nx * overlap;
+                        ball.y += ny * overlap;
+
+                        // 速度反弹
+                        const dot = ball.vx * nx + ball.vy * ny;
+                        if (dot < 0) {
+                            ball.vx -= (1 + CONFIG.bounceDamping) * dot * nx;
+                            ball.vy -= (1 + CONFIG.bounceDamping) * dot * ny;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==================== 粒子系统 ====================
+        function spawnParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4 + 1;
+                game.particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 0.5 + Math.random() * 0.4,
+                    maxLife: 0.9,
+                    size: Math.random() * 3 + 1.5,
+                    color: color
+                });
+            }
+        }
+
+        function updateParticles(dt) {
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const p = game.particles[i];
+                p.x += p.vx * (dt / 16.67);
+                p.y += p.vy * (dt / 16.67);
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                p.life -= dt / 1000;
+                if (p.life <= 0) {
+                    game.particles.splice(i, 1);
+                }
+            }
+        }
+
+        // ==================== UI 更新 ====================
+        function updateScoreUI() {
+            scoreDisplay.textContent = game.score;
+        }
+
+        function showScorePop(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'score-pop';
+            el.textContent = text;
+            el.style.left = (x / W * 100) + '%';
+            el.style.top = (y / H * 100) + '%';
+            el.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 900);
+        }
+
+        // ==================== 关卡完成 ====================
+        function levelComplete() {
+            game.levelCompleting = true;
+            game.score += 200;
+            updateScoreUI();
+
+            // 显示完成提示
+            levelCompleteEl.textContent = '第 ' + game.level + ' 关完成！\n+200 分';
+            levelCompleteEl.classList.remove('show');
+            void levelCompleteEl.offsetWidth;
+            levelCompleteEl.classList.add('show');
+
+            // 终点粒子爆发
+            const goalPixel = game.goalPixel;
+            spawnParticles(goalPixel.x, goalPixel.y, CONFIG.colors.goal, 30);
+            spawnParticles(goalPixel.x, goalPixel.y, '#ffffff', 15);
+
+            // 延迟后进入下一关
+            setTimeout(() => {
+                if (!game.running) return;
+                game.level++;
+                game.levelCompleting = false;
+                generateLevel(game.level);
+                game.gravity.x = 0;
+                game.gravity.y = 0;
+                gravityArrow.style.transform = 'rotate(0rad)';
+            }, 1500);
+        }
+
+        // ==================== 游戏结束 ====================
+        function gameOver(reason) {
+            if (!game.running) return;
+            game.running = false;
+            game.deathFlash = 0.8;
+
+            // 死亡粒子
+            spawnParticles(game.ball.x, game.ball.y, CONFIG.colors.trap, 30);
+
+            // 更新最佳分数
+            let isNewRecord = false;
+            if (game.score > bestScore) {
+                bestScore = game.score;
+                localStorage.setItem('gravity_maze_best', bestScore);
+                bestDisplay.textContent = bestScore;
+                isNewRecord = true;
+            }
+
+            finalScoreEl.textContent = game.score;
+            if (isNewRecord) {
+                newRecordEl.classList.remove('hidden');
+            } else {
+                newRecordEl.classList.add('hidden');
+            }
+
+            // 更新结束原因
+            const subtitle = overOverlay.querySelector('.subtitle');
+            if (subtitle) {
+                subtitle.textContent = reason || '游戏结束';
+            }
+
+            setTimeout(() => {
+                overOverlay.classList.remove('hidden');
+            }, 500);
+        }
+
+        // ==================== 绘制 ====================
+        function draw() {
+            // 背景
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, W, H);
+
+            // 星星
+            game.stars.forEach(s => {
+                ctx.globalAlpha = s.opacity;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // 死亡闪红
+            if (game.deathFlash > 0) {
+                ctx.fillStyle = `rgba(255, 40, 60, ${game.deathFlash * 0.4})`;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            const cellSize = game.cellSize;
+            const cols = CONFIG.cols;
+            const rows = CONFIG.rows;
+
+            // 绘制迷宫地面
+            ctx.fillStyle = CONFIG.colors.floor;
+            ctx.fillRect(
+                gridOffsetX, gridOffsetY,
+                cols * cellSize, rows * cellSize
+            );
+
+            // 绘制网格线
+            ctx.strokeStyle = CONFIG.colors.grid;
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= cols; i++) {
+                const x = gridOffsetX + i * cellSize;
+                ctx.beginPath();
+                ctx.moveTo(x, gridOffsetY);
+                ctx.lineTo(x, gridOffsetY + rows * cellSize);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= rows; i++) {
+                const y = gridOffsetY + i * cellSize;
+                ctx.beginPath();
+                ctx.moveTo(gridOffsetX, y);
+                ctx.lineTo(gridOffsetX + cols * cellSize, y);
+                ctx.stroke();
+            }
+
+            // 绘制墙壁
+            for (const wall of game.walls) {
+                // 墙壁主体
+                ctx.fillStyle = CONFIG.colors.wall;
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+
+                // 墙壁边缘光效
+                ctx.strokeStyle = CONFIG.colors.wallEdge;
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = CONFIG.colors.wallEdge;
+                ctx.shadowBlur = 8;
+                ctx.strokeRect(wall.x + 1, wall.y + 1, wall.w - 2, wall.h - 2);
+                ctx.shadowBlur = 0;
+            }
+
+            // 绘制终点
+            drawGoal();
+
+            // 绘制金币
+            drawCoins();
+
+            // 绘制陷阱
+            drawTraps();
+
+            // 绘制小球
+            drawBall();
+
+            // 绘制粒子
+            drawParticles();
+
+            // 绘制顶部信息
+            drawTopBar();
+        }
+
+        function drawGoal() {
+            const cellSize = game.cellSize;
+            const goalPixel = game.goalPixel;
+            const pulse = 1 + Math.sin(game.goalPulse) * 0.15;
+            const radius = cellSize * 0.35 * pulse;
+
+            // 光晕
+            ctx.shadowColor = CONFIG.colors.goalGlow;
+            ctx.shadowBlur = 25 + Math.sin(game.goalPulse) * 15;
+
+            // 外圈
+            ctx.fillStyle = 'rgba(0, 255, 170, 0.15)';
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius * 1.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 主体
+            ctx.fillStyle = CONFIG.colors.goal;
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 高光
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(goalPixel.x - radius * 0.3, goalPixel.y - radius * 0.3, radius * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 旋转光环
+            ctx.strokeStyle = 'rgba(0, 255, 170, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 8]);
+            ctx.beginPath();
+            ctx.arc(goalPixel.x, goalPixel.y, radius * 2.2, game.goalPulse, game.goalPulse + Math.PI * 1.5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawCoins() {
+            const cellSize = game.cellSize;
+            for (const coin of game.coins) {
+                if (coin.collected) continue;
+
+                const pulse = 1 + Math.sin(game.coinPulse + coin.x * 2) * 0.2;
+                const radius = cellSize * 0.18 * pulse;
+
+                ctx.shadowColor = CONFIG.colors.coinGlow;
+                ctx.shadowBlur = 15;
+
+                ctx.fillStyle = CONFIG.colors.coin;
+                ctx.beginPath();
+                ctx.arc(coin.pixelX, coin.pixelY, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 高光
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.beginPath();
+                ctx.arc(coin.pixelX - radius * 0.3, coin.pixelY - radius * 0.3, radius * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawTraps() {
+            for (const trap of game.traps) {
+                ctx.shadowColor = CONFIG.colors.trapGlow;
+                ctx.shadowBlur = 18;
+
+                // 主体
+                ctx.fillStyle = CONFIG.colors.trap;
+                ctx.beginPath();
+                ctx.arc(trap.x, trap.y, trap.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 内部闪烁
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(trap.x - 2, trap.y - 2, trap.radius * 0.35, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 警告光环
+                ctx.strokeStyle = `rgba(255, 68, 102, ${0.3 + Math.sin(Date.now() * 0.005) * 0.2})`;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(trap.x, trap.y, trap.radius + 4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function drawBall() {
+            const ball = game.ball;
+
+            // 运动轨迹残影
+            const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+            if (speed > 1) {
+                for (let i = 1; i <= 3; i++) {
+                    const t = i / 4;
+                    const trailX = ball.x - ball.vx * t * 2;
+                    const trailY = ball.y - ball.vy * t * 2;
+                    ctx.globalAlpha = (1 - t) * 0.3;
+                    ctx.fillStyle = CONFIG.colors.ball;
+                    ctx.beginPath();
+                    ctx.arc(trailX, trailY, ball.radius * (1 - t * 0.5), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // 光晕
+            ctx.shadowColor = CONFIG.colors.ballGlow;
+            ctx.shadowBlur = 20;
+
+            // 主体
+            ctx.fillStyle = CONFIG.colors.ball;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 高光
+            ctx.shadowBlur = 0;
+            const gradient = ctx.createRadialGradient(
+                ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.1,
+                ball.x, ball.y, ball.radius
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawParticles() {
+            game.particles.forEach(p => {
+                const alpha = Math.max(0, p.life / p.maxLife);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        function drawTopBar() {
+            // 顶部装饰线
+            ctx.strokeStyle = 'rgba(130, 80, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, 8);
+            ctx.lineTo(W, 8);
+            ctx.stroke();
+        }
+
+        // ==================== 游戏主循环 ====================
+        function gameLoop(timestamp) {
+            if (!game.lastTime) game.lastTime = timestamp;
+            const dt = Math.min(timestamp - game.lastTime, 50);
+            game.lastTime = timestamp;
+
+            if (game.running && !game.levelCompleting) {
+                updatePhysics(dt);
+            } else if (game.levelCompleting) {
+                // 关卡完成时仍然更新粒子
+                updateParticles(dt);
+                game.goalPulse += dt / 1000 * 3;
+                game.coinPulse += dt / 1000 * 4;
+            }
+
+            // 更新星星
+            game.stars.forEach(s => {
+                s.y += s.speed * (dt / 16.67);
+                if (s.y > H) {
+                    s.y = -5;
+                    s.x = Math.random() * W;
+                }
+            });
+
+            // 死亡闪屏衰减
+            if (game.deathFlash > 0) {
+                game.deathFlash -= dt / 1000;
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== 开始游戏 ====================
+        function startGame() {
+            resize();
+            initStars();
+            game.running = true;
+            game.score = 0;
+            game.level = 1;
+            game.deathFlash = 0;
+            game.particles = [];
+            game.lastTime = 0;
+            game.levelCompleting = false;
+
+            updateScoreUI();
+            bestDisplay.textContent = bestScore;
+
+            generateLevel(1);
+
+            startOverlay.classList.add('hidden');
+            overOverlay.classList.add('hidden');
+            newRecordEl.classList.add('hidden');
+            hintEl.style.opacity = '1';
+
+            setTimeout(() => {
+                hintEl.style.opacity = '0';
+            }, 4000);
+        }
+
+        // ==================== 事件绑定 ====================
+        document.getElementById('startBtn').addEventListener('click', () => {
+            // 请求设备方向权限（iOS 13+）
+            if (typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            setupOrientation();
+                        }
+                        startGame();
+                    })
+                    .catch(() => {
+                        game.orientationAvailable = false;
+                        gravityText.textContent = '触摸拖动控制重力';
+                        hintEl.textContent = '触摸拖动 · 移动小球';
+                        startGame();
+                    });
+            } else {
+                setupOrientation();
+                startGame();
+            }
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            startGame();
+        });
+
+        document.getElementById('restartSmall').addEventListener('click', () => {
+            if (game.running) {
+                gameOver('重新开始');
+            }
+        });
+
+        // 防止页面滚动
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === canvas) e.preventDefault();
+        }, { passive: false });
+
+        // 初始化
+        resize();
+        initStars();
+        // 预生成一个迷宫用于显示背景
+        game.wallCells = generateMaze(CONFIG.cols, CONFIG.rows);
+        game.goal = { x: CONFIG.cols - 2, y: CONFIG.rows - 2 };
+        game.wallCells[game.goal.y][game.goal.x] = 0;
+        rebuildCollisionRects();
+        const startPixel = cellToPixel(1, 1);
+        game.ball.x = startPixel.x;
+        game.ball.y = startPixel.y;
+        draw();
+
+        // 启动主循环
+        requestAnimationFrame(gameLoop);
+
+        // roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (r > w / 2) r = w / 2;
+                if (r > h / 2) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    })();
+</script>
+</body>
+</html>
