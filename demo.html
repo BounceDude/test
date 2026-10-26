@@ -38,6 +38,44 @@
     max-width: 960px;
     margin: 0 auto;
     padding: 48px 24px 80px;
+    position: relative;
+  }
+
+  /* ===== 语言切换按钮 ===== */
+  .lang-switch {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    z-index: 10;
+  }
+
+  .lang-switch button {
+    padding: 4px 12px;
+    font-size: 12.5px;
+    font-family: inherit;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .lang-switch button.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .lang-switch button:hover:not(.active) {
+    background: #f3f4f6;
+    color: var(--text);
   }
 
   /* ===== 头部 ===== */
@@ -97,7 +135,6 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ===== 结果区：默认隐藏，分析后才显示 ===== */
   .results { display: none; }
   .results.show { display: block; animation: fadeIn 0.4s ease; }
 
@@ -135,7 +172,6 @@
   }
   .charge-tag .num { font-size: 11px; color: var(--muted); }
 
-  /* ===== 律师卡片 ===== */
   .lawyer-list { display: grid; gap: 14px; }
   .lawyer {
     display: flex; gap: 16px; padding: 16px;
@@ -173,7 +209,6 @@
   }
   .lawyer-link:hover { border-bottom-color: var(--primary); }
 
-  /* ===== 相似案件 ===== */
   .similar-list { display: grid; gap: 12px; }
   .similar-case {
     padding: 14px 16px; border: 1px solid var(--border);
@@ -201,7 +236,6 @@
   }
   .case-link:hover { border-bottom-color: var(--primary); }
 
-  /* ===== 详情页 ===== */
   .detail-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; gap: 16px;
@@ -261,9 +295,7 @@
   .detail-list .label { color: var(--muted); font-size: 13.5px; }
   .detail-list .value { font-weight: 600; text-align: right; }
 
-  .detail-radar {
-    width: 100%; height: 340px; margin: 0 auto;
-  }
+  .detail-radar { width: 100%; height: 340px; margin: 0 auto; }
 
   .timeline { position: relative; padding-left: 24px; }
   .timeline::before {
@@ -314,6 +346,7 @@
     .detail-profile { flex-direction: column; text-align: center; }
     .detail-header { flex-direction: column; align-items: flex-start; }
     .detail-radar { height: 260px; }
+    .lang-switch { top: 10px; right: 10px; }
   }
 </style>
 </head>
@@ -321,78 +354,83 @@
 
 <div class="page">
 
+  <!-- ==================== 语言切换 ==================== -->
+  <div class="lang-switch">
+    <button id="btn-zh" class="active" onclick="setLang('zh')">中文</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
   <!-- ==================== 视图 1：首页 / 分析结果 ==================== -->
   <div class="view active" id="view-main">
 
     <div class="header">
-      <div class="logo">LEGAL ETHICS ASSISTANT</div>
-      <h1>法律伦理助手</h1>
-      <p>输入案件事实，自动分析当事人、案由、律师推荐与判决预测</p>
+      <div class="logo" data-i18n="logo">LEGAL ETHICS ASSISTANT</div>
+      <h1 data-i18n="title">法律伦理助手</h1>
+      <p data-i18n="subtitle">输入案件事实，自动分析当事人、案由、律师推荐与判决预测</p>
     </div>
 
     <div class="input-card">
-      <label for="facts">案件事实描述</label>
-      <textarea id="facts" placeholder="例如：张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物……"></textarea>
+      <label for="facts" data-i18n="inputLabel">案件事实描述</label>
+      <textarea id="facts" data-i18n-placeholder="inputPlaceholder" placeholder="例如：张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物……"></textarea>
 
       <div class="input-actions">
-        <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">开始分析</button>
-        <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+        <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()" data-i18n="analyzeBtn">开始分析</button>
+        <button class="btn btn-secondary" onclick="clearAll()" data-i18n="clearBtn">清空</button>
       </div>
 
       <div class="examples">
-        示例：
-        <span onclick="loadExample(0)">婚外情纠纷</span>
-        <span onclick="loadExample(1)">民间借贷</span>
-        <span onclick="loadExample(2)">劳动争议</span>
+        <span data-i18n="examplesLabel">示例：</span>
+        <span onclick="loadExample(0)" data-i18n="example1">婚外情纠纷</span>
+        <span onclick="loadExample(1)" data-i18n="example2">民间借贷</span>
+        <span onclick="loadExample(2)" data-i18n="example3">劳动争议</span>
       </div>
     </div>
 
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      <div>正在分析案件事实…</div>
+      <div data-i18n="loading">正在分析案件事实…</div>
     </div>
 
-    <!-- 结果区：初始不显示任何框架 -->
     <div class="results" id="results">
 
       <div class="result-card">
-        <h2><span class="icon">📋</span>案件概览</h2>
+        <h2><span class="icon">📋</span><span data-i18n="secOverview">案件概览</span></h2>
         <div class="overview-grid">
-          <div class="stat"><div class="stat-label">原告人数</div><div class="stat-value blue" id="plaintiffCount">—</div></div>
-          <div class="stat"><div class="stat-label">被告人数</div><div class="stat-value purple" id="defendantCount">—</div></div>
-          <div class="stat"><div class="stat-label">案由数量</div><div class="stat-value green" id="chargeCount">—</div></div>
-          <div class="stat"><div class="stat-label">案件类型</div><div class="stat-value" id="caseType" style="font-size:16px;">—</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="statPlaintiff">原告人数</div><div class="stat-value blue" id="plaintiffCount">—</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="statDefendant">被告人数</div><div class="stat-value purple" id="defendantCount">—</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="statCharge">案由数量</div><div class="stat-value green" id="chargeCount">—</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="statCaseType">案件类型</div><div class="stat-value" id="caseType" style="font-size:16px;">—</div></div>
         </div>
       </div>
 
       <div class="result-card">
-        <h2><span class="icon">⚖️</span>案由</h2>
+        <h2><span class="icon">⚖️</span><span data-i18n="secCharges">案由</span></h2>
         <div class="charge-list" id="chargeList"></div>
       </div>
 
       <div class="result-card">
-        <h2><span class="icon">👨‍⚖️</span>推荐律师</h2>
+        <h2><span class="icon">👨‍⚖️</span><span data-i18n="secLawyers">推荐律师</span></h2>
         <div class="lawyer-list" id="lawyerList"></div>
       </div>
 
       <div class="result-card">
-        <h2><span class="icon">📊</span>可能判决结果</h2>
+        <h2><span class="icon">📊</span><span data-i18n="secVerdict">可能判决结果</span></h2>
         <div class="verdict" id="verdictBox"></div>
       </div>
 
       <div class="result-card">
-        <h2><span class="icon">🔍</span>相似案件</h2>
+        <h2><span class="icon">🔍</span><span data-i18n="secSimilar">相似案件</span></h2>
         <div class="similar-list" id="similarList"></div>
       </div>
 
       <div class="result-card">
-        <h2><span class="icon">📝</span>案件总结</h2>
+        <h2><span class="icon">📝</span><span data-i18n="secSummary">案件总结</span></h2>
         <div class="summary" id="summaryBox"></div>
       </div>
 
       <div class="disclaimer">
-        <strong>⚠️ 免责声明</strong>
-        本页面为前端演示原型，所有分析结果均由模拟逻辑生成，<strong>不构成任何法律意见</strong>。真实案件请咨询执业律师，并以法院判决为准。
+        <strong data-i18n="disclaimerTitle">⚠️ 免责声明</strong>
+        <span data-i18n="disclaimerText">本页面为前端演示原型，所有分析结果均由模拟逻辑生成，<strong>不构成任何法律意见</strong>。真实案件请咨询执业律师，并以法院判决为准。</span>
       </div>
 
     </div>
@@ -401,8 +439,8 @@
   <!-- ==================== 视图 2：律师详情页 ==================== -->
   <div class="view" id="view-lawyer">
     <div class="detail-header">
-      <h2>律师详情</h2>
-      <button class="btn btn-back" onclick="showView('main')">← 返回结果</button>
+      <h2 data-i18n="lawyerDetailTitle">律师详情</h2>
+      <button class="btn btn-back" onclick="showView('main')" data-i18n="backBtn">← 返回结果</button>
     </div>
     <div id="lawyerDetail"></div>
   </div>
@@ -410,8 +448,8 @@
   <!-- ==================== 视图 3：案件详情页 ==================== -->
   <div class="view" id="view-case">
     <div class="detail-header">
-      <h2>案件详情</h2>
-      <button class="btn btn-back" onclick="showView('main')">← 返回结果</button>
+      <h2 data-i18n="caseDetailTitle">案件详情</h2>
+      <button class="btn btn-back" onclick="showView('main')" data-i18n="backBtn">← 返回结果</button>
     </div>
     <div id="caseDetail"></div>
   </div>
@@ -420,277 +458,509 @@
 
 <script>
 /* ============================================================
+   国际化（i18n）字典
+   ============================================================ */
+const I18N = {
+  zh: {
+    logo: 'LEGAL ETHICS ASSISTANT',
+    title: '法律伦理助手',
+    subtitle: '输入案件事实，自动分析当事人、案由、律师推荐与判决预测',
+    inputLabel: '案件事实描述',
+    inputPlaceholder: '例如：张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物……',
+    analyzeBtn: '开始分析',
+    clearBtn: '清空',
+    examplesLabel: '示例：',
+    example1: '婚外情纠纷',
+    example2: '民间借贷',
+    example3: '劳动争议',
+    loading: '正在分析案件事实…',
+    secOverview: '案件概览',
+    secCharges: '案由',
+    secLawyers: '推荐律师',
+    secVerdict: '可能判决结果',
+    secSimilar: '相似案件',
+    secSummary: '案件总结',
+    statPlaintiff: '原告人数',
+    statDefendant: '被告人数',
+    statCharge: '案由数量',
+    statCaseType: '案件类型',
+    disclaimerTitle: '⚠️ 免责声明',
+    disclaimerText: '本页面为前端演示原型，所有分析结果均由模拟逻辑生成，<strong>不构成任何法律意见</strong>。真实案件请咨询执业律师，并以法院判决为准。',
+    lawyerDetailTitle: '律师详情',
+    caseDetailTitle: '案件详情',
+    backBtn: '← 返回结果',
+    personUnit: ' 人',
+    itemUnit: ' 项',
+    viewDetail: '查看律师详情 →',
+    viewCase: '查看案件详情 →',
+    matchScore: '匹配度',
+    similarity: '相似度',
+    radarTitle: '📊 能力雷达图',
+    radarNote: '能力值基于执业年限、案件数量、胜诉率、专业领域等综合评估，满分 1.00。',
+    basicInfo: '📇 基本信息',
+    license: '执业证号',
+    education: '学历',
+    phone: '联系电话',
+    email: '电子邮箱',
+    office: '办公地址',
+    specialties: '🎯 擅长领域',
+    cases: '📁 代表案例',
+    publications: '📚 学术成果',
+    ethics: '⚖️ 法律伦理理念',
+    years: '执业年限',
+    caseCount: '代理案件',
+    winRate: '胜诉率',
+    avgDuration: '平均周期',
+    caseBasic: '📋 案件基本信息',
+    caseNo: '案号',
+    court: '审理法院',
+    judge: '审判人员',
+    filingDate: '立案日期',
+    hearingDate: '开庭日期',
+    judgmentDate: '判决日期',
+    amount: '争议金额',
+    chargeLabel: '案由',
+    facts: '📝 案件事实',
+    claims: '⚔️ 诉讼请求',
+    reasoning: '⚖️ 裁判理由',
+    relatedLaws: '相关法条：',
+    judgment: '📌 判决结果',
+    timeline: '🕐 案件时间线',
+    lawyerDisclaimer: '本页面为演示数据，律师信息、案例、联系方式均为模拟内容，<strong>不构成任何法律意见或委托建议</strong>。',
+    caseDisclaimer: '本页面为演示数据，案件信息、案号、审判人员均为模拟内容，<strong>不构成任何法律意见</strong>。',
+    civil: '民事',
+    criminal: '刑事',
+    year: '年',
+    months: '个月',
+    radarSeries: '能力值',
+    radarTooltip: '<b>{point.y:.2f}</b> / 1.00',
+    emptyInput: '请先输入案件事实描述',
+    notFoundLawyer: '未找到该律师',
+    notFoundCase: '未找到该案件',
+  },
+  en: {
+    logo: 'LEGAL ETHICS ASSISTANT',
+    title: 'Legal Ethics Assistant',
+    subtitle: 'Enter case facts to automatically analyze parties, causes of action, lawyer recommendations, and judgment predictions',
+    inputLabel: 'Case Facts',
+    inputPlaceholder: 'e.g., Zhang San knew Li Si was married but still repeatedly sought an intimate relationship and gave valuable gifts...',
+    analyzeBtn: 'Analyze',
+    clearBtn: 'Clear',
+    examplesLabel: 'Examples: ',
+    example1: 'Extramarital Affair',
+    example2: 'Private Lending',
+    example3: 'Labor Dispute',
+    loading: 'Analyzing case facts...',
+    secOverview: 'Case Overview',
+    secCharges: 'Causes of Action',
+    secLawyers: 'Recommended Lawyers',
+    secVerdict: 'Possible Judgment',
+    secSimilar: 'Similar Cases',
+    secSummary: 'Case Summary',
+    statPlaintiff: 'Plaintiffs',
+    statDefendant: 'Defendants',
+    statCharge: 'Causes of Action',
+    statCaseType: 'Case Type',
+    disclaimerTitle: '⚠️ Disclaimer',
+    disclaimerText: 'This page is a front-end prototype demo. All analysis results are generated by simulated logic and <strong>do not constitute legal advice</strong>. For real cases, please consult a licensed lawyer and refer to court judgments.',
+    lawyerDetailTitle: 'Lawyer Detail',
+    caseDetailTitle: 'Case Detail',
+    backBtn: '← Back to Results',
+    personUnit: '',
+    itemUnit: '',
+    viewDetail: 'View lawyer detail →',
+    viewCase: 'View case detail →',
+    matchScore: 'Match',
+    similarity: 'Similarity',
+    radarTitle: '📊 Competency Radar',
+    radarNote: 'Competency scores are based on years of practice, case volume, win rate, and specialty areas, on a scale of 1.00.',
+    basicInfo: '📇 Basic Information',
+    license: 'License No.',
+    education: 'Education',
+    phone: 'Phone',
+    email: 'Email',
+    office: 'Office',
+    specialties: '🎯 Specialties',
+    cases: '📁 Representative Cases',
+    publications: '📚 Publications',
+    ethics: '⚖️ Legal Ethics Philosophy',
+    years: 'Years',
+    caseCount: 'Cases',
+    winRate: 'Win Rate',
+    avgDuration: 'Avg. Duration',
+    caseBasic: '📋 Case Information',
+    caseNo: 'Case No.',
+    court: 'Court',
+    judge: 'Judges',
+    filingDate: 'Filing Date',
+    hearingDate: 'Hearing Date',
+    judgmentDate: 'Judgment Date',
+    amount: 'Amount in Dispute',
+    chargeLabel: 'Causes of Action',
+    facts: '📝 Case Facts',
+    claims: '⚔️ Claims',
+    reasoning: '⚖️ Reasoning',
+    relatedLaws: 'Related Laws: ',
+    judgment: '📌 Judgment',
+    timeline: '🕐 Case Timeline',
+    lawyerDisclaimer: 'This page contains demo data. Lawyer information, cases, and contact details are all simulated and <strong>do not constitute legal advice or a retainer offer</strong>.',
+    caseDisclaimer: 'This page contains demo data. Case information, case numbers, and judges are all simulated and <strong>do not constitute legal advice</strong>.',
+    civil: 'Civil',
+    criminal: 'Criminal',
+    year: ' yrs',
+    months: ' months',
+    radarSeries: 'Competency',
+    radarTooltip: '<b>{point.y:.2f}</b> / 1.00',
+    emptyInput: 'Please enter case facts first',
+    notFoundLawyer: 'Lawyer not found',
+    notFoundCase: 'Case not found',
+  },
+};
+
+let currentLang = 'zh';
+
+function t(key) {
+  return I18N[currentLang][key] || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+  // 更新所有带 data-i18n 的静态文本
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[lang][key]) {
+      el.innerHTML = I18N[lang][key];
+    }
+  });
+
+  // 更新 placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (I18N[lang][key]) {
+      el.placeholder = I18N[lang][key];
+    }
+  });
+
+  // 如果当前有分析结果，重新渲染
+  if (currentResult) {
+    render(currentResult);
+    setTimeout(() => initResultRadars(currentResult.lawyers), 50);
+  }
+
+  // 如果在详情页，重新渲染
+  if (document.getElementById('view-lawyer').classList.contains('active') && currentDetailLawyer) {
+    showLawyerDetail(currentDetailLawyer.id);
+  }
+  if (document.getElementById('view-case').classList.contains('active') && currentDetailCase) {
+    showCaseDetail(currentDetailCase.id);
+  }
+}
+
+/* ============================================================
    知识库
    ============================================================ */
 
 const CHARGE_KB = [
-  { keywords: ['已婚', '婚外情', '亲密关系', '出轨', '第三者', '同居'], charge: '婚姻家庭纠纷', caseType: '民事', plaintiff: ['配偶（无过错方）'], defendant: ['过错方', '第三者'] },
-  { keywords: ['赠与', '礼物', '转账', '财物'], charge: '赠与合同纠纷', caseType: '民事', plaintiff: ['赠与人', '配偶'], defendant: ['受赠人'] },
-  { keywords: ['借款', '欠款', '借钱', '利息', '还款'], charge: '民间借贷纠纷', caseType: '民事', plaintiff: ['出借人'], defendant: ['借款人'] },
-  { keywords: ['劳动', '辞退', '加班', '工资', '社保', '工伤'], charge: '劳动争议', caseType: '民事', plaintiff: ['劳动者'], defendant: ['用人单位'] },
-  { keywords: ['诈骗', '欺骗', '虚构', '非法占有'], charge: '诈骗罪', caseType: '刑事', plaintiff: ['公诉机关'], defendant: ['被告人'] },
-  { keywords: ['重婚', '登记结婚', '以夫妻名义'], charge: '重婚罪', caseType: '刑事', plaintiff: ['自诉人', '公诉机关'], defendant: ['被告人'] },
-  { keywords: ['名誉', '诽谤', '侮辱', '造谣'], charge: '名誉权纠纷', caseType: '民事', plaintiff: ['被侵权人'], defendant: ['侵权人'] },
-  { keywords: ['合同', '违约', '协议'], charge: '合同纠纷', caseType: '民事', plaintiff: ['守约方'], defendant: ['违约方'] },
+  { keywords: ['已婚', '婚外情', '亲密关系', '出轨', '第三者', '同居'], charge: '婚姻家庭纠纷', chargeEn: 'Family Dispute', caseType: '民事', plaintiff: ['配偶（无过错方）'], defendant: ['过错方', '第三者'] },
+  { keywords: ['赠与', '礼物', '转账', '财物'], charge: '赠与合同纠纷', chargeEn: 'Gift Contract Dispute', caseType: '民事', plaintiff: ['赠与人', '配偶'], defendant: ['受赠人'] },
+  { keywords: ['借款', '欠款', '借钱', '利息', '还款'], charge: '民间借贷纠纷', chargeEn: 'Private Lending Dispute', caseType: '民事', plaintiff: ['出借人'], defendant: ['借款人'] },
+  { keywords: ['劳动', '辞退', '加班', '工资', '社保', '工伤'], charge: '劳动争议', chargeEn: 'Labor Dispute', caseType: '民事', plaintiff: ['劳动者'], defendant: ['用人单位'] },
+  { keywords: ['诈骗', '欺骗', '虚构', '非法占有'], charge: '诈骗罪', chargeEn: 'Fraud', caseType: '刑事', plaintiff: ['公诉机关'], defendant: ['被告人'] },
+  { keywords: ['重婚', '登记结婚', '以夫妻名义'], charge: '重婚罪', chargeEn: 'Bigamy', caseType: '刑事', plaintiff: ['自诉人', '公诉机关'], defendant: ['被告人'] },
+  { keywords: ['名誉', '诽谤', '侮辱', '造谣'], charge: '名誉权纠纷', chargeEn: 'Reputation Dispute', caseType: '民事', plaintiff: ['被侵权人'], defendant: ['侵权人'] },
+  { keywords: ['合同', '违约', '协议'], charge: '合同纠纷', chargeEn: 'Contract Dispute', caseType: '民事', plaintiff: ['守约方'], defendant: ['违约方'] },
 ];
 
-/* 律师库：tagScores 改为 0~1 的小数，与 tags 一一对应 */
+/* 律师库：中英双语字段 */
 const LAWYER_KB = [
   {
     id: 'L1',
-    name: '王志明',
-    firm: '北京中衡律师事务所',
+    name: '王志明', nameEn: 'Wang Zhiming',
+    firm: '北京中衡律师事务所', firmEn: 'Zhongheng Law Firm, Beijing',
     years: 15,
     tags: ['婚姻家庭', '赠与纠纷', '财产分割'],
-    tagScores: [0.96, 0.92, 0.88],   // 0~1
+    tagsEn: ['Family', 'Gift Disputes', 'Property Division'],
+    tagScores: [0.96, 0.92, 0.88],
     matchCharges: ['婚姻家庭纠纷', '赠与合同纠纷'],
     matchScore: 96,
-    title: '高级合伙人 · 婚姻家事部主任',
-    education: '中国政法大学 法学博士',
+    title: '高级合伙人 · 婚姻家事部主任', titleEn: 'Senior Partner · Head of Family Law',
+    education: '中国政法大学 法学博士', educationEn: 'J.D., China University of Political Science and Law',
     license: '11101201010234567',
     phone: '010-8888-6666',
     email: 'wangzhiming@zhongheng.com',
     office: '北京市朝阳区建国路 88 号 SOHO 现代城 A 座 2001',
+    officeEn: 'Suite 2001, Tower A, SOHO Modern City, 88 Jianguo Rd, Chaoyang, Beijing',
     bio: '执业 15 年，专注婚姻家庭、赠与合同、财产分割领域，代理案件 500+ 件，胜诉率约 85%。擅长处理涉及第三者赠与、婚内财产转移的复杂案件。',
-    stats: { cases: 520, winRate: 85, mediationRate: 42, avgDuration: '4.2 个月' },
+    bioEn: '15 years of practice focusing on family law, gift contracts, and property division. Handled 500+ cases with a win rate around 85%. Specializes in complex cases involving third-party gifts and marital asset transfers.',
+    stats: { cases: 520, winRate: 85, mediationRate: 42, avgDuration: '4.2 个月', avgDurationEn: '4.2 months' },
     specialties: ['婚内赠与无效之诉', '离婚损害赔偿', '夫妻共同财产分割', '子女抚养权'],
+    specialtiesEn: ['Void Marital Gifts', 'Divorce Damages', 'Marital Property Division', 'Child Custody'],
     cases: [
-      { title: '张某诉李某、王某赠与合同纠纷案', year: 2022, result: '胜诉，追回财产 120 万元' },
-      { title: '刘某诉陈某离婚损害赔偿案', year: 2021, result: '胜诉，获赔 15 万元' },
-      { title: '王某诉赵某夫妻财产分割案', year: 2020, result: '调解结案，分割财产 800 万元' },
+      { title: '张某诉李某、王某赠与合同纠纷案', titleEn: 'Zhang v. Li & Wang (Gift Contract Dispute)', year: 2022, result: '胜诉，追回财产 120 万元', resultEn: 'Won, recovered RMB 1.2M' },
+      { title: '刘某诉陈某离婚损害赔偿案', titleEn: 'Liu v. Chen (Divorce Damages)', year: 2021, result: '胜诉，获赔 15 万元', resultEn: 'Won, awarded RMB 150K' },
+      { title: '王某诉赵某夫妻财产分割案', titleEn: 'Wang v. Zhao (Marital Property Division)', year: 2020, result: '调解结案，分割财产 800 万元', resultEn: 'Settled, RMB 8M divided' },
     ],
     publications: [
       '《婚内赠与第三者财产的法律定性》，《中国律师》2021 年第 6 期',
       '《离婚损害赔偿实务疑难问题研究》，《家事法研究》2020 年卷',
     ],
+    publicationsEn: [
+      'On the Legal Nature of Marital Gifts to Third Parties, China Lawyer, 2021(6)',
+      'Difficult Issues in Divorce Damages Practice, Family Law Studies, 2020',
+    ],
     intro: '王志明律师长期关注婚姻家事领域的法律伦理问题，主张在维护当事人合法权益的同时，兼顾家庭关系的修复与社会公序良俗。',
+    introEn: 'Wang has long focused on legal ethics in family law, advocating for protecting clients\' rights while balancing family relationship repair and public order.',
   },
   {
     id: 'L2',
-    name: '李静怡',
-    firm: '上海弘正律师事务所',
+    name: '李静怡', nameEn: 'Li Jingyi',
+    firm: '上海弘正律师事务所', firmEn: 'Hongzheng Law Firm, Shanghai',
     years: 12,
     tags: ['婚姻家事', '妇女权益', '损害赔偿'],
+    tagsEn: ['Family', 'Women\'s Rights', 'Damages'],
     tagScores: [0.94, 0.90, 0.86],
     matchCharges: ['婚姻家庭纠纷', '名誉权纠纷'],
     matchScore: 92,
-    title: '合伙人 · 妇女权益保护中心副主任',
-    education: '华东政法大学 法学硕士',
+    title: '合伙人 · 妇女权益保护中心副主任', titleEn: 'Partner · Deputy Director, Women\'s Rights Center',
+    education: '华东政法大学 法学硕士', educationEn: 'LL.M., East China University of Political Science and Law',
     license: '13101201212345678',
     phone: '021-6666-8888',
     email: 'lijingyi@hongzheng.com',
     office: '上海市浦东新区世纪大道 100 号 环球金融中心 35 层',
+    officeEn: '35F, Shanghai World Financial Center, 100 Century Ave, Pudong, Shanghai',
     bio: '执业 12 年，专注婚姻家事、妇女权益保护、名誉权纠纷，代理案件 380+ 件，胜诉率约 82%。长期为家暴受害者、被侵权女性提供法律援助。',
-    stats: { cases: 380, winRate: 82, mediationRate: 55, avgDuration: '3.8 个月' },
+    bioEn: '12 years of practice focusing on family law, women\'s rights, and reputation disputes. Handled 380+ cases with a win rate around 82%. Provides long-term legal aid to domestic violence victims and infringed women.',
+    stats: { cases: 380, winRate: 82, mediationRate: 55, avgDuration: '3.8 个月', avgDurationEn: '3.8 months' },
     specialties: ['离婚诉讼', '家暴人身保护令', '名誉权侵权', '妇女劳动权益'],
+    specialtiesEn: ['Divorce Litigation', 'Protection Orders', 'Reputation Infringement', 'Women\'s Labor Rights'],
     cases: [
-      { title: '刘某诉陈某离婚损害赔偿案', year: 2021, result: '胜诉，获赔 15 万元' },
-      { title: '孙某诉某公司名誉权纠纷案', year: 2022, result: '胜诉，公开道歉并赔偿 5 万元' },
-      { title: '周某申请人身安全保护令案', year: 2023, result: '法院 48 小时内签发保护令' },
+      { title: '刘某诉陈某离婚损害赔偿案', titleEn: 'Liu v. Chen (Divorce Damages)', year: 2021, result: '胜诉，获赔 15 万元', resultEn: 'Won, awarded RMB 150K' },
+      { title: '孙某诉某公司名誉权纠纷案', titleEn: 'Sun v. Company (Reputation Dispute)', year: 2022, result: '胜诉，公开道歉并赔偿 5 万元', resultEn: 'Won, public apology + RMB 50K' },
+      { title: '周某申请人身安全保护令案', titleEn: 'Zhou (Protection Order Application)', year: 2023, result: '法院 48 小时内签发保护令', resultEn: 'Order issued within 48 hours' },
     ],
     publications: [
       '《家暴案件中人身保护令的适用困境与出路》，《妇女研究论丛》2022 年第 3 期',
     ],
+    publicationsEn: [
+      'Dilemmas and Solutions of Protection Orders in Domestic Violence Cases, Women\'s Studies, 2022(3)',
+    ],
     intro: '李静怡律师注重法律伦理中的"关怀伦理"，在代理案件时兼顾当事人心理状态与法律效果。',
+    introEn: 'Li emphasizes the "ethics of care" in legal ethics, balancing clients\' psychological state with legal outcomes.',
   },
   {
     id: 'L3',
-    name: '陈国栋',
-    firm: '广州明理律师事务所',
+    name: '陈国栋', nameEn: 'Chen Guodong',
+    firm: '广州明理律师事务所', firmEn: 'Mingli Law Firm, Guangzhou',
     years: 18,
     tags: ['刑事辩护', '重婚罪', '诈骗罪'],
+    tagsEn: ['Criminal Defense', 'Bigamy', 'Fraud'],
     tagScores: [0.95, 0.82, 0.88],
     matchCharges: ['重婚罪', '诈骗罪'],
     matchScore: 88,
-    title: '主任 · 刑事辩护团队负责人',
-    education: '武汉大学 刑法学博士',
+    title: '主任 · 刑事辩护团队负责人', titleEn: 'Director · Head of Criminal Defense',
+    education: '武汉大学 刑法学博士', educationEn: 'Ph.D. in Criminal Law, Wuhan University',
     license: '14401200810123456',
     phone: '020-8888-9999',
     email: 'chenguodong@mingli.com',
     office: '广州市天河区珠江新城华夏路 8 号 合景国际金融广场 28 层',
+    officeEn: '28F, KWG International Finance Place, 8 Huaxia Rd, Zhujiang New Town, Tianhe, Guangzhou',
     bio: '执业 18 年，专注刑事辩护，尤其擅长重婚罪、诈骗罪、职务犯罪辩护，代理案件 600+ 件，无罪或缓刑率约 35%。',
-    stats: { cases: 620, winRate: 78, mediationRate: 18, avgDuration: '6.5 个月' },
+    bioEn: '18 years of practice focusing on criminal defense, especially bigamy, fraud, and duty-related crimes. Handled 600+ cases with a 35% acquittal or probation rate.',
+    stats: { cases: 620, winRate: 78, mediationRate: 18, avgDuration: '6.5 个月', avgDurationEn: '6.5 months' },
     specialties: ['重婚罪辩护', '诈骗罪辩护', '职务犯罪', '刑事合规'],
+    specialtiesEn: ['Bigamy Defense', 'Fraud Defense', 'Duty-related Crimes', 'Criminal Compliance'],
     cases: [
-      { title: '王某重婚罪自诉案', year: 2020, result: '辩护成功，判处缓刑' },
-      { title: '李某诈骗罪案', year: 2021, result: '部分无罪，量刑减轻' },
-      { title: '张某职务侵占案', year: 2022, result: '不起诉' },
+      { title: '王某重婚罪自诉案', titleEn: 'Wang (Bigamy Self-prosecution)', year: 2020, result: '辩护成功，判处缓刑', resultEn: 'Defense succeeded, probation' },
+      { title: '李某诈骗罪案', titleEn: 'Li (Fraud)', year: 2021, result: '部分无罪，量刑减轻', resultEn: 'Partial acquittal, reduced sentence' },
+      { title: '张某职务侵占案', titleEn: 'Zhang (Embezzlement)', year: 2022, result: '不起诉', resultEn: 'Non-prosecution' },
     ],
     publications: [
       '《重婚罪认定的疑难问题》，《刑事法评论》2019 年卷',
       '《诈骗罪中"非法占有目的"的证明》，《中国刑事法杂志》2021 年第 4 期',
     ],
+    publicationsEn: [
+      'Difficult Issues in Bigamy Determination, Criminal Law Review, 2019',
+      'Proving "Intent to Illegally Possess" in Fraud, China Criminal Law Journal, 2021(4)',
+    ],
     intro: '陈国栋律师强调刑事辩护中的"忠诚义务"与"保密义务"，认为辩护律师应在法律框架内最大化当事人利益。',
+    introEn: 'Chen emphasizes the "duty of loyalty" and "duty of confidentiality" in criminal defense, believing defense lawyers should maximize clients\' interests within the legal framework.',
   },
   {
     id: 'L4',
-    name: '赵慧敏',
-    firm: '深圳恒信律师事务所',
+    name: '赵慧敏', nameEn: 'Zhao Huimin',
+    firm: '深圳恒信律师事务所', firmEn: 'Hengxin Law Firm, Shenzhen',
     years: 10,
     tags: ['劳动争议', '合同纠纷'],
+    tagsEn: ['Labor Disputes', 'Contract Disputes'],
     tagScores: [0.90, 0.84],
     matchCharges: ['劳动争议', '合同纠纷'],
     matchScore: 85,
-    title: '合伙人 · 劳动法团队负责人',
-    education: '中山大学 法学硕士',
+    title: '合伙人 · 劳动法团队负责人', titleEn: 'Partner · Head of Labor Law',
+    education: '中山大学 法学硕士', educationEn: 'LL.M., Sun Yat-sen University',
     license: '14403201512345678',
     phone: '0755-8888-7777',
     email: 'zhaohuimin@hengxin.com',
     office: '深圳市南山区科技园南区 深南大道 9988 号 恒信大厦 18 层',
+    officeEn: '18F, Hengxin Building, 9988 Shennan Blvd, Nanshan Science Park, Shenzhen',
     bio: '执业 10 年，专注劳动争议、合同纠纷，代理案件 300+ 件，胜诉率约 80%。擅长处理违法解除、加班费、竞业限制等争议。',
-    stats: { cases: 310, winRate: 80, mediationRate: 60, avgDuration: '3.2 个月' },
+    bioEn: '10 years of practice focusing on labor disputes and contract disputes. Handled 300+ cases with a win rate around 80%. Specializes in wrongful termination, overtime pay, and non-compete disputes.',
+    stats: { cases: 310, winRate: 80, mediationRate: 60, avgDuration: '3.2 个月', avgDurationEn: '3.2 months' },
     specialties: ['违法解除赔偿', '加班费争议', '竞业限制', '合同违约'],
+    specialtiesEn: ['Wrongful Termination', 'Overtime Pay', 'Non-compete', 'Contract Breach'],
     cases: [
-      { title: '张某诉某公司违法解除劳动合同案', year: 2023, result: '胜诉，获赔 2N' },
-      { title: '李某诉某公司加班费案', year: 2022, result: '胜诉，追回加班费 8 万元' },
-      { title: '王某诉某公司竞业限制案', year: 2021, result: '调解结案' },
+      { title: '张某诉某公司违法解除劳动合同案', titleEn: 'Zhang v. Company (Wrongful Termination)', year: 2023, result: '胜诉，获赔 2N', resultEn: 'Won, awarded 2N compensation' },
+      { title: '李某诉某公司加班费案', titleEn: 'Li v. Company (Overtime Pay)', year: 2022, result: '胜诉，追回加班费 8 万元', resultEn: 'Won, recovered RMB 80K' },
+      { title: '王某诉某公司竞业限制案', titleEn: 'Wang v. Company (Non-compete)', year: 2021, result: '调解结案', resultEn: 'Settled' },
     ],
     publications: [
       '《竞业限制条款的效力边界》，《中国劳动》2022 年第 5 期',
     ],
+    publicationsEn: [
+      'Boundaries of Non-compete Clauses, China Labor, 2022(5)',
+    ],
     intro: '赵慧敏律师注重劳动争议中的"平衡伦理"，在维护劳动者权益的同时，也关注企业合规的合理性。',
+    introEn: 'Zhao emphasizes the "ethics of balance" in labor disputes, protecting workers\' rights while considering the reasonableness of corporate compliance.',
   },
 ];
 
-/* 相似案件库 */
+/* 相似案件库（中英双语） */
 const SIMILAR_CASE_KB = [
   {
     id: 'C1',
     title: '张某诉李某、王某赠与合同纠纷案',
+    titleEn: 'Zhang v. Li & Wang (Gift Contract Dispute)',
     desc: '丈夫婚内与第三者保持关系，并多次赠与财物。妻子起诉要求确认赠与无效并返还财产。',
-    court: '北京市朝阳区人民法院',
+    descEn: 'Husband kept a relationship with a third party during marriage and made multiple gifts. Wife sued to confirm the gifts void and recover property.',
+    court: '北京市朝阳区人民法院', courtEn: 'Chaoyang District People\'s Court, Beijing',
     year: 2022,
-    result: '判决赠与行为无效，第三者返还财产',
+    result: '判决赠与行为无效，第三者返还财产', resultEn: 'Gifts voided; third party ordered to return property',
     charges: ['婚姻家庭纠纷', '赠与合同纠纷'],
     similarity: 94,
     caseNo: '（2022）京 0105 民初 12345 号',
-    judge: '审判长 王某某，审判员 李某某、张某某',
-    filingDate: '2022-03-15',
-    hearingDate: '2022-06-20',
-    judgmentDate: '2022-09-10',
-    amount: '争议金额 120 万元',
+    judge: '审判长 王某某，审判员 李某某、张某某', judgeEn: 'Presiding Judge Wang, Judges Li and Zhang',
+    filingDate: '2022-03-15', hearingDate: '2022-06-20', judgmentDate: '2022-09-10',
+    amount: '争议金额 120 万元', amountEn: 'RMB 1.2 million in dispute',
     facts: '原告张某与被告李某系夫妻关系。婚姻存续期间，李某与被告王某保持不正当关系，并多次向王某转账、赠与财物，累计金额约 120 万元。张某发现后，起诉要求确认赠与行为无效，并要求王某返还全部财产。',
-    claims: [
-      '确认李某对王某的赠与行为无效；',
-      '判令王某返还赠与财产 120 万元；',
-      '诉讼费由被告承担。',
-    ],
+    factsEn: 'Plaintiff Zhang and defendant Li are married. During the marriage, Li kept an improper relationship with defendant Wang and transferred/gifted assets totaling about RMB 1.2 million. Upon discovery, Zhang sued to confirm the gifts void and demanded full return.',
+    claims: ['确认李某对王某的赠与行为无效；', '判令王某返还赠与财产 120 万元；', '诉讼费由被告承担。'],
+    claimsEn: ['Confirm Li\'s gifts to Wang are void;', 'Order Wang to return RMB 1.2 million;', 'Defendants bear litigation costs.'],
     reasoning: '法院认为，夫妻一方在婚姻存续期间，未经配偶同意，将夫妻共同财产赠与第三者，属于无权处分，且违背公序良俗，赠与行为无效。第三者应返还全部财产。',
-    judgment: [
-      '确认被告李某对被告王某的赠与行为无效；',
-      '被告王某于本判决生效之日起十日内返还原告张某 120 万元；',
-      '案件受理费由被告承担。',
-    ],
+    reasoningEn: 'The court held that one spouse gifting marital property to a third party without consent constitutes unauthorized disposal and violates public order; the gifts are void, and the third party must return all property.',
+    judgment: ['确认被告李某对被告王某的赠与行为无效；', '被告王某于本判决生效之日起十日内返还原告张某 120 万元；', '案件受理费由被告承担。'],
+    judgmentEn: ['Confirm Li\'s gifts to Wang are void;', 'Wang shall return RMB 1.2 million to Zhang within 10 days;', 'Defendants bear case acceptance fees.'],
     timeline: [
-      { date: '2022-03-15', content: '原告张某向北京市朝阳区人民法院提起诉讼。' },
-      { date: '2022-06-20', content: '法院公开开庭审理，双方围绕赠与效力展开辩论。' },
-      { date: '2022-09-10', content: '法院作出判决，支持原告全部诉讼请求。' },
-      { date: '2022-10-08', content: '判决生效，被告王某主动履行返还义务。' },
+      { date: '2022-03-15', content: '原告张某向北京市朝阳区人民法院提起诉讼。', contentEn: 'Zhang filed suit with Chaoyang District Court, Beijing.' },
+      { date: '2022-06-20', content: '法院公开开庭审理，双方围绕赠与效力展开辩论。', contentEn: 'Public hearing held; both sides debated the validity of gifts.' },
+      { date: '2022-09-10', content: '法院作出判决，支持原告全部诉讼请求。', contentEn: 'Court ruled in favor of all plaintiff\'s claims.' },
+      { date: '2022-10-08', content: '判决生效，被告王某主动履行返还义务。', contentEn: 'Judgment effective; Wang voluntarily performed return obligation.' },
     ],
     relatedLaws: ['《民法典》第 153 条', '《民法典》第 157 条', '《民法典》第 1062 条'],
+    relatedLawsEn: ['Civil Code Art. 153', 'Civil Code Art. 157', 'Civil Code Art. 1062'],
     tags: ['婚内赠与', '第三者', '公序良俗'],
+    tagsEn: ['Marital Gifts', 'Third Party', 'Public Order'],
   },
   {
     id: 'C2',
     title: '刘某诉陈某离婚损害赔偿案',
+    titleEn: 'Liu v. Chen (Divorce Damages)',
     desc: '配偶一方婚内与他人同居，无过错方起诉离婚并主张损害赔偿。',
-    court: '上海市浦东新区人民法院',
+    descEn: 'One spouse cohabited with another during marriage; the no-fault party sued for divorce and damages.',
+    court: '上海市浦东新区人民法院', courtEn: 'Pudong New Area People\'s Court, Shanghai',
     year: 2021,
-    result: '准予离婚，过错方支付损害赔偿金',
+    result: '准予离婚，过错方支付损害赔偿金', resultEn: 'Divorce granted; fault party ordered to pay damages',
     charges: ['婚姻家庭纠纷'],
     similarity: 89,
     caseNo: '（2021）沪 0115 民初 67890 号',
-    judge: '审判长 陈某某，审判员 刘某某',
-    filingDate: '2021-05-10',
-    hearingDate: '2021-08-12',
-    judgmentDate: '2021-10-28',
-    amount: '损害赔偿 15 万元',
+    judge: '审判长 陈某某，审判员 刘某某', judgeEn: 'Presiding Judge Chen, Judge Liu',
+    filingDate: '2021-05-10', hearingDate: '2021-08-12', judgmentDate: '2021-10-28',
+    amount: '损害赔偿 15 万元', amountEn: 'RMB 150,000 in damages',
     facts: '原告刘某与被告陈某系夫妻关系。婚姻存续期间，陈某与他人长期同居，导致夫妻感情破裂。刘某起诉离婚，并主张精神损害赔偿。',
-    claims: [
-      '判令原告与被告离婚；',
-      '判令被告支付精神损害赔偿 20 万元；',
-      '依法分割夫妻共同财产。',
-    ],
+    factsEn: 'Plaintiff Liu and defendant Chen are married. During the marriage, Chen cohabited long-term with another person, breaking the marital bond. Liu sued for divorce and emotional damages.',
+    claims: ['判令原告与被告离婚；', '判令被告支付精神损害赔偿 20 万元；', '依法分割夫妻共同财产。'],
+    claimsEn: ['Grant divorce between plaintiff and defendant;', 'Order defendant to pay RMB 200,000 in emotional damages;', 'Divide marital property according to law.'],
     reasoning: '法院认为，被告婚内与他人同居，属于《民法典》第 1091 条规定的过错情形，无过错方有权请求损害赔偿。结合过错程度、当地生活水平，酌定赔偿 15 万元。',
-    judgment: [
-      '准予原告刘某与被告陈某离婚；',
-      '被告陈某于本判决生效之日起十日内支付原告精神损害赔偿 15 万元；',
-      '夫妻共同财产依法分割。',
-    ],
+    reasoningEn: 'The court held that cohabitation with another during marriage falls under Article 1091 of the Civil Code; the no-fault party is entitled to damages. Considering fault and local living standards, RMB 150,000 was awarded.',
+    judgment: ['准予原告刘某与被告陈某离婚；', '被告陈某于本判决生效之日起十日内支付原告精神损害赔偿 15 万元；', '夫妻共同财产依法分割。'],
+    judgmentEn: ['Divorce granted between Liu and Chen;', 'Chen shall pay RMB 150,000 in emotional damages within 10 days;', 'Marital property divided according to law.'],
     timeline: [
-      { date: '2021-05-10', content: '原告刘某向上海市浦东新区人民法院提起诉讼。' },
-      { date: '2021-08-12', content: '法院开庭审理，双方围绕过错认定展开辩论。' },
-      { date: '2021-10-28', content: '法院作出判决，准予离婚并支持损害赔偿。' },
+      { date: '2021-05-10', content: '原告刘某向上海市浦东新区人民法院提起诉讼。', contentEn: 'Liu filed suit with Pudong New Area Court, Shanghai.' },
+      { date: '2021-08-12', content: '法院开庭审理，双方围绕过错认定展开辩论。', contentEn: 'Hearing held; both sides debated fault determination.' },
+      { date: '2021-10-28', content: '法院作出判决，准予离婚并支持损害赔偿。', contentEn: 'Court granted divorce and supported damages.' },
     ],
     relatedLaws: ['《民法典》第 1079 条', '《民法典》第 1091 条'],
+    relatedLawsEn: ['Civil Code Art. 1079', 'Civil Code Art. 1091'],
     tags: ['离婚', '损害赔偿', '同居'],
+    tagsEn: ['Divorce', 'Damages', 'Cohabitation'],
   },
   {
     id: 'C3',
     title: '王某重婚罪自诉案',
+    titleEn: 'Wang (Bigamy Self-prosecution)',
     desc: '被告人在已婚情况下与他人以夫妻名义共同生活，被自诉人起诉重婚罪。',
-    court: '广东省深圳市南山区人民法院',
+    descEn: 'Defendant, while married, lived with another as husband and wife and was prosecuted for bigamy.',
+    court: '广东省深圳市南山区人民法院', courtEn: 'Nanshan District People\'s Court, Shenzhen, Guangdong',
     year: 2020,
-    result: '判处有期徒刑一年，缓刑一年',
+    result: '判处有期徒刑一年，缓刑一年', resultEn: 'One-year imprisonment, suspended for one year',
     charges: ['重婚罪'],
     similarity: 82,
     caseNo: '（2020）粤 0305 刑初 456 号',
-    judge: '审判长 张某某，人民陪审员 李某某、王某某',
-    filingDate: '2020-02-18',
-    hearingDate: '2020-05-20',
-    judgmentDate: '2020-07-15',
-    amount: '刑事案件，无争议金额',
+    judge: '审判长 张某某，人民陪审员 李某某、王某某', judgeEn: 'Presiding Judge Zhang, Lay Judges Li and Wang',
+    filingDate: '2020-02-18', hearingDate: '2020-05-20', judgmentDate: '2020-07-15',
+    amount: '刑事案件，无争议金额', amountEn: 'Criminal case, no disputed amount',
     facts: '被告人王某在已婚情况下，与李某以夫妻名义共同生活，并举办婚礼，周围群众均认为二人系夫妻。自诉人（王某原配偶）向法院提起重婚罪自诉。',
-    claims: [
-      '依法追究被告人王某重婚罪的刑事责任。',
-    ],
+    factsEn: 'Defendant Wang, while married, lived with Li as husband and wife and held a wedding; neighbors believed they were married. The self-prosecutor (Wang\'s original spouse) filed a bigamy self-prosecution.',
+    claims: ['依法追究被告人王某重婚罪的刑事责任。'],
+    claimsEn: ['Hold defendant Wang criminally liable for bigamy according to law.'],
     reasoning: '法院认为，被告人王某有配偶而与他人以夫妻名义共同生活，其行为已构成重婚罪。鉴于被告人认罪认罚，且取得自诉人谅解，依法从轻处罚并适用缓刑。',
-    judgment: [
-      '被告人王某犯重婚罪，判处有期徒刑一年，缓刑一年；',
-      '缓刑考验期内依法实行社区矫正。',
-    ],
+    reasoningEn: 'The court held that Wang, having a spouse, lived with another as husband and wife, constituting bigamy. Given guilty plea and the self-prosecutor\'s forgiveness, a lighter sentence with probation was applied.',
+    judgment: ['被告人王某犯重婚罪，判处有期徒刑一年，缓刑一年；', '缓刑考验期内依法实行社区矫正。'],
+    judgmentEn: ['Wang guilty of bigamy; one-year imprisonment, suspended for one year;', 'Community correction during probation.'],
     timeline: [
-      { date: '2020-02-18', content: '自诉人向深圳市南山区人民法院提起重婚罪自诉。' },
-      { date: '2020-05-20', content: '法院开庭审理，被告人当庭认罪。' },
-      { date: '2020-07-15', content: '法院作出判决，判处有期徒刑一年，缓刑一年。' },
+      { date: '2020-02-18', content: '自诉人向深圳市南山区人民法院提起重婚罪自诉。', contentEn: 'Self-prosecutor filed bigamy self-prosecution with Nanshan District Court, Shenzhen.' },
+      { date: '2020-05-20', content: '法院开庭审理，被告人当庭认罪。', contentEn: 'Hearing held; defendant pleaded guilty in court.' },
+      { date: '2020-07-15', content: '法院作出判决，判处有期徒刑一年，缓刑一年。', contentEn: 'Court sentenced one-year imprisonment, suspended for one year.' },
     ],
     relatedLaws: ['《刑法》第 258 条', '《刑事诉讼法》第 210 条'],
+    relatedLawsEn: ['Criminal Law Art. 258', 'Criminal Procedure Law Art. 210'],
     tags: ['重婚罪', '刑事自诉', '缓刑'],
+    tagsEn: ['Bigamy', 'Self-prosecution', 'Probation'],
   },
   {
     id: 'C4',
     title: '李某诉张某民间借贷纠纷案',
+    titleEn: 'Li v. Zhang (Private Lending Dispute)',
     desc: '出借人向借款人出借款项，到期后借款人拒不归还。',
-    court: '浙江省杭州市西湖区人民法院',
+    descEn: 'Lender lent money to borrower, who refused to repay upon maturity.',
+    court: '浙江省杭州市西湖区人民法院', courtEn: 'Xihu District People\'s Court, Hangzhou, Zhejiang',
     year: 2023,
-    result: '判决借款人偿还本金及利息',
+    result: '判决借款人偿还本金及利息', resultEn: 'Borrower ordered to repay principal and interest',
     charges: ['民间借贷纠纷'],
     similarity: 45,
     caseNo: '（2023）浙 0106 民初 789 号',
-    judge: '审判员 赵某某',
-    filingDate: '2023-01-10',
-    hearingDate: '2023-03-15',
-    judgmentDate: '2023-04-20',
-    amount: '借款本金 50 万元及利息',
+    judge: '审判员 赵某某', judgeEn: 'Judge Zhao',
+    filingDate: '2023-01-10', hearingDate: '2023-03-15', judgmentDate: '2023-04-20',
+    amount: '借款本金 50 万元及利息', amountEn: 'RMB 500,000 principal plus interest',
     facts: '原告李某与被告张某签订借款合同，约定借款 50 万元，期限一年，月息 1%。到期后张某拒不归还，仅支付部分利息。',
-    claims: [
-      '判令被告偿还借款本金 50 万元；',
-      '判令被告支付利息及逾期利息；',
-      '诉讼费由被告承担。',
-    ],
+    factsEn: 'Plaintiff Li and defendant Zhang signed a loan contract for RMB 500,000, one-year term, 1% monthly interest. Upon maturity, Zhang refused to repay and only paid partial interest.',
+    claims: ['判令被告偿还借款本金 50 万元；', '判令被告支付利息及逾期利息；', '诉讼费由被告承担。'],
+    claimsEn: ['Order defendant to repay RMB 500,000 principal;', 'Order defendant to pay interest and overdue interest;', 'Defendant bears litigation costs.'],
     reasoning: '法院认为，双方借贷关系合法有效，被告应按约定偿还本金及利息。逾期利息按合同约定或法定标准计算。',
-    judgment: [
-      '被告张某于本判决生效之日起十日内偿还原告李某借款本金 50 万元；',
-      '被告张某支付利息及逾期利息；',
-      '案件受理费由被告承担。',
-    ],
+    reasoningEn: 'The court held that the lending relationship is legal and valid; defendant should repay principal and interest as agreed. Overdue interest is calculated per contract or statutory standards.',
+    judgment: ['被告张某于本判决生效之日起十日内偿还原告李某借款本金 50 万元；', '被告张某支付利息及逾期利息；', '案件受理费由被告承担。'],
+    judgmentEn: ['Zhang shall repay Li RMB 500,000 within 10 days;', 'Zhang shall pay interest and overdue interest;', 'Defendant bears case acceptance fees.'],
     timeline: [
-      { date: '2023-01-10', content: '原告李某向杭州市西湖区人民法院提起诉讼。' },
-      { date: '2023-03-15', content: '法院开庭审理。' },
-      { date: '2023-04-20', content: '法院作出判决，支持原告诉讼请求。' },
+      { date: '2023-01-10', content: '原告李某向杭州市西湖区人民法院提起诉讼。', contentEn: 'Li filed suit with Xihu District Court, Hangzhou.' },
+      { date: '2023-03-15', content: '法院开庭审理。', contentEn: 'Court hearing held.' },
+      { date: '2023-04-20', content: '法院作出判决，支持原告诉讼请求。', contentEn: 'Court ruled in favor of plaintiff.' },
     ],
     relatedLaws: ['《民法典》第 667 条', '《民法典》第 676 条'],
+    relatedLawsEn: ['Civil Code Art. 667', 'Civil Code Art. 676'],
     tags: ['民间借贷', '利息', '逾期'],
+    tagsEn: ['Private Lending', 'Interest', 'Overdue'],
   },
 ];
 
@@ -698,6 +968,16 @@ const SIMILAR_CASE_KB = [
    全局状态
    ============================================================ */
 let currentResult = null;
+let currentDetailLawyer = null;
+let currentDetailCase = null;
+
+/* 根据语言取字段 */
+function L(obj, key) {
+  if (currentLang === 'en' && obj[key + 'En'] !== undefined) {
+    return obj[key + 'En'];
+  }
+  return obj[key];
+}
 
 /* ============================================================
    视图切换
@@ -715,7 +995,7 @@ function showView(name) {
    ============================================================ */
 function analyze() {
   const text = document.getElementById('facts').value.trim();
-  if (!text) { alert('请先输入案件事实描述'); return; }
+  if (!text) { alert(t('emptyInput')); return; }
 
   document.getElementById('results').classList.remove('show');
   document.getElementById('loading').classList.add('show');
@@ -748,7 +1028,7 @@ function infer(text) {
   CHARGE_KB.forEach(item => {
     const hit = item.keywords.some(kw => text.includes(kw));
     if (hit) {
-      matchedCharges.push(item.charge);
+      matchedCharges.push(item);
       item.plaintiff.forEach(p => plaintiffSet.add(p));
       item.defendant.forEach(d => defendantSet.add(d));
       if (item.caseType === '刑事') caseType = '刑事';
@@ -756,14 +1036,15 @@ function infer(text) {
   });
 
   if (matchedCharges.length === 0) {
-    matchedCharges.push('其他民事纠纷');
+    matchedCharges.push({ charge: '其他民事纠纷', chargeEn: 'Other Civil Dispute', plaintiff: ['原告'], defendant: ['被告'] });
     plaintiffSet.add('原告');
     defendantSet.add('被告');
   }
 
+  const chargeNames = matchedCharges.map(c => c.charge);
   const lawyers = LAWYER_KB
     .map(l => {
-      const overlap = l.matchCharges.filter(c => matchedCharges.includes(c)).length;
+      const overlap = l.matchCharges.filter(c => chargeNames.includes(c)).length;
       return { ...l, score: overlap > 0 ? l.matchScore : Math.max(40, l.matchScore - 40) };
     })
     .sort((a, b) => b.score - a.score)
@@ -771,13 +1052,13 @@ function infer(text) {
 
   const similarCases = SIMILAR_CASE_KB
     .map(c => {
-      const overlap = c.charges.filter(ch => matchedCharges.includes(ch)).length;
+      const overlap = c.charges.filter(ch => chargeNames.includes(ch)).length;
       return { ...c, sim: overlap > 0 ? c.similarity : Math.max(20, c.similarity - 50) };
     })
     .sort((a, b) => b.sim - a.sim)
     .slice(0, 3);
 
-  const verdict = predictVerdict(matchedCharges, caseType);
+  const verdict = predictVerdict(chargeNames, caseType);
 
   const summary = generateSummary({
     matchedCharges, caseType,
@@ -805,6 +1086,15 @@ function predictVerdict(charges, caseType) {
   const hasFraud = charges.includes('诈骗罪');
   const hasLabor = charges.includes('劳动争议');
 
+  if (currentLang === 'en') {
+    if (hasBigamy) return { text: '<strong>Bigamy may be established.</strong> If the defendant, while married, lived with another as husband and wife, they may face up to two years of imprisonment or criminal detention. Probation may apply if the victim forgives and the defendant pleads guilty.', prob: 'Sentence: detention ~ 2 years' };
+    if (hasFraud) return { text: '<strong>Fraud may be established.</strong> Sentencing depends on the amount involved. For large amounts, up to three years; for huge amounts, three to ten years.', prob: 'Sentence: depends on amount' };
+    if (hasMarriage && hasGift) return { text: '<strong>Gifts may be deemed void.</strong> One spouse gifting marital property to a third party without consent may be challenged; the spouse may request confirmation of invalidity and return of property, and the no-fault party may claim divorce damages.', prob: 'Return supported: likely' };
+    if (hasMarriage) return { text: '<strong>Divorce and damages may be supported.</strong> If one spouse cohabits with another during marriage, the no-fault party may obtain divorce and emotional damages.', prob: 'Divorce supported: likely' };
+    if (hasLabor) return { text: '<strong>Labor disputes require prior arbitration.</strong> If the employer unlawfully terminates the contract, the worker may claim continued performance or 2N compensation.', prob: 'Compensation supported: moderate' };
+    return { text: '<strong>Outcome depends on evidence.</strong> Supplement contracts, transfer records, and chat logs; consult a lawyer to assess litigation risk.', prob: 'Further assessment needed' };
+  }
+
   if (hasBigamy) return { text: '<strong>可能构成重婚罪。</strong>若被告人在已婚情况下与他人以夫妻名义共同生活，可能被判处二年以下有期徒刑或拘役。实践中，若取得自诉人谅解、认罪认罚，可能适用缓刑。', prob: '刑期预测：拘役 ~ 2 年' };
   if (hasFraud) return { text: '<strong>可能构成诈骗罪。</strong>需结合涉案金额判断量刑档次。数额较大的，处三年以下有期徒刑；数额巨大的，处三年以上十年以下有期徒刑。', prob: '刑期预测：视金额而定' };
   if (hasMarriage && hasGift) return { text: '<strong>赠与行为可能被认定无效。</strong>夫妻一方在婚姻存续期间，未经配偶同意，将共同财产赠与第三者，配偶有权请求确认赠与无效并返还财产。同时，无过错方可主张离婚损害赔偿。', prob: '支持返还概率：较高' };
@@ -815,12 +1105,23 @@ function predictVerdict(charges, caseType) {
 
 function generateSummary(ctx) {
   const { matchedCharges, caseType, plaintiffs, defendants, verdict, similarCases } = ctx;
-  const chargeStr = matchedCharges.join('、');
-  const plaintiffStr = plaintiffs.join('、') || '原告';
-  const defendantStr = defendants.join('、') || '被告';
+  const chargeStr = matchedCharges.map(c => L(c, 'charge')).join(currentLang === 'en' ? ', ' : '、');
+  const plaintiffStr = plaintiffs.join(currentLang === 'en' ? ', ' : '、') || (currentLang === 'en' ? 'Plaintiff' : '原告');
+  const defendantStr = defendants.join(currentLang === 'en' ? ', ' : '、') || (currentLang === 'en' ? 'Defendant' : '被告');
+  const caseTypeStr = caseType === '刑事' ? t('criminal') : t('civil');
+
+  if (currentLang === 'en') {
+    return `
+      <p>This is a <strong>${caseTypeStr} case</strong> involving <strong>${chargeStr}</strong> (${matchedCharges.length} cause(s) of action).</p>
+      <p>Based on the facts, the possible <strong>plaintiff(s)</strong>: ${plaintiffStr}; possible <strong>defendant(s)</strong>: ${defendantStr}.</p>
+      <p><strong>Judgment tendency:</strong> ${verdict.text.replace(/<[^>]+>/g, '')}</p>
+      <p><strong>Reference:</strong> The most similar case is "${similarCases[0] ? L(similarCases[0], 'title') : '—'}", with the result: ${similarCases[0] ? L(similarCases[0], 'result') : '—'}.</p>
+      <p><strong>Advice:</strong> Preserve evidence (chat logs, transfer records, witness testimony) and consult a professional lawyer to evaluate litigation strategy.</p>
+    `;
+  }
 
   return `
-    <p>本案属于<strong>${caseType}案件</strong>，涉及案由 <strong>${chargeStr}</strong>（共 ${matchedCharges.length} 项）。</p>
+    <p>本案属于<strong>${caseTypeStr}案件</strong>，涉及案由 <strong>${chargeStr}</strong>（共 ${matchedCharges.length} 项）。</p>
     <p>根据事实描述，可能的<strong>原告方</strong>为：${plaintiffStr}；可能的<strong>被告方</strong>为：${defendantStr}。</p>
     <p><strong>判决倾向：</strong>${verdict.text.replace(/<[^>]+>/g, '')}</p>
     <p><strong>参考依据：</strong>与本案相似度最高的案件为「${similarCases[0]?.title || '—'}」，该案判决结果为：${similarCases[0]?.result || '—'}。</p>
@@ -832,28 +1133,28 @@ function generateSummary(ctx) {
    渲染结果页
    ============================================================ */
 function render(r) {
-  document.getElementById('plaintiffCount').textContent = r.plaintiffCount + ' 人';
-  document.getElementById('defendantCount').textContent = r.defendantCount + ' 人';
-  document.getElementById('chargeCount').textContent = r.charges.length + ' 项';
-  document.getElementById('caseType').textContent = r.caseType;
+  document.getElementById('plaintiffCount').textContent = r.plaintiffCount + t('personUnit');
+  document.getElementById('defendantCount').textContent = r.defendantCount + t('personUnit');
+  document.getElementById('chargeCount').textContent = r.charges.length + t('itemUnit');
+  document.getElementById('caseType').textContent = r.caseType === '刑事' ? t('criminal') : t('civil');
 
   document.getElementById('chargeList').innerHTML = r.charges.map((c, i) =>
-    `<span class="charge-tag">${c}<span class="num">#${i + 1}</span></span>`
+    `<span class="charge-tag">${L(c, 'charge')}<span class="num">#${i + 1}</span></span>`
   ).join('');
 
   document.getElementById('lawyerList').innerHTML = r.lawyers.map(l => `
     <div class="lawyer">
-      <div class="lawyer-avatar">${l.name[0]}</div>
+      <div class="lawyer-avatar">${L(l, 'name')[0]}</div>
       <div class="lawyer-body">
-        <div class="lawyer-name">${l.name}</div>
-        <div class="lawyer-meta">${l.firm} · 执业 ${l.years} 年</div>
+        <div class="lawyer-name">${L(l, 'name')}</div>
+        <div class="lawyer-meta">${L(l, 'firm')} · ${currentLang === 'en' ? '' : '执业 '}${l.years}${t('year')}</div>
         <div class="lawyer-tags">
-          ${l.tags.map(t => `<span class="lawyer-tag">${t}</span>`).join('')}
+          ${(currentLang === 'en' && l.tagsEn ? l.tagsEn : l.tags).map(tag => `<span class="lawyer-tag">${tag}</span>`).join('')}
         </div>
         <div class="lawyer-radar" id="radar-${l.id}"></div>
-        <a class="lawyer-link" onclick="showLawyerDetail('${l.id}')">查看律师详情 →</a>
+        <a class="lawyer-link" onclick="showLawyerDetail('${l.id}')">${t('viewDetail')}</a>
       </div>
-      <div class="lawyer-match">匹配度 ${l.score}%</div>
+      <div class="lawyer-match">${t('matchScore')} ${l.score}%</div>
     </div>
   `).join('');
 
@@ -865,12 +1166,12 @@ function render(r) {
   document.getElementById('similarList').innerHTML = r.similarCases.map(c => `
     <div class="similar-case">
       <div class="similar-header">
-        <span class="similar-title">${c.title}</span>
-        <span class="similar-sim">相似度 ${c.sim}%</span>
+        <span class="similar-title">${L(c, 'title')}</span>
+        <span class="similar-sim">${t('similarity')} ${c.sim}%</span>
       </div>
-      <div class="similar-desc">${c.desc}</div>
-      <div class="similar-meta">${c.court} · ${c.year} · 判决：${c.result}</div>
-      <a class="case-link" onclick="showCaseDetail('${c.id}')">查看案件详情 →</a>
+      <div class="similar-desc">${L(c, 'desc')}</div>
+      <div class="similar-meta">${L(c, 'court')} · ${c.year} · ${currentLang === 'en' ? 'Result: ' : '判决：'}${L(c, 'result')}</div>
+      <a class="case-link" onclick="showCaseDetail('${c.id}')">${t('viewCase')}</a>
     </div>
   `).join('');
 
@@ -900,7 +1201,7 @@ function buildRadarOptions(tags, scores, opts = {}) {
     legend: { enabled: false },
     tooltip: {
       enabled: true,
-      pointFormat: '<b>{point.y:.2f}</b> / 1.00',
+      pointFormat: t('radarTooltip'),
     },
     xAxis: {
       categories: tags,
@@ -916,7 +1217,7 @@ function buildRadarOptions(tags, scores, opts = {}) {
     },
     yAxis: {
       min: 0,
-      max: 1,                    // 满分 1
+      max: 1,
       gridLineInterpolation: 'polygon',
       lineWidth: 0,
       tickInterval: 0.25,
@@ -943,7 +1244,7 @@ function buildRadarOptions(tags, scores, opts = {}) {
       },
     },
     series: [{
-      name: '能力值',
+      name: t('radarSeries'),
       data: scores,
       color: '#1e40af',
       fillColor: {
@@ -962,10 +1263,13 @@ function initResultRadars(lawyers) {
     const containerId = `radar-${l.id}`;
     const container = document.getElementById(containerId);
     if (!container) return;
+    container.dataset.chartInit = '';
     if (container.dataset.chartInit === '1') return;
     container.dataset.chartInit = '1';
 
-    Highcharts.chart(container, buildRadarOptions(l.tags, l.tagScores, {
+    const tags = currentLang === 'en' && l.tagsEn ? l.tagsEn : l.tags;
+
+    Highcharts.chart(container, buildRadarOptions(tags, l.tagScores, {
       height: 160,
       showLabels: true,
       pointLabels: true,
@@ -977,10 +1281,11 @@ function initResultRadars(lawyers) {
 function initDetailRadar(lawyer) {
   const container = document.getElementById('lawyer-radar-detail');
   if (!container) return;
-  if (container.dataset.chartInit === '1') return;
   container.dataset.chartInit = '1';
 
-  Highcharts.chart(container, buildRadarOptions(lawyer.tags, lawyer.tagScores, {
+  const tags = currentLang === 'en' && lawyer.tagsEn ? lawyer.tagsEn : lawyer.tags;
+
+  Highcharts.chart(container, buildRadarOptions(tags, lawyer.tagScores, {
     height: 340,
     showLabels: true,
     pointLabels: true,
@@ -993,84 +1298,87 @@ function initDetailRadar(lawyer) {
    ============================================================ */
 function showLawyerDetail(lawyerId) {
   const lawyer = LAWYER_KB.find(l => l.id === lawyerId);
-  if (!lawyer) { alert('未找到该律师'); return; }
+  if (!lawyer) { alert(t('notFoundLawyer')); return; }
 
+  currentDetailLawyer = lawyer;
   const container = document.getElementById('lawyerDetail');
+
+  const cases = (currentLang === 'en' && lawyer.cases) ? lawyer.cases : lawyer.cases;
+  const pubs = currentLang === 'en' && lawyer.publicationsEn ? lawyer.publicationsEn : lawyer.publications;
+  const specs = currentLang === 'en' && lawyer.specialtiesEn ? lawyer.specialtiesEn : lawyer.specialties;
+  const tags = currentLang === 'en' && lawyer.tagsEn ? lawyer.tagsEn : lawyer.tags;
 
   container.innerHTML = `
     <div class="detail-profile">
-      <div class="detail-avatar">${lawyer.name[0]}</div>
+      <div class="detail-avatar">${L(lawyer, 'name')[0]}</div>
       <div class="detail-info">
-        <h3>${lawyer.name}</h3>
-        <div class="firm">${lawyer.title} · ${lawyer.firm}</div>
-        <div class="bio">${lawyer.bio}</div>
+        <h3>${L(lawyer, 'name')}</h3>
+        <div class="firm">${L(lawyer, 'title')} · ${L(lawyer, 'firm')}</div>
+        <div class="bio">${L(lawyer, 'bio')}</div>
         <div class="detail-tags">
-          ${lawyer.tags.map(t => `<span class="detail-tag">${t}</span>`).join('')}
+          ${tags.map(tg => `<span class="detail-tag">${tg}</span>`).join('')}
         </div>
       </div>
     </div>
 
     <div class="detail-grid">
-      <div class="detail-stat"><div class="label">执业年限</div><div class="value">${lawyer.years} 年</div></div>
-      <div class="detail-stat"><div class="label">代理案件</div><div class="value">${lawyer.stats.cases}+</div></div>
-      <div class="detail-stat"><div class="label">胜诉率</div><div class="value">${lawyer.stats.winRate}%</div></div>
-      <div class="detail-stat"><div class="label">平均周期</div><div class="value" style="font-size:18px;">${lawyer.stats.avgDuration}</div></div>
+      <div class="detail-stat"><div class="label">${t('years')}</div><div class="value">${lawyer.years}${t('year')}</div></div>
+      <div class="detail-stat"><div class="label">${t('caseCount')}</div><div class="value">${lawyer.stats.cases}+</div></div>
+      <div class="detail-stat"><div class="label">${t('winRate')}</div><div class="value">${lawyer.stats.winRate}%</div></div>
+      <div class="detail-stat"><div class="label">${t('avgDuration')}</div><div class="value" style="font-size:18px;">${currentLang === 'en' ? lawyer.stats.avgDurationEn : lawyer.stats.avgDuration}</div></div>
     </div>
 
-    <!-- 能力雷达图（满分 1） -->
     <div class="detail-section">
-      <h3>📊 能力雷达图</h3>
+      <h3>${t('radarTitle')}</h3>
       <div class="detail-radar" id="lawyer-radar-detail"></div>
-      <p style="margin-top:12px;font-size:13px;color:#6b7280;text-align:center;">
-        能力值基于执业年限、案件数量、胜诉率、专业领域等综合评估，满分 1.00。
-      </p>
+      <p style="margin-top:12px;font-size:13px;color:#6b7280;text-align:center;">${t('radarNote')}</p>
     </div>
 
     <div class="detail-section">
-      <h3>📇 基本信息</h3>
+      <h3>${t('basicInfo')}</h3>
       <ul class="detail-list">
-        <li><span class="label">执业证号</span><span class="value">${lawyer.license}</span></li>
-        <li><span class="label">学历</span><span class="value">${lawyer.education}</span></li>
-        <li><span class="label">联系电话</span><span class="value">${lawyer.phone}</span></li>
-        <li><span class="label">电子邮箱</span><span class="value">${lawyer.email}</span></li>
-        <li><span class="label">办公地址</span><span class="value">${lawyer.office}</span></li>
+        <li><span class="label">${t('license')}</span><span class="value">${lawyer.license}</span></li>
+        <li><span class="label">${t('education')}</span><span class="value">${L(lawyer, 'education')}</span></li>
+        <li><span class="label">${t('phone')}</span><span class="value">${lawyer.phone}</span></li>
+        <li><span class="label">${t('email')}</span><span class="value">${lawyer.email}</span></li>
+        <li><span class="label">${t('office')}</span><span class="value">${L(lawyer, 'office')}</span></li>
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>🎯 擅长领域</h3>
+      <h3>${t('specialties')}</h3>
       <div class="charge-list">
-        ${lawyer.specialties.map(s => `<span class="charge-tag">${s}</span>`).join('')}
+        ${specs.map(s => `<span class="charge-tag">${s}</span>`).join('')}
       </div>
     </div>
 
     <div class="detail-section">
-      <h3>📁 代表案例</h3>
+      <h3>${t('cases')}</h3>
       <ul class="detail-list">
-        ${lawyer.cases.map(c => `
+        ${cases.map(c => `
           <li>
-            <span class="label">${c.title}</span>
-            <span class="value">${c.year} · ${c.result}</span>
+            <span class="label">${L(c, 'title')}</span>
+            <span class="value">${c.year} · ${L(c, 'result')}</span>
           </li>
         `).join('')}
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>📚 学术成果</h3>
+      <h3>${t('publications')}</h3>
       <ul class="detail-list">
-        ${lawyer.publications.map(p => `<li><span class="label" style="flex:1;">${p}</span></li>`).join('')}
+        ${pubs.map(p => `<li><span class="label" style="flex:1;">${p}</span></li>`).join('')}
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>⚖️ 法律伦理理念</h3>
-      <p>${lawyer.intro}</p>
+      <h3>${t('ethics')}</h3>
+      <p>${L(lawyer, 'intro')}</p>
     </div>
 
     <div class="disclaimer">
-      <strong>⚠️ 免责声明</strong>
-      本页面为演示数据，律师信息、案例、联系方式均为模拟内容，<strong>不构成任何法律意见或委托建议</strong>。
+      <strong>${t('disclaimerTitle')}</strong>
+      ${t('lawyerDisclaimer')}
     </div>
   `;
 
@@ -1083,73 +1391,79 @@ function showLawyerDetail(lawyerId) {
    ============================================================ */
 function showCaseDetail(caseId) {
   const c = SIMILAR_CASE_KB.find(x => x.id === caseId);
-  if (!c) { alert('未找到该案件'); return; }
+  if (!c) { alert(t('notFoundCase')); return; }
 
+  currentDetailCase = c;
   const container = document.getElementById('caseDetail');
+
+  const claims = currentLang === 'en' && c.claimsEn ? c.claimsEn : c.claims;
+  const judgment = currentLang === 'en' && c.judgmentEn ? c.judgmentEn : c.judgment;
+  const laws = currentLang === 'en' && c.relatedLawsEn ? c.relatedLawsEn : c.relatedLaws;
+  const tags = currentLang === 'en' && c.tagsEn ? c.tagsEn : c.tags;
 
   container.innerHTML = `
     <div class="detail-section">
-      <h3>📄 ${c.title}</h3>
-      <p>${c.desc}</p>
+      <h3>📄 ${L(c, 'title')}</h3>
+      <p>${L(c, 'desc')}</p>
       <div class="charge-list" style="margin-top:12px;">
-        ${c.tags.map(t => `<span class="charge-tag">${t}</span>`).join('')}
+        ${tags.map(tg => `<span class="charge-tag">${tg}</span>`).join('')}
       </div>
     </div>
 
     <div class="detail-section">
-      <h3>📋 案件基本信息</h3>
+      <h3>${t('caseBasic')}</h3>
       <ul class="detail-list">
-        <li><span class="label">案号</span><span class="value">${c.caseNo}</span></li>
-        <li><span class="label">审理法院</span><span class="value">${c.court}</span></li>
-        <li><span class="label">审判人员</span><span class="value">${c.judge}</span></li>
-        <li><span class="label">立案日期</span><span class="value">${c.filingDate}</span></li>
-        <li><span class="label">开庭日期</span><span class="value">${c.hearingDate}</span></li>
-        <li><span class="label">判决日期</span><span class="value">${c.judgmentDate}</span></li>
-        <li><span class="label">争议金额</span><span class="value">${c.amount}</span></li>
-        <li><span class="label">案由</span><span class="value">${c.charges.join('、')}</span></li>
+        <li><span class="label">${t('caseNo')}</span><span class="value">${c.caseNo}</span></li>
+        <li><span class="label">${t('court')}</span><span class="value">${L(c, 'court')}</span></li>
+        <li><span class="label">${t('judge')}</span><span class="value">${L(c, 'judge')}</span></li>
+        <li><span class="label">${t('filingDate')}</span><span class="value">${c.filingDate}</span></li>
+        <li><span class="label">${t('hearingDate')}</span><span class="value">${c.hearingDate}</span></li>
+        <li><span class="label">${t('judgmentDate')}</span><span class="value">${c.judgmentDate}</span></li>
+        <li><span class="label">${t('amount')}</span><span class="value">${L(c, 'amount')}</span></li>
+        <li><span class="label">${t('chargeLabel')}</span><span class="value">${c.charges.join(currentLang === 'en' ? ', ' : '、')}</span></li>
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>📝 案件事实</h3>
-      <p>${c.facts}</p>
+      <h3>${t('facts')}</h3>
+      <p>${L(c, 'facts')}</p>
     </div>
 
     <div class="detail-section">
-      <h3>⚔️ 诉讼请求</h3>
+      <h3>${t('claims')}</h3>
       <ul class="detail-list">
-        ${c.claims.map((cl, i) => `<li><span class="label">${i + 1}.</span><span class="value" style="text-align:left;flex:1;">${cl}</span></li>`).join('')}
+        ${claims.map((cl, i) => `<li><span class="label">${i + 1}.</span><span class="value" style="text-align:left;flex:1;">${cl}</span></li>`).join('')}
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>⚖️ 裁判理由</h3>
-      <p>${c.reasoning}</p>
-      <div class="notice"><strong>相关法条：</strong>${c.relatedLaws.join('、')}</div>
+      <h3>${t('reasoning')}</h3>
+      <p>${L(c, 'reasoning')}</p>
+      <div class="notice"><strong>${t('relatedLaws')}</strong>${laws.join(currentLang === 'en' ? ', ' : '、')}</div>
     </div>
 
     <div class="detail-section">
-      <h3>📌 判决结果</h3>
+      <h3>${t('judgment')}</h3>
       <ul class="detail-list">
-        ${c.judgment.map((j, i) => `<li><span class="label">${i + 1}.</span><span class="value" style="text-align:left;flex:1;">${j}</span></li>`).join('')}
+        ${judgment.map((j, i) => `<li><span class="label">${i + 1}.</span><span class="value" style="text-align:left;flex:1;">${j}</span></li>`).join('')}
       </ul>
     </div>
 
     <div class="detail-section">
-      <h3>🕐 案件时间线</h3>
+      <h3>${t('timeline')}</h3>
       <div class="timeline">
-        ${c.timeline.map(t => `
+        ${c.timeline.map(tl => `
           <div class="timeline-item">
-            <div class="timeline-date">${t.date}</div>
-            <div class="timeline-content">${t.content}</div>
+            <div class="timeline-date">${tl.date}</div>
+            <div class="timeline-content">${L(tl, 'content')}</div>
           </div>
         `).join('')}
       </div>
     </div>
 
     <div class="disclaimer">
-      <strong>⚠️ 免责声明</strong>
-      本页面为演示数据，案件信息、案号、审判人员均为模拟内容，<strong>不构成任何法律意见</strong>。
+      <strong>${t('disclaimerTitle')}</strong>
+      ${t('caseDisclaimer')}
     </div>
   `;
 
@@ -1160,323 +1474,523 @@ function showCaseDetail(caseId) {
    辅助
    ============================================================ */
 const EXAMPLES = [
-  '张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物。李四的配偶王五发现后，要求张三返还全部赠与财物，并主张离婚损害赔偿。',
-  '2023年3月，甲向乙借款50万元，约定一年后归还，月息1%。到期后乙多次催讨，甲拒不归还，仅支付了部分利息。',
-  '某公司以"业绩不达标"为由辞退员工张某，未支付任何经济补偿。张某认为公司违法解除劳动合同，要求支付赔偿金。',
+  {
+    zh: '张三已知李四已婚，仍然多次寻求与李四建立亲密关系，并赠送贵重礼物。李四的配偶王五发现后，要求张三返还全部赠与财物，并主张离婚损害赔偿。',
+    en: 'Zhang San knew Li Si was married but still repeatedly sought an intimate relationship and gave valuable gifts. Li Si\'s spouse Wang Wu discovered this and demanded Zhang San return all gifts while claiming divorce damages.',
+  },
+  {
+    zh: '2023年3月，甲向乙借款50万元，约定一年后归还，月息1%。到期后乙多次催讨，甲拒不归还，仅支付了部分利息。',
+    en: 'In March 2023, A borrowed RMB 500,000 from B, agreeing to repay in one year at 1% monthly interest. Upon maturity, A refused to repay despite B\'s repeated demands, paying only partial interest.',
+  },
+  {
+    zh: '某公司以"业绩不达标"为由辞退员工张某，未支付任何经济补偿。张某认为公司违法解除劳动合同，要求支付赔偿金。',
+    en: 'A company terminated employee Zhang on grounds of "underperformance" without any compensation. Zhang believes the termination was unlawful and demands compensation.',
+  },
 ];
 
-function loadExample(i) { document.getElementById('facts').value = EXAMPLES[i]; }
+function loadExample(i) {
+  document.getElementById('facts').value = EXAMPLES[i][currentLang];
+}
+
 function clearAll() {
   document.getElementById('facts').value = '';
   document.getElementById('results').classList.remove('show');
 }
 
 window.addEventListener('popstate', () => { showView('main'); });
+
+/* 初始化 */
+setLang('zh');
 </script>
+
 
     
         <blockquote class="layui-elem-quote">
 
-        <b>【相关技术】</b><br>
+        <b>【Related Works】</b><br>
         <hr>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Sphere · Legal Tech Visualization</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<canvas id="cas" width="1200" height="600">浏览器不支持canvas，请更新浏览器后再浏览</canvas>
-                    <div style="width:50px;margin:10px auto">
-                        <button id="controlBtn">停止</button>
-                    </div>
-    <style>
-    #cas {
+    body {
+      background: #e9eef3;
+      font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .canvas-wrapper {
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 0 25px 40px -12px rgba(0, 20, 30, 0.35), 0 8px 18px rgba(0, 0, 0, 0.05);
+      padding: 12px;
+      display: inline-block;
+    }
+
+    canvas {
       display: block;
-      border: 1px solid;
-      margin: auto;
-        background-color: #F2F2F2;
+      width: 1200px;
+      height: 600px;
+      border-radius: 20px;
+      background: #f9fbfd;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.02);
+      cursor: crosshair;
+    }
+
+    .control-panel {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    button {
+      background: #1f2a3a;
+      border: none;
+      color: white;
+      font-weight: 500;
+      font-size: 1.1rem;
+      letter-spacing: 0.3px;
+      padding: 12px 42px;
+      border-radius: 60px;
+      box-shadow: 0 6px 12px rgba(0, 20, 30, 0.15);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: #2a3a50;
+      transform: scale(1.02);
+      box-shadow: 0 10px 18px -6px rgba(0, 20, 30, 0.3);
+    }
+
+    button:active {
+      transform: scale(0.98);
+      background: #141d28;
     }
   </style>
-    <script>
-  var canvas = document.getElementById("cas"),
-      ctx = canvas.getContext("2d"),
-      vpx = canvas.width / 2,
-      vpy = canvas.height / 2,
-      Radius = 150,
-      balls = [],
-      angleX = Math.PI / 100,
-      angleY = Math.PI / 100;
-ctx.save();
+</head>
+<body>
+<div class="canvas-wrapper">
+  <canvas id="cas" width="1200" height="600"></canvas>
+</div>
+<div class="control-panel">
+  <button id="controlBtn">Pause</button>
+</div>
 
+<script>
+  (function() {
+    // ---------- 获取canvas上下文 ----------
+    const canvas = document.getElementById('cas');
+    const ctx = canvas.getContext('2d');
 
-  window.addEventListener("mousemove", function(event) {
-    var x = event.clientX - canvas.offsetLeft - vpx - document.body.scrollLeft - document.documentElement.scrollLeft;
-    var y = event.clientY - canvas.offsetTop - vpy - document.body.scrollTop - document.documentElement.scrollTop;
-    angleY = -x * 0.0001;
-    angleX = -y * 0.0001;
-  });
+    // 固定参数 (与原始逻辑一致)
+    const vpx = canvas.width / 2;
+    const vpy = canvas.height / 2;
+    const Radius = 150;
 
-  var Animation = function() {
-    this.init();
-  };
-  Animation.prototype = {
-    isrunning: false,
-    init: function() {
-      balls = [];
-      papers = ["LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP"];
-        relations = [[1], [], [], [], [1], [], [], [], [1,2, 3], [], [], [], [1], [], [], [], [2]];
-      var num = 500;
-      for (var i = 0; i <= num; i++) {
-        var k = -1 + (2 * (i + 1) - 1) / num;
-        var a = Math.acos(k);
-        var b = a * Math.sqrt(num * Math.PI);
-        var x = Radius * Math.sin(a) * Math.cos(b);
-        var y = Radius * Math.sin(a) * Math.sin(b);
-        var z = Radius * Math.cos(a);
-        if (i < papers.length){
-            var t = papers[i];
-        var ref = relations[i];
-        }
-        else {
-            var t = " ";
-        var ref = null;
-        }
-        var b = new ball(x, y, z, 1.5, t, ref);
-        balls.push(b);
-        b.paint();
-      }
-    },
-    start: function() {
-      this.isrunning = true;
-      animate();
-    },
-    stop: function() {
-      this.isrunning = false;
-    }
-  }
+    let balls = [];
+    let angleX = Math.PI / 100;
+    let angleY = Math.PI / 100;
 
-  function drawArrow(ctx, fromX, fromY, toX, toY, theta, headlen, width, color) {
-  theta = typeof theta != 'undefined' ? theta : 30;
-  headlen = typeof headlen != 'undefined' ? headlen : 10;
-  width = typeof width != 'undefined' ? width : 1;
-  color = typeof color != 'undefined' ? color : '#000';
+    // 鼠标交互 —— 调整旋转速度
+    window.addEventListener('mousemove', function(event) {
+      const rect = canvas.getBoundingClientRect();
+      // 相对于canvas中心的偏移
+      const x = event.clientX - rect.left - vpx;
+      const y = event.clientY - rect.top - vpy;
+      // 平滑限制范围，避免过度旋转（与原代码逻辑一致，但做了细微的系数调整，视觉更稳）
+      angleY = -x * 0.00008;
+      angleX = -y * 0.00008;
+    });
 
-  const angle = Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI;
-  const angle1 = (angle + theta) * Math.PI / 180;
-  const angle2 = (angle - theta) * Math.PI / 180;
-  const topX = headlen * Math.cos(angle1);
-  const topY = headlen * Math.sin(angle1);
-  const botX = headlen * Math.cos(angle2);
-  const botY = headlen * Math.sin(angle2);
+    // ---------- 球体数据 ----------
+    // 英文标签替换: LawyerPAN, MCTS4LawyerRec, PF-LJP, LawyerGen, PositionLJP 等
+    const papers = [
+      "LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP"
+    ];
 
-  ctx.save();
-  ctx.beginPath();
+    // 关联关系 (索引对应上面的papers)
+    // 1 → 律师属性表示 (Lawyer attribute) 左侧框 (200,200)
+    // 2 → 案件属性表示 (Case attribute) 左侧框 (200,400)
+    // 3 → 表示学习方法 (Representation learning) 右侧框 (900,200)
+    // 4 → 关联关系 (Relations) 右侧框 (900,400) —— 但原代码未用4，保持原样
+    const relations = [
+      [1], [], [], [], [1], [], [], [], [1, 2, 3], [], [], [], [1], [], [], [], [2]
+    ];
 
-  // 画直线
-  ctx.moveTo(fromX, fromY);
-  ctx.lineTo(toX, toY);
-    // 画箭头头部
-  ctx.moveTo(toX + topX, toY + topY);
-  ctx.lineTo(toX, toY);
-  ctx.lineTo(toX + botX, toY + botY);
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.stroke();
-  ctx.restore();
-}
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    rotateX();
-    rotateY();
-    balls.sort(function(a, b) {
-      return b.z - a.z;
-    })
-    for (var i = 0; i < balls.length; i++) {
-      balls[i].paint();
+    // ---------- Ball 构造函数 ----------
+    function Ball(x, y, z, r, text, ref) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+      this.r = r;
+      this.t = text;
+      this.ref = ref;
     }
 
+    // ---------- 球体绘制方法 ----------
+    Ball.prototype.paint = function() {
+      const fl = 450; // 焦距
 
-
-
-// 使用
-ctx.beginPath();
-drawArrow(ctx, 50, 510, 50, 330, 30, 20, 5, '#8b8b8b');
-ctx.stroke();
-ctx.beginPath();
-drawArrow(ctx, 50, 270, 50, 90, 30, 20, 5, '#8b8b8b');
-ctx.stroke();
-ctx.strokeStyle = '#000000';ctx.lineWidth = 1
-    ctx.strokeRect(10, 30, 100, 50);
-    ctx.fillStyle = 'black'
-ctx.fillText("研究目标", 20, 60);
-ctx.strokeStyle = '#000000';ctx.lineWidth = 1
-    ctx.strokeRect(10, 270, 100, 50);
-    ctx.fillStyle = 'black'
-ctx.fillText("理论方法", 20, 300);
-ctx.strokeStyle = '#000000';ctx.lineWidth = 1
-    ctx.strokeRect(10, 510, 100, 50);
-    ctx.fillStyle = 'black'
-ctx.fillText("研究主题", 20, 540);
-              ctx.fillStyle = '#FFE699'
-ctx.fillRect(200, 10, 800, 50)
-ctx.font = '20px Arial';
-ctx.fillStyle = 'black'
-ctx.fillText("科技向善，推动社会发展，维护社会长治久安", 450, 50);
-ctx.fillStyle = '#B4C7E7'
-ctx.fillRect(150, 170, 200, 50)
-        ctx.fillStyle = 'black'
-ctx.fillText("律师属性表示", 200, 200);
-
-
-ctx.fillStyle = '#B4C7E7'
-ctx.fillRect(850, 170, 200, 50)
-
-ctx.fillStyle = '#B4C7E7'
-ctx.fillRect(150, 370, 200, 50)
-        ctx.fillStyle = 'black'
-ctx.fillText("表示学习方法", 900, 200);
-
-ctx.fillStyle = '#B4C7E7'
-ctx.fillRect(850, 370, 200, 50)
-        ctx.fillStyle = 'black'
-ctx.fillText("关联关系", 900, 400);
-ctx.fillStyle = 'red'
-ctx.fillRect(250, 510, 700, 50)
-ctx.fillStyle = 'black'
-ctx.fillText("面向司法智能服务的用户建模方法研究与应用", 400, 550);        ctx.fillStyle = 'black'
-ctx.fillText("案件属性表示", 200, 400);
-ctx.restore();
-    if (animation.isrunning) {
-      if ("requestAnimationFrame" in window) {
-        requestAnimationFrame(animate);
-      }
-      else if ("webkitRequestAnimationFrame" in window) {
-        webkitRequestAnimationFrame(animate);
-      }
-      else if ("msRequestAnimationFrame" in window) {
-        msRequestAnimationFrame(animate);
-      }
-      else if ("mozRequestAnimationFrame" in window) {
-        mozRequestAnimationFrame(animate);
-      }
-    }
-  }
-
-  function rotateX() {
-    var cos = Math.cos(angleX);
-    var sin = Math.sin(angleX);
-    for (var i = 0; i < balls.length; i++) {
-      var y1 = balls[i].y * cos - balls[i].z * sin;
-      var z1 = balls[i].z * cos + balls[i].y * sin;
-      balls[i].y = y1;
-      balls[i].z = z1;
-    }
-  }
-
-  function rotateY() {
-    var cos = Math.cos(angleY);
-    var sin = Math.sin(angleY);
-    for (var i = 0; i < balls.length; i++) {
-      var x1 = balls[i].x * cos - balls[i].z * sin;
-      var z1 = balls[i].z * cos + balls[i].x * sin;
-      balls[i].x = x1;
-      balls[i].z = z1;
-    }
-  }
-
-  var ball = function(x, y, z, r, text, ref) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.r = r;
-    this.width = 2 * r;
-    this.t = text;
-    this.ref = ref;
-  }
-
-  ball.prototype = {
-    paint: function() {
-      var fl = 450 //焦距
+      // 绘制中心球体
       ctx.save();
       ctx.beginPath();
-      var scale = fl / (fl - this.z);
-      var alpha = (this.z + Radius) / (2 * Radius);
+      const scale = fl / (fl - this.z);
+      const alpha = (this.z + Radius) / (2 * Radius);
       ctx.arc(vpx + this.x, vpy + this.y, this.r * scale, 0, 2 * Math.PI, true);
-      ctx.fillStyle = "rgba(190, 46, 202," + (alpha + 0.5) + ")"
-
+      ctx.fillStyle = "rgba(190, 46, 202, " + (alpha + 0.5) + ")";
       ctx.fill();
       ctx.restore();
-      var num = 1
-for (var i = 0; i <= num; i++) {
-    var radius = 15
-         var k = -1 + (2 * (i + 1) - 1) / num;
-        var a = Math.acos(k);
-        var b = a * Math.sqrt(num * Math.PI);
-        var x = radius * Math.sin(a) * Math.cos(b);
-        var y = radius * Math.sin(a) * Math.sin(b);
-        var z = radius * Math.cos(a);
-    var fl = 450 //焦距
 
-    ctx.save();
-    ctx.beginPath();
-    var scale = fl / (fl - z);
-    var alpha = (z + Radius) / (2 * Radius);
-    ctx.arc(vpx + this.x + x, vpy + this.y + y, 1 * scale, 0, 2 * Math.PI, true);
-    ctx.fillStyle = "rgba(190, 46, 202," + (alpha + 0.5) + ")"
+      // 围绕的小点装饰 (球壳上的小粒子，视觉增强)
+      // 原代码用了一个循环，但num=1，效果就是重复绘制一个偏移点，这里保留但改为更自然的多个小点
+      const num = 1; // 保持与原逻辑一致，但改为循环绘制一个点，由于原代码变量名冲突，稍作优化
+      for (let i = 0; i <= num; i++) {
+        const radius = 15;
+        const k = -1 + (2 * (i + 1) - 1) / num;
+        const a = Math.acos(k);
+        const b = a * Math.sqrt(num * Math.PI);
+        const x = radius * Math.sin(a) * Math.cos(b);
+        const y = radius * Math.sin(a) * Math.sin(b);
+        const z = radius * Math.cos(a);
 
-      ctx.fill();
-      ctx.restore();
-}
-
-      ctx.font = '16px Arial';
-ctx.fillStyle = 'black'
-        ctx.fillText(this.t, vpx + this.x, vpy + this.y);
-if(this.t!==" "){
-
-    if (this.ref.includes(1)){
-ctx.beginPath();          // 开启新路径
-ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
-ctx.lineTo(200, 200);     // 终点
-                    ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 0.2;
-ctx.stroke();             // 描边
-        };
-    if (this.ref.includes(2)){
-ctx.beginPath();          // 开启新路径
-ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
-ctx.lineTo(200, 400);     // 终点
-                    ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 0.2;
-ctx.stroke();             // 描边
-        };if (this.ref.includes(3)){
-ctx.beginPath();          // 开启新路径
-ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
-ctx.lineTo(900, 200);     // 终点
-                    ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 0.2;
-ctx.stroke();             // 描边
-        };if (this.ref.includes(4)){
-ctx.beginPath();          // 开启新路径
-ctx.moveTo(vpx + this.x, vpy + this.y);       // 起点
-ctx.lineTo(900, 400);     // 终点
-                    ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 0.2;
-ctx.stroke();             // 描边
-        };
-}
+        const flLocal = 450;
+        ctx.save();
+        ctx.beginPath();
+        const scaleLocal = flLocal / (flLocal - z);
+        const alphaLocal = (z + Radius) / (2 * Radius);
+        ctx.arc(vpx + this.x + x, vpy + this.y + y, 1 * scaleLocal, 0, 2 * Math.PI, true);
+        ctx.fillStyle = "rgba(190, 46, 202, " + (alphaLocal + 0.5) + ")";
+        ctx.fill();
         ctx.restore();
+      }
 
+      // 绘制文字标签 (英文)
+      ctx.font = '500 16px "Segoe UI", Inter, Arial, sans-serif';
+      ctx.fillStyle = '#1e293b';
+      ctx.shadowColor = 'rgba(255,255,255,0.6)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(this.t, vpx + this.x, vpy + this.y);
+      ctx.shadowColor = 'transparent'; // 重置阴影避免影响后续线条
 
+      // 绘制关联连线 (当 ref 存在且不为空)
+      if (this.t !== " " && this.ref) {
+        // 律师属性表示线 (ref 包含 1)
+        if (this.ref.includes(1)) {
+          ctx.beginPath();
+          ctx.moveTo(vpx + this.x, vpy + this.y);
+          ctx.lineTo(200, 200);
+          ctx.strokeStyle = 'rgba(30, 100, 200, 0.55)';
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+        // 案件属性表示线 (ref 包含 2)
+        if (this.ref.includes(2)) {
+          ctx.beginPath();
+          ctx.moveTo(vpx + this.x, vpy + this.y);
+          ctx.lineTo(200, 400);
+          ctx.strokeStyle = 'rgba(30, 100, 200, 0.55)';
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+        // 表示学习方法线 (ref 包含 3)
+        if (this.ref.includes(3)) {
+          ctx.beginPath();
+          ctx.moveTo(vpx + this.x, vpy + this.y);
+          ctx.lineTo(900, 200);
+          ctx.strokeStyle = 'rgba(30, 100, 200, 0.55)';
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+        // 关联关系线 (ref 包含 4) —— 原代码有此分支，保留但数据中无4，不影响
+        if (this.ref.includes(4)) {
+          ctx.beginPath();
+          ctx.moveTo(vpx + this.x, vpy + this.y);
+          ctx.lineTo(900, 400);
+          ctx.strokeStyle = 'rgba(30, 100, 200, 0.55)';
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+      }
+    };
+
+    // ---------- 初始化球体 (斐波那契球分布) ----------
+    function initBalls() {
+      balls = [];
+      const num = 500;
+      for (let i = 0; i <= num; i++) {
+        const k = -1 + (2 * (i + 1) - 1) / num;
+        const a = Math.acos(k);
+        const b = a * Math.sqrt(num * Math.PI);
+        const x = Radius * Math.sin(a) * Math.cos(b);
+        const y = Radius * Math.sin(a) * Math.sin(b);
+        const z = Radius * Math.cos(a);
+
+        let text = "";
+        let ref = null;
+
+        if (i < papers.length) {
+          text = papers[i];
+          ref = relations[i];
+        } else {
+          text = " ";
+          ref = null;
+        }
+
+        const ball = new Ball(x, y, z, 1.5, text, ref);
+        balls.push(ball);
+        ball.paint(); // 初始绘制一次（虽然后面动画会重绘，但保留也无妨）
+      }
     }
-  }
 
-  var animation = new Animation();
-  animation.start();
+    // ---------- 绘制装饰性箭头 (英文文本已替换) ----------
+    function drawArrow(ctx, fromX, fromY, toX, toY, theta, headlen, width, color) {
+      theta = typeof theta !== 'undefined' ? theta : 30;
+      headlen = typeof headlen !== 'undefined' ? headlen : 10;
+      width = typeof width !== 'undefined' ? width : 1;
+      color = typeof color !== 'undefined' ? color : '#000';
 
-  document.getElementById("controlBtn").onclick = function() {
-    this.innerText === "开始" ? this.innerText = "停止" : this.innerText = "开始";
-    this.innerText === "开始" ? animation.stop() : animation.start();
-    ;
-  }
+      const angle = Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI;
+      const angle1 = (angle + theta) * Math.PI / 180;
+      const angle2 = (angle - theta) * Math.PI / 180;
+      const topX = headlen * Math.cos(angle1);
+      const topY = headlen * Math.sin(angle1);
+      const botX = headlen * Math.cos(angle2);
+      const botY = headlen * Math.sin(angle2);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.moveTo(toX + topX, toY + topY);
+      ctx.lineTo(toX, toY);
+      ctx.lineTo(toX + botX, toY + botY);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ---------- 旋转函数 ----------
+    function rotateX() {
+      const cos = Math.cos(angleX);
+      const sin = Math.sin(angleX);
+      for (let i = 0; i < balls.length; i++) {
+        const y1 = balls[i].y * cos - balls[i].z * sin;
+        const z1 = balls[i].z * cos + balls[i].y * sin;
+        balls[i].y = y1;
+        balls[i].z = z1;
+      }
+    }
+
+    function rotateY() {
+      const cos = Math.cos(angleY);
+      const sin = Math.sin(angleY);
+      for (let i = 0; i < balls.length; i++) {
+        const x1 = balls[i].x * cos - balls[i].z * sin;
+        const z1 = balls[i].z * cos + balls[i].x * sin;
+        balls[i].x = x1;
+        balls[i].z = z1;
+      }
+    }
+
+    // ---------- 动画状态 ----------
+    let isRunning = true;
+    let animationFrameId = null;
+
+    // ---------- 绘制静态背景 + 英文标注 ----------
+    function drawStaticBackground() {
+      // 不需要清除画布，因为animate里会clearRect
+
+      // 三个箭头 (灰色)
+      drawArrow(ctx, 50, 510, 50, 330, 30, 20, 5, '#b0b8c5');
+      drawArrow(ctx, 50, 270, 50, 90, 30, 20, 5, '#b0b8c5');
+
+      // 左侧三个矩形框 (Research Target, Theoretical Method, Research Topic)
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0,0,0,0.02)';
+      ctx.shadowBlur = 8;
+
+      // 1. 研究目标 → Research Goal
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(10, 30, 100, 50);
+      ctx.strokeRect(10, 30, 100, 50);
+      ctx.font = '500 14px "Segoe UI", Inter, sans-serif';
+      ctx.fillStyle = '#1e293b';
+      ctx.shadowBlur = 0;
+      ctx.fillText("Research Goal", 20, 60);
+
+      // 2. 理论方法 → Theoretical Methods
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(10, 270, 100, 50);
+      ctx.strokeRect(10, 270, 100, 50);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillText("Theoretical Methods", 16, 300);
+
+      // 3. 研究主题 → Research Topics
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(10, 510, 100, 50);
+      ctx.strokeRect(10, 510, 100, 50);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillText("Research Topics", 18, 540);
+
+      // 顶部黄色横幅: 科技向善... → Tech for good, driving social development and maintaining long-term stability
+      ctx.fillStyle = '#FFE699';
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = 'rgba(255, 230, 150, 0.3)';
+      ctx.fillRect(200, 10, 800, 50);
+      ctx.shadowBlur = 0;
+      ctx.font = '600 20px "Segoe UI", Inter, sans-serif';
+      ctx.fillStyle = '#1e2b3c';
+      ctx.fillText("Tech for good · Driving social development & long-term stability", 370, 50);
+
+      // 四个蓝色标签框 (律师属性表示、案件属性表示、表示学习方法、关联关系)
+      // 左侧：Lawyer representation
+      ctx.fillStyle = '#B4C7E7';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(180, 199, 231, 0.4)';
+      ctx.fillRect(150, 170, 200, 50);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#0f1c2e';
+      ctx.font = '600 15px "Segoe UI", Inter, sans-serif';
+      ctx.fillText("Lawyer representation", 178, 202);
+
+      // 右侧：Representation learning
+      ctx.fillStyle = '#B4C7E7';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(850, 170, 200, 50);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#0f1c2e';
+      ctx.fillText("Representation learning", 870, 202);
+
+      // 左侧下：Case representation
+      ctx.fillStyle = '#B4C7E7';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(150, 370, 200, 50);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#0f1c2e';
+      ctx.fillText("Case representation", 178, 402);
+
+      // 右侧下：Relations
+      ctx.fillStyle = '#B4C7E7';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(850, 370, 200, 50);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#0f1c2e';
+      ctx.fillText("Relations", 920, 402);
+
+      // 底部红色横幅: 面向司法智能服务的用户建模方法研究与应用
+      // → User modeling for intelligent judicial services: research & application
+      ctx.fillStyle = '#f8d7da';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(248, 215, 218, 0.5)';
+      ctx.fillRect(250, 510, 700, 50);
+      ctx.shadowBlur = 0;
+      ctx.font = '600 18px "Segoe UI", Inter, sans-serif';
+      ctx.fillStyle = '#4a1e1e';
+      ctx.fillText("User Modeling for Intelligent Judicial Services: Research & Application", 290, 550);
+
+      // 额外标签 "案件属性表示" 原代码出现在 (200,400) 位置，但前面已经画过 Case representation，这里原代码有冗余，我们保留一个更清晰的
+      // 但为了不与前面重复，我们不再重复画。原代码在最后还有 fillText("案件属性表示",200,400) 与前面的Case representation可能重叠，略去。
+      // 但如果要完全保留原绘制逻辑，可添加，但为了美观就不重复绘制了。
+
+      // 重置阴影
+      ctx.shadowColor = 'transparent';
+    }
+
+    // ---------- 主动画循环 ----------
+    function animate() {
+      // 清除画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制静态背景（箭头、方框、英文文字）
+      drawStaticBackground();
+
+      // 旋转所有球体
+      rotateX();
+      rotateY();
+
+      // 根据z轴排序（远的先画）
+      balls.sort(function(a, b) {
+        return b.z - a.z;
+      });
+
+      // 绘制所有球体及其连线、文字
+      for (let i = 0; i < balls.length; i++) {
+        balls[i].paint();
+      }
+
+      // 继续动画
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        animationFrameId = null;
+      }
+    }
+
+    // ---------- 启动/停止控制 ----------
+    const controlBtn = document.getElementById('controlBtn');
+
+    function startAnimation() {
+      if (!isRunning) {
+        isRunning = true;
+        animate();
+        controlBtn.innerText = 'Pause';
+      }
+    }
+
+    function stopAnimation() {
+      if (isRunning) {
+        isRunning = false;
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        controlBtn.innerText = 'Resume';
+        // 保证最后一帧可见（实际上停止时已经绘制完了）
+      }
+    }
+
+    // 按钮点击切换
+    controlBtn.addEventListener('click', function() {
+      if (isRunning) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    });
+
+    // 初始化球体
+    initBalls();
+
+    // 启动动画
+    animate();
+
+    // 确保鼠标移动不阻塞，并保持平滑（原逻辑已添加）
+  })();
 </script>
+</body>
+</html>
 </blockquote>
 </body>
 </html>
