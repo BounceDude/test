@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>双人视频 + 协作画板</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, sans-serif; }
+  body { background:#1a1e2b; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
+  .app { max-width:1200px; width:100%; background:#0f1219; border-radius:24px; padding:20px; }
+  .room-bar { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .room-bar input { background:#2d3448; border:1px solid #3c445c; color:#eef2ff; padding:8px 14px; border-radius:40px; font-size:14px; outline:none; }
+  .room-bar button { background:#4b7bec; border:none; color:#fff; padding:8px 20px; border-radius:40px; font-size:14px; cursor:pointer; font-weight:600; }
+  .room-bar button:hover { background:#5f8aff; }
+  .videos { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .video-box { flex:1 1 280px; background:#202532; border-radius:16px; overflow:hidden; position:relative; aspect-ratio:16/9; border:2px solid #2a3142; }
+  .video-box video { width:100%; height:100%; object-fit:cover; background:#000; }
+  .label { position:absolute; bottom:8px; left:12px; background:rgba(0,0,0,.6); color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; }
+  .canvas-area { background:#202532; border-radius:20px; padding:16px; }
+  .toolbar { display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  .toolbar label { color:#b6c2e0; font-size:13px; }
+  input[type="color"] { width:36px; height:36px; border:2px solid #3f4a62; border-radius:50%; cursor:pointer; padding:2px; background:none; }
+  .btn { background:#2d3448; border:1px solid #3c445c; color:#d0d9f0; padding:8px 16px; border-radius:40px; cursor:pointer; font-size:14px; }
+  .btn:hover { background:#3a425b; }
+  canvas { display:block; width:100%; height:auto; background:#f8f9fc; border-radius:12px; cursor:crosshair; touch-action:none; }
+  #status { color:#9aa9c4; font-size:13px; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="room-bar">
+    <input id="roomInput" value="room1" placeholder="房间号" />
+    <button id="joinBtn">加入房间</button>
+  </div>
+
+  <div class="videos">
+    <div class="video-box"><video id="localVideo" autoplay muted playsinline></video><div class="label">我</div></div>
+    <div class="video-box"><video id="remoteVideo" autoplay playsinline></video><div class="label">对方</div></div>
+  </div>
+
+  <div class="canvas-area">
+    <div class="toolbar">
+      <label>画笔</label>
+      <input type="color" id="colorPicker" value="#4b7bec">
+      <button class="btn" id="clearBtn">清空</button>
+    </div>
+    <canvas id="drawingCanvas" width="1200" height="600"></canvas>
+    <div id="status">未加入房间</div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function(){
+  // ---------- DOM ----------
+  const canvas = document.getElementById('drawingCanvas');
+  const ctx = canvas.getContext('2d');
+  const colorPicker = document.getElementById('colorPicker');
+  const clearBtn = document.getElementById('clearBtn');
+  const statusEl = document.getElementById('status');
+  const localVideo = document.getElementById('localVideo');
+  const remoteVideo = document.getElementById('remoteVideo');
+  const roomInput = document.getElementById('roomInput');
+  const joinBtn = document.getElementById('joinBtn');
+
+  // 画布初始化
+  canvas.width = 1200;
+  canvas.height = 600;
+  ctx.fillStyle = '#f8f9fc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // ---------- 画板绘制 ----------
+  let drawing = false, lastX = 0, lastY = 0;
+  let currentColor = colorPicker.value;
+  let brushSize = 4;
+  let dataChannel = null; // WebRTC 数据通道，用于画板同步
+
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let cx, cy;
+    if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; e.preventDefault(); }
+    else { cx = e.clientX; cy = e.clientY; }
+    return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY };
+  }
+
+  function drawLine(x0,y0,x1,y1,color,size) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.moveTo(x0,y0);
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  function sendDraw(msg) {
+    if (dataChannel && dataChannel.readyState === 'open') {
+      dataChannel.send(JSON.stringify(msg));
+    }
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    const {x,y} = getCoords(e);
+    lastX = x; lastY = y;
+    ctx.beginPath();
+    ctx.fillStyle = currentColor;
+    ctx.arc(x, y, brushSize/2, 0, Math.PI*2);
+    ctx.fill();
+    sendDraw({type:'draw', x0:x, y0:y, x1:x, y1:y, color:currentColor, size:brushSize});
+  }
+  function moveDraw(e) {
+    e.preventDefault();
+    if (!drawing) return;
+    const {x,y} = getCoords(e);
+    drawLine(lastX, lastY, x, y, currentColor, brushSize);
+    sendDraw({type:'draw', x0:lastX, y0:lastY, x1:x, y1:y, color:currentColor, size:brushSize});
+    lastX = x; lastY = y;
+  }
+  function stopDraw(e) { e.preventDefault(); drawing = false; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive:false});
+  canvas.addEventListener('touchmove', moveDraw, {passive:false});
+  canvas.addEventListener('touchend', stopDraw);
+
+  colorPicker.addEventListener('input', e => currentColor = e.target.value);
+
+  clearBtn.addEventListener('click', () => {
+    ctx.fillStyle = '#f8f9fc';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    sendDraw({type:'clear'});
+  });
+
+  // ---------- WebRTC ----------
+  const socket = io();
+  let localStream = null;
+  let pc = null;
+  let roomId = null;
+
+  const status = (msg) => { statusEl.textContent = msg; console.log('[status]', msg); };
+
+  // 获取本地摄像头
+  async function getLocalStream() {
+    if (localStream) return localStream;
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+      status('本地视频已开启');
+    } catch (err) {
+      console.error('getUserMedia 失败:', err);
+      status('⚠️ 无法获取摄像头: ' + err.message);
+    }
+    return localStream;
+  }
+
+  // 创建 PeerConnection
+  function createPC(isCaller) {
+    if (pc) pc.close();
+    pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    });
+
+    // 添加本地轨道
+    if (localStream) {
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    }
+
+    // 接收远程流
+    pc.ontrack = (e) => {
+      if (e.streams && e.streams[0]) {
+        remoteVideo.srcObject = e.streams[0];
+        status('✅ 已连接对方，视频通话中');
+      }
+    };
+
+    // ICE 候选通过信令服务器转发
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit('signal', { to: peerId, data: { type: 'candidate', candidate: e.candidate } });
+      }
+    };
+
+    // 数据通道：由主叫方创建，被叫方接收
+    if (isCaller) {
+      dataChannel = pc.createDataChannel('drawing');
+      setupDataChannel(dataChannel);
+    } else {
+      pc.ondatachannel = (e) => {
+        dataChannel = e.channel;
+        setupDataChannel(dataChannel);
+      };
+    }
+
+    return pc;
+  }
+
+  function setupDataChannel(ch) {
+    ch.onopen = () => status('✅ 画板已同步，双方都可以画');
+    ch.onclose = () => status('画板通道已关闭');
+    ch.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'draw') {
+          drawLine(msg.x0, msg.y0, msg.x1, msg.y1, msg.color, msg.size || 4);
+        } else if (msg.type === 'clear') {
+          ctx.fillStyle = '#f8f9fc';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+      } catch(err) { console.warn('消息解析失败', err); }
+    };
+  }
+
+  let peerId = null; // 对方 socket id
+
+  // ---------- 信令事件 ----------
+  socket.on('connect', () => console.log('socket 已连接', socket.id));
+
+  socket.on('room-info', ({ members }) => {
+    status(`已加入房间，当前人数: ${members}。等待对方加入...`);
+    if (members < 2) {
+      // 只有自己，清空远端
+      remoteVideo.srcObject = null;
+      peerId = null;
+    }
+  });
+
+  // 老成员收到：新人来了，由老成员发起 offer
+  socket.on('peer-joined', async (newPeerId) => {
+    console.log('对方加入:', newPeerId);
+    peerId = newPeerId;
+    status('对方已加入，正在连接...');
+    await getLocalStream();
+    createPC(true); // 主叫
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit('signal', { to: peerId, data: { type: 'offer', sdp: offer } });
+    } catch (err) {
+      console.error('创建 offer 失败', err);
+      status('连接失败: ' + err.message);
+    }
+  });
+
+  // 收到信令
+  socket.on('signal', async ({ from, data }) => {
+    peerId = from;
+
+    if (data.type === 'offer') {
+      // 被叫方：收到 offer
+      status('收到呼叫，正在应答...');
+      await getLocalStream();
+      createPC(false);
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('signal', { to: from, data: { type: 'answer', sdp: answer } });
+      } catch (err) {
+        console.error('应答失败', err);
+        status('应答失败: ' + err.message);
+      }
+    } else if (data.type === 'answer') {
+      // 主叫方：收到 answer
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        status('连接建立中...');
+      } catch (err) {
+        console.error('设置 answer 失败', err);
+      }
+    } else if (data.type === 'candidate') {
+      // 收到 ICE 候选
+      try {
+        if (pc && pc.remoteDescription) {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      } catch (err) {
+        console.warn('添加 ICE 失败', err);
+      }
+    }
+  });
+
+  socket.on('peer-left', () => {
+    status('对方已离开，等待重新加入...');
+    remoteVideo.srcObject = null;
+    if (pc) { pc.close(); pc = null; }
+    dataChannel = null;
+    peerId = null;
+  });
+
+  // ---------- 加入房间按钮 ----------
+  joinBtn.addEventListener('click', async () => {
+    const id = roomInput.value.trim();
+    if (!id) return alert('请输入房间号');
+    roomId = id;
+    await getLocalStream();
+    socket.emit('join', roomId);
+    status('正在加入房间 ' + roomId + '...');
+  });
+})();
+</script>
+</body>
+</html>
