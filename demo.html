@@ -1624,7 +1624,7 @@ setLang('zh');
     // ---------- 球体数据 ----------
     // 英文标签替换: LawyerPAN, MCTS4LawyerRec, PF-LJP, LawyerGen, PositionLJP 等
     const papers = [
-      "LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP"
+      "LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP", "LawyerKG", "LawyerDev", "ALCR", "LawyerPANE"
     ];
 
     // 关联关系 (索引对应上面的papers)
@@ -1633,7 +1633,7 @@ setLang('zh');
     // 3 → 表示学习方法 (Representation learning) 右侧框 (900,200)
     // 4 → 关联关系 (Relations) 右侧框 (900,400) —— 但原代码未用4，保持原样
     const relations = [
-      [1], [], [], [], [1], [], [], [], [1, 2, 3], [], [], [], [1], [], [], [], [2]
+      [1], [], [], [], [1], [], [], [], [1, 2, 3], [], [], [], [1], [], [], [], [2], [1], [1,3], [2], [4]
     ];
 
     // ---------- Ball 构造函数 ----------
@@ -1989,8 +1989,25 @@ setLang('zh');
     // 确保鼠标移动不阻塞，并保持平滑（原逻辑已添加）
   })();
 </script>
-</body>
-</html>
+
+<h4>Yanqing An et al. LawyerPAN: A Proficiency Assessment Network for Trial Lawyers. SIGKDD 2021</h4>
+<p>Modelling lawyers based on case handling records to assess their proficiencies.</p>
+<h4>Yanqing An et al. Post-hoc Facts augmented Legal Judgment Prediction. DASFAA 2024</h4>
+<p>Modelling the plaintiff, defendant and judge based on courtroom dialogue, and predicting the judgment.</p>
+<h4>Yanqing An et al. MCTS4LawyerRec: Lawyer Recommendation Using Monte Carlo Tree Search via Litigation Simulation. CICIA 2026</h4>
+<p>Use LawyerPAN to simulate a lawsuit using its simulator, and receive lawyer recommendations based on the results.</p>
+<h4>Yanqing An et al. LawyerGen: Towards Case Summary Generation and Generative Proficiency Assessment for Trial Lawyers</h4>
+<p>Incorporate generative models to enhance judgment outcomes and assist lawyers with modeling.</p>
+<h4>Yanqing An et al. PositionLJP: Multi-defendant Legal Judgment Prediction via Position Encoding</h4>
+<p>Multi-defendant Legal Judgment Prediction.</p>
+<h4>Yanqing An et al. LawyerKG: Exploiting Relationships within Knowledge Graph for assessing proficiency of lawyers</h4>
+<p>Enhancing Legal Modeling by Manually Constructing a Charge Entity Graph.</p>
+<h4>Yanqing An et al. LawyerDev: Development Path Recommendation for Trial Lawyers</h4>
+<p>LawyerPAN simulates the process of handling cases in a lawyer’s career to provide personalized career development recommendations for lawyers.</p>
+<h4>Yanqing An et al. Article-enhanced Pre-trained Language Model for Legal Case Retrieval</h4>
+<p>Legal Case Retrieval using Pre-trained Language Model.</p>
+<h4>Yanqing An et al. LawyerPANE: A Proficiency Assessment Network Extension for Trial Lawyers</h4>
+<p>LawyerPAN's Extensions for Modeling.</p>
 </blockquote>
 </body>
 </html>
