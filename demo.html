@@ -1504,7 +1504,7 @@ setLang('zh');
 </script>
 
 
-    
+
         <blockquote class="layui-elem-quote">
 
         <b>【Related Works】</b><br>
@@ -1660,28 +1660,7 @@ setLang('zh');
       ctx.fill();
       ctx.restore();
 
-      // 围绕的小点装饰 (球壳上的小粒子，视觉增强)
-      // 原代码用了一个循环，但num=1，效果就是重复绘制一个偏移点，这里保留但改为更自然的多个小点
-      const num = 1; // 保持与原逻辑一致，但改为循环绘制一个点，由于原代码变量名冲突，稍作优化
-      for (let i = 0; i <= num; i++) {
-        const radius = 15;
-        const k = -1 + (2 * (i + 1) - 1) / num;
-        const a = Math.acos(k);
-        const b = a * Math.sqrt(num * Math.PI);
-        const x = radius * Math.sin(a) * Math.cos(b);
-        const y = radius * Math.sin(a) * Math.sin(b);
-        const z = radius * Math.cos(a);
 
-        const flLocal = 450;
-        ctx.save();
-        ctx.beginPath();
-        const scaleLocal = flLocal / (flLocal - z);
-        const alphaLocal = (z + Radius) / (2 * Radius);
-        ctx.arc(vpx + this.x + x, vpy + this.y + y, 1 * scaleLocal, 0, 2 * Math.PI, true);
-        ctx.fillStyle = "rgba(190, 46, 202, " + (alphaLocal + 0.5) + ")";
-        ctx.fill();
-        ctx.restore();
-      }
 
       // 绘制文字标签 (英文)
       ctx.font = '500 16px "Segoe UI", Inter, Arial, sans-serif';
@@ -1833,8 +1812,8 @@ setLang('zh');
 
       // 1. 研究目标 → Research Goal
       ctx.fillStyle = '#f1f5f9';
-      ctx.fillRect(10, 30, 100, 50);
-      ctx.strokeRect(10, 30, 100, 50);
+      ctx.fillRect(10, 30, 120, 50);
+      ctx.strokeRect(10, 30, 120, 50);
       ctx.font = '500 14px "Segoe UI", Inter, sans-serif';
       ctx.fillStyle = '#1e293b';
       ctx.shadowBlur = 0;
@@ -1842,15 +1821,15 @@ setLang('zh');
 
       // 2. 理论方法 → Theoretical Methods
       ctx.fillStyle = '#f1f5f9';
-      ctx.fillRect(10, 270, 100, 50);
-      ctx.strokeRect(10, 270, 100, 50);
+      ctx.fillRect(10, 270, 130, 50);
+      ctx.strokeRect(10, 270, 130, 50);
       ctx.fillStyle = '#1e293b';
       ctx.fillText("Theoretical Methods", 16, 300);
 
       // 3. 研究主题 → Research Topics
       ctx.fillStyle = '#f1f5f9';
-      ctx.fillRect(10, 510, 100, 50);
-      ctx.strokeRect(10, 510, 100, 50);
+      ctx.fillRect(10, 510, 120, 50);
+      ctx.strokeRect(10, 510, 120, 50);
       ctx.fillStyle = '#1e293b';
       ctx.fillText("Research Topics", 18, 540);
 
@@ -1992,6 +1971,8 @@ setLang('zh');
 </body>
 </html>
 
+</blockquote>
+<div style="float: left">
 <h4>Yanqing An et al. LawyerPAN: A Proficiency Assessment Network for Trial Lawyers. SIGKDD 2021</h4>
 <p>Modelling lawyers based on case handling records to assess their proficiencies.</p>
 <h4>Yanqing An et al. Post-hoc Facts augmented Legal Judgment Prediction. DASFAA 2024</h4>
@@ -2002,20 +1983,20 @@ setLang('zh');
 <p>Incorporate generative models to enhance judgment outcomes and assist lawyers with modeling.</p>
 <h4>Yanqing An et al. PositionLJP: Multi-defendant Legal Judgment Prediction via Position Encoding</h4>
 <p>Multi-defendant Legal Judgment Prediction.</p>
-<h4>Yanqing An et al. LawyerKG: Exploiting Relationships within Knowledge Graph for assessing proficiency of lawyers</h4>
+<h4>LawyerKG: Exploiting Relationships within Knowledge Graph for assessing proficiency of lawyers</h4>
 <p>Enhancing Legal Modeling by Manually Constructing a Charge Entity Graph.</p>
-<h4>Yanqing An et al. LawyerDev: Development Path Recommendation for Trial Lawyers</h4>
+<h4>LawyerDev: Development Path Recommendation for Trial Lawyers</h4>
 <p>LawyerPAN simulates the process of handling cases in a lawyer’s career to provide personalized career development recommendations for lawyers.</p>
-<h4>Yanqing An et al. Article-enhanced Pre-trained Language Model for Legal Case Retrieval</h4>
+<h4>Article-enhanced Pre-trained Language Model for Legal Case Retrieval</h4>
 <p>Legal Case Retrieval using Pre-trained Language Model.</p>
-<h4>Yanqing An et al. LawyerPANE: A Proficiency Assessment Network Extension for Trial Lawyers</h4>
+<h4>LawyerPANE: A Proficiency Assessment Network Extension for Trial Lawyers</h4>
 <p>LawyerPAN's Extensions for Modeling.</p>
-<h4>Yanqing An et al. LawyerCC: A Cooperation and Competition related Proficiency Assessment Network Trial Lawyers</h4>
+<h4>LawyerCC: A Cooperation and Competition related Proficiency Assessment Network Trial Lawyers</h4>
 <p>Exploring Cooperation and Competition relationships among lawyers.</p>
-<h4>Yanqing An et al. LawyerMTL: Lawyer Proficiency Assessment via Multi-task Learning</h4>
+<h4>LawyerMTL: Lawyer Proficiency Assessment via Multi-task Learning</h4>
 <p>Using predictions of match outcomes and each team's average score to assist in Proficiency Assessment of lawyers.</p>
-<h4>Yanqing An et al. LawyerCube: Legal Model fused Lawyer Proficiency Assessment</h4>
-<p>By obtaining lawyer and case characteristics, this framework assesses lawyer’s proficiency through a combination of tasks such as legal judgment prediction, retrieval of similar cases, knowledge graphs, and case summary generation.</p>
-</blockquote>
+<h4>LawyerCube: Legal Model fused Lawyer Proficiency Assessment</h4>
+<p>By obtaining lawyer and case characteristics, this framework assesses lawyer’s proficiency through a combination of tasks such as legal case retrieval and case summary generation.</p>
+</div>
 </body>
 </html>
