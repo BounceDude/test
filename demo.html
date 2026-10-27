@@ -1624,7 +1624,7 @@ setLang('zh');
     // ---------- 球体数据 ----------
     // 英文标签替换: LawyerPAN, MCTS4LawyerRec, PF-LJP, LawyerGen, PositionLJP 等
     const papers = [
-      "LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP", "LawyerKG", "LawyerDev", "ALCR", "LawyerPANE"
+      "LawyerPAN", "", "", "", "MCTS4LawyerRec", "", "", "", "PF-LJP", "", "", "", "LawyerGen", "", "", "", "PositionLJP", "LawyerKG", "LawyerDev", "ALCR", "LawyerPANE", "LawyerCC", "LawyerMTL", "LawyerCube"
     ];
 
     // 关联关系 (索引对应上面的papers)
@@ -1633,7 +1633,7 @@ setLang('zh');
     // 3 → 表示学习方法 (Representation learning) 右侧框 (900,200)
     // 4 → 关联关系 (Relations) 右侧框 (900,400) —— 但原代码未用4，保持原样
     const relations = [
-      [1], [], [], [], [1], [], [], [], [1, 2, 3], [], [], [], [1], [], [], [], [2], [1], [1,3], [2], [4]
+      [1], [], [], [], [1], [], [], [], [1, 2, 3], [], [], [], [1], [], [], [], [2], [1], [1,3], [2], [4], [1,4], [1,3], [1,2,4]
     ];
 
     // ---------- Ball 构造函数 ----------
@@ -2008,6 +2008,12 @@ setLang('zh');
 <p>Legal Case Retrieval using Pre-trained Language Model.</p>
 <h4>Yanqing An et al. LawyerPANE: A Proficiency Assessment Network Extension for Trial Lawyers</h4>
 <p>LawyerPAN's Extensions for Modeling.</p>
+<h4>Yanqing An et al. LawyerCC: A Cooperation and Competition related Proficiency Assessment Network Trial Lawyers</h4>
+<p>Exploring Cooperation and Competition relationships among lawyers.</p>
+<h4>Yanqing An et al. LawyerMTL: Lawyer Proficiency Assessment via Multi-task Learning</h4>
+<p>Using predictions of match outcomes and each team's average score to assist in Proficiency Assessment of lawyers.</p>
+<h4>Yanqing An et al. LawyerCube: Legal Model fused Lawyer Proficiency Assessment</h4>
+<p>By obtaining lawyer and case characteristics, this framework assesses lawyer’s proficiency through a combination of tasks such as legal judgment prediction, retrieval of similar cases, knowledge graphs, and case summary generation.</p>
 </blockquote>
 </body>
 </html>
