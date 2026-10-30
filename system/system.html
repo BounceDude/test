@@ -3,422 +3,705 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>栖迟 · 总览</title>
+  <title>栖迟 · 工作台</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* ================= 基础重置与色彩变量 ================= */
     *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;}
     :root{
-      --ink:#1a2130;--ink-2:#5a6579;--line:#e3e7ef;--paper:#f6f7fb;--card:#fff;
-      --indigo:#4a5cf5;--indigo-soft:#eef0ff;--amber:#e8a33d;--mint:#2bb3a3;
-      --r:18px;--r-sm:10px;
-      --sh:0 1px 2px rgba(24,32,48,.05);
-      --sh-2:0 4px 16px rgba(24,32,48,.07);
-      --sh-3:0 16px 40px rgba(24,32,48,.12);
-      --ease:cubic-bezier(.4,0,.2,1);
+      /* 色彩系统：深绿 + 米白 + 暖灰 */
+      --bg-main: #f8f9f6;
+      --bg-sidebar: #152f27;
+      --bg-card: #ffffff;
+      --bg-hover: #f1f4f0;
+      --text-main: #1c2b27;
+      --text-sub: #64746f;
+      --text-light: #95a49e;
+      --border: #e8ece9;
+
+      --primary: #296b5c;
+      --primary-dark: #1a4a3e;
+      --primary-light: #e8f0ed;
+      --primary-soft: #f0f6f3;
+
+      --accent: #cd7b53;
+      --accent-soft: #fbefe9;
+
+      --r-md: 16px;
+      --r-sm: 12px;
+      --r-xs: 8px;
+
+      --sh-card: 0 4px 20px rgba(18, 40, 34, 0.03);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    body{background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-    /* 顶部栏 */
-    .topbar{position:sticky;top:0;z-index:1000;background:rgba(246,247,251,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);}
-    .topbar-in{max-width:1280px;margin:0 auto;height:68px;padding:0 32px;display:flex;align-items:center;gap:26px;}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:650;font-size:1.02rem;flex-shrink:0;}
-    .brand .glyph{width:32px;height:32px;border-radius:10px;background:linear-gradient(140deg,var(--indigo),#7c8bff);display:grid;place-items:center;color:#fff;font-size:.9rem;box-shadow:0 4px 12px rgba(74,92,245,.3);}
-    .nav{display:flex;align-items:center;gap:2px;flex:1;}
-    .nav-it{position:relative;}
-    .nav-a{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;color:var(--ink-2);font-size:.87rem;font-weight:500;border:none;background:none;cursor:pointer;font-family:inherit;transition:.15s;}
-    .nav-a i:first-child{font-size:.82rem;color:var(--indigo);opacity:.8;}
-    .nav-a .caret{font-size:.55rem;opacity:.5;transition:transform .25s;}
-    .nav-a:hover,.nav-a[aria-expanded="true"]{background:var(--indigo-soft);color:var(--indigo);}
-    .nav-it.open .nav-a .caret{transform:rotate(180deg);}
-    .drop{position:absolute;top:calc(100% + 8px);left:0;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);box-shadow:var(--sh-3);padding:6px;list-style:none;z-index:1200;opacity:0;visibility:hidden;transform:translateY(-6px);transition:.18s var(--ease);pointer-events:none;}
-    .nav-it::after{content:'';position:absolute;left:0;right:0;top:100%;height:10px;}
-    .nav-it.open .drop,.nav-it:hover .drop{opacity:1;visibility:visible;transform:none;pointer-events:auto;}
-    .drop li{list-style:none;}
-    .drop a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;color:var(--ink-2);font-size:.85rem;text-decoration:none;transition:.12s;}
-    .drop a i{width:18px;height:18px;display:grid;place-items:center;color:var(--indigo);font-size:.76rem;background:var(--indigo-soft);border-radius:5px;transition:.15s;}
-    .drop a:hover{background:var(--indigo-soft);color:var(--indigo);padding-left:15px;}
-    .drop a:hover i{background:var(--indigo);color:#fff;}
+    body{background:var(--bg-main);color:var(--text-main);min-height:100vh;display:flex;overflow-x:hidden;line-height:1.6;}
 
-    /* 右上角：今日标签 */
-    .day-chip{display:flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line);border-radius:100px;background:var(--card);font-size:.76rem;color:var(--ink-2);flex-shrink:0;box-shadow:var(--sh);}
-    .day-chip .k{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--indigo);font-size:.72rem;letter-spacing:.04em;}
-    .day-chip .k i{font-size:.7rem;}
-    .day-chip .v{color:var(--ink-2);}
-    .day-chip .v b{color:var(--ink);font-weight:600;}
-
-    .menu-btn{display:none;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink-2);cursor:pointer;font-size:.9rem;}
-
-    /* 主体 */
-    .page{max-width:1280px;margin:0 auto;padding:40px 32px 96px;}
-
-    /* Hero：上上版布局 */
-    .hero{display:grid;grid-template-columns:1fr 288px;gap:26px;margin-bottom:34px;}
-    .hero-main{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:38px 40px;box-shadow:var(--sh);display:flex;flex-direction:column;justify-content:center;min-height:240px;}
-    .hero-main h1{font-size:1.8rem;font-weight:650;letter-spacing:-.03em;line-height:1.3;margin-bottom:12px;}
-    .hero-main h1 em{font-style:normal;color:var(--ink);font-weight:750;}
-    .hero-main p{color:var(--ink-2);font-size:.95rem;max-width:540px;}
-    .hero-meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px;}
-    .tag{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:500;padding:6px 13px;border-radius:100px;border:1px solid var(--line);color:var(--ink-2);background:var(--paper);}
-    .tag i{font-size:.7rem;color:var(--indigo);}
-    .tag.amber i{color:var(--amber);}
-
-    /* 时钟卡片：上上版三段（时钟+日期+一言） */
-    .side-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--sh);display:flex;flex-direction:column;justify-content:center;gap:16px;}
-    .clock{font-size:2.15rem;font-weight:650;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;}
-    .clock .s{font-size:.95rem;color:var(--ink-2);font-weight:500;}
-    .clock-date{font-size:.8rem;color:var(--ink-2);display:flex;align-items:center;gap:6px;}
-    .quote-box{border-top:1px dashed var(--line);padding-top:14px;font-size:.82rem;color:var(--ink);line-height:1.6;display:flex;flex-direction:column;gap:5px;}
-    .quote-box .q-label{font-size:.66rem;font-weight:600;letter-spacing:.08em;color:var(--indigo);text-transform:uppercase;display:flex;align-items:center;gap:5px;}
-    .quote-box q{quotes:'「' '」';font-style:normal;}
-
-    /* 区块标题 */
-    .sec-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:40px 0 16px;}
-    .sec-head h2{font-size:1.02rem;font-weight:600;display:flex;align-items:center;gap:9px;}
-    .sec-head h2 .bar{width:4px;height:16px;border-radius:2px;background:linear-gradient(var(--indigo),#8a6cff);}
-    .sec-head .link-more{font-size:.78rem;color:var(--ink-2);text-decoration:none;display:flex;align-items:center;gap:5px;transition:.15s;}
-    .sec-head .link-more:hover{color:var(--indigo);gap:8px;}
-
-    /* 今日焦点 */
-    .focus-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
-    .focus-it{padding:22px 24px;border-right:1px solid var(--line);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:7px;transition:.18s;}
-    .focus-it:last-child{border-right:none;}
-    .focus-it:hover{background:var(--paper);}
-    .focus-it .k{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);display:flex;align-items:center;gap:6px;}
-    .focus-it .k .pip{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55;}
-    .focus-it h3{font-size:.95rem;font-weight:600;}
-    .focus-it p{font-size:.79rem;color:var(--ink-2);}
-
-    /* 卡片网格 */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:18px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;text-decoration:none;color:inherit;box-shadow:var(--sh);transition:.22s var(--ease);display:flex;flex-direction:column;gap:12px;}
-    .card:hover{border-color:rgba(74,92,245,.3);box-shadow:var(--sh-2);transform:translateY(-2px);}
-    .card .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:1.02rem;color:#fff;}
-    .ic.i1{background:linear-gradient(140deg,#4a5cf5,#7c8bff);}
-    .ic.i2{background:linear-gradient(140deg,#e8607a,#ff8fa3);}
-    .ic.i3{background:linear-gradient(140deg,#8a6cff,#b39dff);}
-    .ic.i4{background:linear-gradient(140deg,#e8a33d,#ffc46b);}
-    .ic.i5{background:linear-gradient(140deg,#2bb3a3,#5fd9c9);}
-    .ic.i6{background:linear-gradient(140deg,#5a6579,#8894aa);}
-    .card h3{font-size:.96rem;font-weight:600;}
-    .card p{font-size:.8rem;color:var(--ink-2);flex:1;}
-
-    /* 数据概览 */
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;}
-    .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px;box-shadow:var(--sh);transition:.2s;}
-    .stat:hover{transform:translateY(-2px);box-shadow:var(--sh-2);}
-    .stat .lbl{font-size:.75rem;color:var(--ink-2);display:flex;align-items:center;gap:6px;}
-    .stat .lbl i{color:var(--indigo);font-size:.72rem;}
-    .stat .n{font-size:1.7rem;font-weight:650;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums;}
-    .stat .n small{font-size:.78rem;font-weight:500;color:var(--ink-2);}
-    .stat .d{font-size:.7rem;margin-top:4px;font-weight:500;color:#1f9d6b;display:inline-flex;align-items:center;gap:4px;}
-
-    /* 灵感罗盘 */
-    .fab{position:fixed;right:28px;bottom:28px;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(140deg,var(--indigo),#7c8bff);color:#fff;font-size:1.15rem;display:grid;place-items:center;box-shadow:0 10px 30px rgba(74,92,245,.45);z-index:950;transition:transform .35s var(--ease);}
-    .fab:hover{transform:scale(1.06);}
-    .fab.open{transform:rotate(135deg) scale(1.04);}
-    .radial{position:fixed;inset:0;z-index:940;pointer-events:none;overflow:hidden;}
-    .radial.open{pointer-events:auto;}
-    .radial .rit{position:absolute;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--ink-2);font-size:.92rem;text-decoration:none;box-shadow:var(--sh-2);opacity:0;transform:scale(.6);transition:transform .38s var(--ease),opacity .28s,background .15s,color .15s;pointer-events:none;}
-    .radial.open .rit{opacity:1;pointer-events:auto;transform:scale(1);}
-    .radial.open .rit:hover{background:var(--indigo);color:#fff;border-color:var(--indigo);}
-    .radial .rit::after{content:attr(title);position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);white-space:nowrap;font-size:.7rem;color:var(--ink-2);background:var(--card);padding:3px 8px;border-radius:6px;border:1px solid var(--line);opacity:0;transition:.15s;pointer-events:none;}
-    .radial.open .rit:hover::after{opacity:1;}
-
-    /* 响应式 */
-    @media (max-width:1080px){
-      .day-chip{display:none;}
+    /* ================= 左侧边栏 ================= */
+    .sidebar{
+      width: 240px; background: var(--bg-sidebar); color: #fff;
+      position: fixed; top: 0; bottom: 0; left: 0;
+      display: flex; flex-direction: column;
+      padding: 24px 16px; z-index: 100;
     }
-    @media (max-width:920px){
-      .hero{grid-template-columns:1fr;gap:20px;}
-      .hero-main{padding:30px 28px;min-height:auto;}
-      .side-card{padding:22px;}
+    .brand {
+      display: flex; align-items: center; gap: 12px; padding: 0 12px;
+      margin-bottom: 32px; text-decoration: none; color: #fff;
     }
-    @media (max-width:780px){
-      .topbar-in{height:62px;padding:0 18px;gap:16px;}
-      .nav{position:fixed;left:0;right:0;top:62px;background:var(--card);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;padding:10px;gap:2px;box-shadow:var(--sh-3);transform:translateY(-12px);opacity:0;visibility:hidden;transition:.22s var(--ease);z-index:999;}
-      .nav.show{transform:none;opacity:1;visibility:visible;}
-      .nav-a{justify-content:flex-start;padding:10px 12px;}
-      .drop{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;padding:0 0 0 22px;display:none;background:transparent;}
-      .nav-it.open .drop{display:block;}
-      .nav-it:hover .drop{display:none;}
-      .nav-it.open:hover .drop{display:block;}
-      .menu-btn{display:grid;}
-      .page{padding:26px 18px 84px;}
-      .hero-main{padding:26px 22px;}
-      .hero-main h1{font-size:1.5rem;}
-      .focus-line{grid-template-columns:1fr;}
-      .focus-it{border-right:none;border-bottom:1px solid var(--line);}
-      .focus-it:last-child{border-bottom:none;}
-      .fab{right:20px;bottom:20px;width:52px;height:52px;}
-      .radial .rit{width:42px;height:42px;font-size:.85rem;}
+    .brand .logo-icon{
+      font-size: 1.4rem; background: rgba(255,255,255,0.1);
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center;
+    }
+    .brand-text h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; line-height: 1.2;}
+    .brand-text p { font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .nav-group { margin-bottom: 24px; }
+    .nav-title {
+      font-size: 0.7rem; color: rgba(255,255,255,0.4);
+      padding: 0 12px; margin-bottom: 8px; letter-spacing: 1px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: var(--r-xs);
+      color: rgba(255,255,255,0.7); text-decoration: none;
+      font-size: 0.88rem; transition: background 0.2s, color 0.2s; margin-bottom: 2px;
+    }
+    .nav-item i { width: 18px; font-size: 1rem; text-align: center; opacity: 0.8;}
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 500; }
+
+    .user-panel {
+      margin-top: auto; display: flex; align-items: center; gap: 12px;
+      padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .user-panel img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #eee;}
+    .user-info h4 { font-size: 0.85rem; font-weight: 500; color: #fff; }
+    .user-info p { font-size: 0.7rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; margin-top: 2px;}
+    .user-info p::before { content:''; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; }
+
+    /* ================= 主内容区 ================= */
+    .main-wrapper {
+      margin-left: 240px; flex: 1; display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 顶部工具条 */
+    .topbar {
+      height: 72px; padding: 0 40px;
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 20px;
+    }
+    .top-icon { color: var(--text-sub); font-size: 1.1rem; cursor: pointer; transition: color 0.2s; }
+    .top-icon:hover { color: var(--primary); }
+
+    /* 页面滚动容器 */
+    .page { padding: 0 40px 40px; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; display: flex; gap: 28px;}
+
+    /* 左侧主栏 */
+    .main-col { flex: 1; min-width: 0; }
+    /* 右侧边栏 */
+    .right-col { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Hero 头部与水墨背景 */
+    .hero {
+      position: relative; margin-bottom: 24px; padding: 10px 0;
+    }
+    .hero-bg {
+      position: absolute; top: -40px; right: -100px; width: 500px; height: 200px;
+      background: radial-gradient(ellipse at 50% 100%, rgba(41,107,92,0.08) 0%, transparent 70%);
+      z-index: -1; pointer-events: none;
+      clip-path: polygon(0 100%, 20% 40%, 40% 60%, 60% 20%, 80% 50%, 100% 0, 100% 100%);
+      opacity: 0.6;
+    }
+
+    .date-time { position: absolute; right: 0; top: 10px; text-align: right; font-size: 0.8rem; color: var(--text-sub); font-variant-numeric: tabular-nums;}
+    .date-time .time { font-size: 1.1rem; color: var(--text-main); font-weight: 500; margin-top: 4px; letter-spacing: 1px;}
+
+    /* 修复：加深名字颜色，加大字号 */
+    .greeting { font-size: 2rem; font-weight: 700; color: var(--text-main); letter-spacing: 1px; margin-bottom: 12px;}
+    .greeting span { color: var(--primary-dark); font-weight: 700;}
+    .subtitle { font-size: 1rem; color: var(--text-sub); }
+
+    /* 今日一言卡片 */
+    .quote-card {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--primary-soft); border: 1px solid var(--primary-light);
+      border-radius: var(--r-md); padding: 16px 20px; margin-bottom: 28px;
+      color: var(--primary-dark); font-size: 0.9rem; font-weight: 500;
+    }
+    .quote-card i { font-size: 1.2rem; opacity: 0.6; }
+    .quote-card span { font-size: 0.8rem; color: var(--text-sub); font-weight: 400; margin-left: auto;}
+
+    /* 通用区块标题 */
+    .sec-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .sec-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .sec-title i { color: var(--primary); font-size: 1rem; }
+    .sec-link { font-size: 0.8rem; color: var(--text-sub); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.2s;}
+    .sec-link:hover { color: var(--primary); }
+
+    /* 今日焦点：横向卡片 */
+    .focus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;}
+    .focus-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 20px; box-shadow: var(--sh-card);
+      text-decoration: none; color: inherit; display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; position: relative; overflow: hidden;
+    }
+    .focus-card:hover { border-color: #c2d6d0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(18,40,34,0.06); }
+    .fc-tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; background: var(--bg-hover); color: var(--text-sub); display: inline-block; width: fit-content; margin-bottom: 12px;}
+    .fc-tag.t-blue { background: #e8f0fe; color: #1a73e8; }
+    .fc-tag.t-green { background: #e6f4ea; color: #1e8e3e; }
+    .focus-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; line-height: 1.4;}
+    .focus-card p { font-size: 0.8rem; color: var(--text-sub); flex: 1; margin-bottom: 16px;}
+    .fc-foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-light); margin-top: auto;}
+    .fc-foot i { color: var(--text-light); transition: 0.2s; }
+    .focus-card:hover .fc-foot i { color: var(--primary); transform: translateX(3px); }
+
+    /* 核心模块：网格 */
+    .module-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;}
+    .mod-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 20px;
+      text-decoration: none; color: inherit; display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; box-shadow: var(--sh-card);
+    }
+    .mod-card:hover { border-color: #c2d6d0; transform: translateY(-2px); }
+    .mod-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-hover); color: var(--primary); display: grid; place-items: center; font-size: 1rem; margin-bottom: 16px; transition: 0.2s;}
+    .mod-card:hover .mod-icon { background: var(--primary); color: #fff; }
+    .mod-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px;}
+    .mod-card p { font-size: 0.75rem; color: var(--text-sub); line-height: 1.5; margin-bottom: 12px;}
+    .mod-card .arrow { margin-top: auto; align-self: flex-end; color: var(--text-light); font-size: 0.8rem;}
+
+    /* 数据概览：带迷你折线图 */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-box {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 20px; box-shadow: var(--sh-card);
+    }
+    .stat-head { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 8px;}
+    .stat-val { font-size: 1.5rem; font-weight: 600; color: var(--text-main); display: flex; align-items: baseline; gap: 6px;}
+    .stat-val .trend { font-size: 0.7rem; color: #1e8e3e; font-weight: 500;}
+    .stat-chart { height: 30px; margin-top: 12px; width: 100%; }
+    .stat-chart svg { width: 100%; height: 100%; overflow: visible;}
+
+    /* 右侧面板共用样式 */
+    .side-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 20px; box-shadow: var(--sh-card);
+    }
+    .sp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;}
+    .sp-head h3 { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+    .sp-head h3 i { color: var(--primary); font-size: 0.9rem;}
+    .sp-head .sp-time { font-size: 0.7rem; color: var(--text-light); }
+
+    /* 网络状态卡 */
+    .net-status { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-sub); margin-bottom: 16px;}
+    .net-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #1e8e3e;}
+    .net-stats-row { display: flex; justify-content: space-between; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px;}
+    .net-item .val { font-size: 1.1rem; font-weight: 600; color: var(--text-main);}
+    .net-item .val small { font-size: 0.7rem; font-weight: 400; color: var(--text-sub);}
+    .net-item .lbl { font-size: 0.7rem; color: var(--text-sub); margin-top: 4px;}
+
+    /* 服务器状态列表 */
+    .srv-list { display: flex; flex-direction: column; gap: 12px;}
+    .srv-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;}
+    .srv-name { display: flex; align-items: center; gap: 8px; color: var(--text-main);}
+    .srv-name .dot { width: 6px; height: 6px; border-radius: 50%; background: #1e8e3e;}
+    .srv-status { color: #1e8e3e; font-size: 0.75rem;}
+    .srv-val { color: var(--text-sub); font-weight: 500; width: 36px; text-align: right;}
+
+    /* 活跃成员 */
+    .avatar-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px;}
+    .avatar-group img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--bg-card); object-fit: cover; background: #eee;}
+    .avatar-group .more { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-hover); color: var(--text-sub); display: grid; place-items: center; font-size: 0.7rem; border: 2px solid var(--bg-card);}
+    .member-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-sub);}
+
+    /* 最近讨论 */
+    .discuss-list { display: flex; flex-direction: column; gap: 16px;}
+    .d-item { display: flex; gap: 12px; text-decoration: none; color: inherit;}
+    .d-item img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #eee;}
+    .d-content h4 { font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; line-height: 1.3;}
+    .d-content .meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-light);}
+    .d-tag { color: var(--primary); background: var(--primary-soft); padding: 1px 6px; border-radius: 4px;}
+
+    /* ================= 右下角罗盘 (修复) ================= */
+    .fab-container { position: fixed; right: 40px; bottom: 40px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 900;}
+    .fab-hint { background: var(--bg-sidebar); color: #fff; font-size: 0.75rem; padding: 6px 12px; border-radius: 20px; opacity: 0; transform: translateY(10px); transition: 0.3s; pointer-events: none;}
+    .fab-container:hover .fab-hint { opacity: 1; transform: translateY(0); }
+    .fab-btn {
+      width: 56px; height: 56px; border-radius: 50%; background: var(--bg-sidebar); color: #fff;
+      border: 4px solid var(--bg-main); box-shadow: 0 4px 16px rgba(18,40,34,0.3);
+      display: grid; place-items: center; font-size: 1.3rem; cursor: pointer; transition: transform 0.35s var(--ease);
+    }
+    .fab-btn.open { transform: rotate(135deg) scale(1.05); }
+
+    /* 罗盘径向菜单 */
+    .radial-menu { position: fixed; inset: 0; pointer-events: none; z-index: 890; overflow: hidden; }
+    .radial-menu.open { pointer-events: auto; }
+    .rit {
+      position: absolute; width: 46px; height: 46px; border-radius: 50%;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-sub); font-size: 1rem; text-decoration: none;
+      box-shadow: 0 4px 12px rgba(18,40,34,0.12);
+      display: grid; place-items: center;
+      opacity: 0; transform: scale(0.5); pointer-events: none;
+      transition: transform 0.38s var(--ease), opacity 0.28s, background 0.2s, color 0.2s;
+    }
+    .radial-menu.open .rit { opacity: 1; transform: scale(1); pointer-events: auto; }
+    .rit:hover { background: var(--bg-sidebar); color: #fff; border-color: var(--bg-sidebar); }
+    .rit::after {
+      content: attr(title); position: absolute; left: 50%; top: calc(100% + 6px);
+      transform: translateX(-50%); white-space: nowrap; font-size: 0.7rem;
+      color: var(--text-main); background: var(--bg-card); padding: 4px 8px;
+      border-radius: 6px; border: 1px solid var(--border);
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .rit:hover::after { opacity: 1; }
+
+    /* 响应式调整 */
+    @media (max-width: 1200px) {
+      .focus-grid { grid-template-columns: 1fr; }
+      .module-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .right-col { display: none; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+      .sidebar.open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; }
+      .page { padding: 0 20px 20px; }
+      .topbar { padding: 0 20px; justify-content: space-between;}
+      .date-time { display: none; }
+      .greeting { font-size: 1.5rem; }
+      .module-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 顶部栏 -->
-  <header class="topbar">
-    <div class="topbar-in">
-      <a href="/system/" class="brand">
-        <span class="glyph"><i class="fas fa-shapes"></i></span>
-        栖迟
-      </a>
-
-      <nav class="nav" id="nav">
-        <div class="nav-it">
-          <button class="nav-a" data-toggle><i class="fas fa-id-card"></i> 用户画像 <i class="fas fa-chevron-down caret"></i></button>
-          <ul class="drop"><li><a href="/system/user_profile/lawyersystem/"><i class="fas fa-user-tie"></i> 律师画像</a></li></ul>
-        </div>
-        <div class="nav-it">
-          <button class="nav-a" data-toggle><i class="fas fa-server"></i> 服务器 <i class="fas fa-chevron-down caret"></i></button>
-          <ul class="drop"><li><a href="/system/server/manuscripts/"><i class="fas fa-pen-fancy"></i> 手账</a></li></ul>
-        </div>
-        <div class="nav-it">
-          <button class="nav-a" data-toggle><i class="fas fa-globe"></i> 网络 <i class="fas fa-chevron-down caret"></i></button>
-          <ul class="drop"><li><a href="/system/cyber/overview/"><i class="fas fa-chart-pie"></i> 概览</a></li></ul>
-        </div>
-        <div class="nav-it">
-          <button class="nav-a" data-toggle><i class="fas fa-comments"></i> 讨论区 <i class="fas fa-chevron-down caret"></i></button>
-          <ul class="drop">
-            <li><a href="/system/discussion/forum/"><i class="fas fa-comment-dots"></i> 论坛</a></li>
-            <li><a href="/system/discussion/applications/"><i class="fas fa-mobile-alt"></i> 应用</a></li>
-            <li><a href="/system/discussion/game/"><i class="fas fa-gamepad"></i> 游戏</a></li>
-          </ul>
-        </div>
-        <div class="nav-it">
-          <button class="nav-a" data-toggle><i class="fas fa-headset"></i> 反馈 <i class="fas fa-chevron-down caret"></i></button>
-          <ul class="drop">
-            <li><a href="/system/feedback/service/"><i class="fas fa-headset"></i> 客服</a></li>
-            <li><a href="/system/feedback/aboutus/"><i class="fas fa-users"></i> 关于我们</a></li>
-          </ul>
-        </div>
-      </nav>
-
-      <!-- 右上角：今日标签 -->
-      <div class="day-chip" title="今日概览">
-        <span class="k"><i class="fas fa-calendar-day"></i> 今日</span>
-        <span class="v" id="dayChipDate">--月--日</span>
-        <span class="v">· <b>宜</b> 整理灵感</span>
+  <!-- 左侧固定侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <a href="/system/" class="brand">
+      <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+      <div class="brand-text">
+        <h1>栖迟</h1>
+        <p>把灵感一格格收好</p>
       </div>
+    </a>
 
-      <button class="menu-btn" id="menuBtn" aria-label="菜单"><i class="fas fa-bars"></i></button>
+    <div class="nav-group">
+      <div class="nav-title">概览</div>
+      <a href="/system/" class="nav-item active"><i class="fas fa-home"></i> 首页</a>
     </div>
-  </header>
 
-  <!-- 主内容 -->
-  <main class="page">
+    <div class="nav-group">
+      <div class="nav-title">个人空间</div>
+      <a href="/system/user_profile/lawyersystem/" class="nav-item"><i class="fas fa-user"></i> 用户画像</a>
+      <a href="/system/server/manuscripts/" class="nav-item"><i class="fas fa-book"></i> 手账</a>
+      <a href="/system/discussion/game/" class="nav-item"><i class="fas fa-gamepad"></i> 游戏</a>
+      <a href="/system/discussion/forum/" class="nav-item"><i class="fas fa-comment-dots"></i> 论坛</a>
+    </div>
 
-    <!-- Hero + 时钟卡（上上版布局） -->
-    <section class="hero">
-      <div class="hero-main">
-        <h1>栖迟，<em>把灵感一格格收好</em></h1>
-        <p>讨论、游戏、成果、手账、成员，都在这里。右下角罗盘随时展开。</p>
-        <div class="hero-meta">
-          <span class="tag"><i class="fas fa-bolt"></i> 高效直达</span>
-          <span class="tag amber"><i class="fas fa-compass"></i> 罗盘探索</span>
-          <span class="tag"><i class="fas fa-keyboard"></i> 键盘友好</span>
+    <div class="nav-group">
+      <div class="nav-title">技术与服务</div>
+      <a href="/system/cyber/overview/" class="nav-item"><i class="fas fa-server"></i> 服务器</a>
+      <a href="/system/cyber/overview/" class="nav-item"><i class="fas fa-globe"></i> 网络</a>
+      <a href="/system/feedback/aboutus/" class="nav-item"><i class="fas fa-users"></i> 团队成员</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-title">其他</div>
+      <a href="/system/feedback/service/" class="nav-item"><i class="fas fa-envelope"></i> 反馈</a>
+      <a href="#" class="nav-item"><i class="fas fa-cog"></i> 设置</a>
+    </div>
+
+    <div class="user-panel">
+      <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Yanqing" alt="User">
+      <div class="user-info">
+        <h4>Yanqing An</h4>
+        <p>在线</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主区域 -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button id="menuBtn" class="top-icon" style="display:none; margin-right:auto;"><i class="fas fa-bars"></i></button>
+      <i class="fas fa-search top-icon"></i>
+      <i class="fas fa-bell top-icon" style="position:relative;">
+        <span style="position:absolute; top:-2px; right:-2px; width:8px; height:8px; background:#ef4444; border-radius:50%; border:2px solid var(--bg-main);"></span>
+      </i>
+      <i class="fas fa-sun top-icon"></i>
+    </header>
+
+    <main class="page">
+
+      <!-- 左侧主栏 -->
+      <div class="main-col">
+
+        <!-- 头部与水墨背景 -->
+        <div class="hero">
+          <div class="hero-bg"></div>
+          <div class="date-time">
+            <div id="dateText">2026年10月29日 星期四</div>
+            <div class="time" id="timeText">12:03:45</div>
+          </div>
+          <h2 class="greeting">早上好，<span>Yanqing</span></h2>
+          <p class="subtitle">把灵感一格格收好。</p>
         </div>
+
+        <!-- 今日一言 -->
+        <div class="quote-card">
+          <i class="fas fa-leaf"></i>
+          <div>“生活不在别处，就在当下。”</div>
+          <span>— 罗曼·罗兰</span>
+        </div>
+
+        <!-- 今日焦点 -->
+        <div class="sec-head">
+          <h3 class="sec-title"><i class="fas fa-fire" style="color:var(--accent)"></i> 今日焦点</h3>
+          <a href="#" class="sec-link">查看全部 <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="focus-grid">
+          <a href="#" class="focus-card">
+            <span class="fc-tag t-blue">项目</span>
+            <h3>LawyerGen 论文初稿完成</h3>
+            <p>已完成论文初稿撰写，下一步进行实验与结果分析。</p>
+            <div class="fc-foot"><span>2026-10-28</span> <i class="fas fa-arrow-right"></i></div>
+          </a>
+          <a href="#" class="focus-card">
+            <span class="fc-tag t-green">讨论</span>
+            <h3>类案检索方案讨论</h3>
+            <p>团队已完成方案初稿，欢迎大家提出修改建议。</p>
+            <div class="fc-foot"><span>2026-10-27</span> <i class="fas fa-arrow-right"></i></div>
+          </a>
+          <a href="#" class="focus-card">
+            <span class="fc-tag" style="background:var(--accent-soft); color:var(--accent);">生活</span>
+            <h3>本周读书计划</h3>
+            <p>《人类简史》已读 1/3，继续保持！</p>
+            <div class="fc-foot"><span>2026-10-26</span> <i class="fas fa-arrow-right"></i></div>
+          </a>
+        </div>
+
+        <!-- 核心模块 -->
+        <div class="sec-head">
+          <h3 class="sec-title"><i class="fas fa-th-large"></i> 核心模块</h3>
+        </div>
+        <div class="module-grid">
+          <a href="/system/user_profile/lawyersystem/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-user"></i></div>
+            <h3>用户画像</h3>
+            <p>管理个人信息与能力标签</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/server/manuscripts/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-book"></i></div>
+            <h3>手账</h3>
+            <p>记录思考与生活点滴</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/discussion/game/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-gamepad"></i></div>
+            <h3>游戏</h3>
+            <p>探索有趣的世界</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/discussion/forum/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-comment-dots"></i></div>
+            <h3>论坛</h3>
+            <p>交流与分享</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/cyber/overview/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-server"></i></div>
+            <h3>服务器</h3>
+            <p>监控与管理服务器状态</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/cyber/overview/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-globe"></i></div>
+            <h3>网络</h3>
+            <p>查看网络与流量信息</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/feedback/aboutus/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-users"></i></div>
+            <h3>团队成员</h3>
+            <p>查看团队信息与动态</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+          <a href="/system/feedback/service/" class="mod-card">
+            <div class="mod-icon"><i class="fas fa-envelope"></i></div>
+            <h3>反馈</h3>
+            <p>收集与处理建议</p>
+            <i class="fas fa-arrow-right arrow"></i>
+          </a>
+        </div>
+
+        <!-- 数据概览 -->
+        <div class="sec-head">
+          <h3 class="sec-title"><i class="fas fa-chart-bar"></i> 数据概览</h3>
+          <a href="#" class="sec-link">最近更新 <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-head">今日访问量</div>
+            <div class="stat-val">2,846 <span class="trend"><i class="fas fa-arrow-up"></i> 12%</span></div>
+            <div class="stat-chart">
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path d="M0,25 Q10,20 20,22 T40,15 T60,18 T80,10 T100,5" fill="none" stroke="#296b5c" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M0,25 Q10,20 20,22 T40,15 T60,18 T80,10 T100,5 L100,30 L0,30 Z" fill="#296b5c" opacity="0.1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-head">项目数量</div>
+            <div class="stat-val">6 <span class="trend"><i class="fas fa-arrow-up"></i> 1</span></div>
+            <div class="stat-chart">
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path d="M0,20 Q15,20 25,15 T50,25 T75,10 T100,10" fill="none" stroke="#296b5c" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M0,20 Q15,20 25,15 T50,25 T75,10 T100,10 L100,30 L0,30 Z" fill="#296b5c" opacity="0.1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-head">在线成员</div>
+            <div class="stat-val">5 / 8 <span class="trend" style="color:var(--text-sub)"><i class="fas fa-arrow-up"></i> 0</span></div>
+            <div class="stat-chart" style="display:flex; align-items:center; gap:4px; margin-top:16px;">
+               <i class="fas fa-user" style="color:#296b5c;font-size:1rem;"></i>
+               <i class="fas fa-user" style="color:#296b5c;font-size:1rem;"></i>
+               <i class="fas fa-user" style="color:#296b5c;font-size:1rem;"></i>
+               <i class="fas fa-user" style="color:var(--text-light);font-size:1rem;"></i>
+               <i class="fas fa-user" style="color:var(--text-light);font-size:1rem;"></i>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-head">存储使用</div>
+            <div class="stat-val">68% <span class="trend"><i class="fas fa-arrow-up"></i> 3%</span></div>
+            <div style="margin-top:16px; height:6px; background:var(--bg-hover); border-radius:10px; overflow:hidden;">
+              <div style="width:68%; height:100%; background:var(--primary); border-radius:10px;"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <aside class="side-card">
-        <div>
-          <div class="clock" id="clock">--:--<span class="s">:--</span></div>
-          <div class="clock-date" id="clockDate"><i class="fas fa-calendar-day"></i> --</div>
+      <!-- 右侧边栏 -->
+      <aside class="right-col">
+
+        <!-- 网络状态 -->
+        <div class="side-panel">
+          <div class="sp-head">
+            <h3><i class="fas fa-wifi"></i> 网络状态</h3>
+            <span class="sp-time" id="netTime">更新于 12:03</span>
+          </div>
+          <div class="net-status"><span class="dot"></span> 实时</div>
+          <div class="net-stats-row">
+            <div class="net-item">
+              <div class="val">24<small>个</small></div>
+              <div class="lbl">在线节点</div>
+            </div>
+            <div class="net-item">
+              <div class="val">1.2<small>Gbps</small></div>
+              <div class="lbl">当前吞吐量</div>
+            </div>
+            <div class="net-item">
+              <div class="val">92<small>%</small></div>
+              <div class="lbl">服务可用率</div>
+            </div>
+          </div>
         </div>
-        <div class="quote-box">
-          <span class="q-label"><i class="fas fa-feather-pointed"></i> 今日一言</span>
-          <q>衡门之下，可以栖迟。</q>
+
+        <!-- 服务器状态 -->
+        <div class="side-panel">
+          <div class="sp-head">
+            <h3><i class="fas fa-server"></i> 服务器状态</h3>
+            <span class="sp-time" id="srvTime">更新于 12:03</span>
+          </div>
+          <div class="net-status"><span class="dot"></span> 运行中</div>
+          <div class="srv-list">
+            <div class="srv-item">
+              <div class="srv-name"><span class="dot"></span> web-01</div>
+              <div class="srv-status">正常</div>
+              <div class="srv-val">98%</div>
+            </div>
+            <div class="srv-item">
+              <div class="srv-name"><span class="dot"></span> web-02</div>
+              <div class="srv-status">正常</div>
+              <div class="srv-val">97%</div>
+            </div>
+            <div class="srv-item">
+              <div class="srv-name"><span class="dot"></span> db-01</div>
+              <div class="srv-status">正常</div>
+              <div class="srv-val">99%</div>
+            </div>
+            <div class="srv-item">
+              <div class="srv-name"><span class="dot"></span> cache-01</div>
+              <div class="srv-status">正常</div>
+              <div class="srv-val">98%</div>
+            </div>
+          </div>
         </div>
+
+        <!-- 活跃成员 -->
+        <div class="side-panel">
+          <div class="sp-head">
+            <h3><i class="fas fa-users"></i> 活跃成员</h3>
+            <span class="sp-time">在线 5 / 8</span>
+          </div>
+          <div class="avatar-group">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Yanqing" alt="U1">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix" alt="U2">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Aneka" alt="U3">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Jack" alt="U4">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Mia" alt="U5">
+            <div class="more">+3</div>
+          </div>
+          <div class="member-info">
+            <span>最后活跃：2分钟前</span>
+            <a href="#" style="color:var(--text-sub); text-decoration:none;">查看全部 <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></a>
+          </div>
+        </div>
+
+        <!-- 最近讨论 -->
+        <div class="side-panel">
+          <div class="sp-head">
+            <h3><i class="fas fa-comments"></i> 最近讨论</h3>
+            <a href="#" class="sec-link">查看全部 <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <div class="discuss-list">
+            <a href="#" class="d-item">
+              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix" alt="U2">
+              <div class="d-content">
+                <h4>关于类案检索的实现思路</h4>
+                <div class="meta">
+                  <span class="d-tag">技术</span>
+                  <span>2小时前</span>
+                </div>
+              </div>
+            </a>
+            <a href="#" class="d-item">
+              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Aneka" alt="U3">
+              <div class="d-content">
+                <h4>AI 与法律的结合有哪些可能性？</h4>
+                <div class="meta">
+                  <span class="d-tag" style="color:var(--accent); background:var(--accent-soft);">思考</span>
+                  <span>5小时前</span>
+                </div>
+              </div>
+            </a>
+            <a href="#" class="d-item">
+              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Jack" alt="U4">
+              <div class="d-content">
+                <h4>推荐几本好书</h4>
+                <div class="meta">
+                  <span class="d-tag" style="color:#8b5cf6; background:#f3e8ff;">生活</span>
+                  <span>昨天</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+
       </aside>
-    </section>
+    </main>
+  </div>
 
-    <!-- 今日焦点 -->
-    <div class="sec-head">
-      <h2><span class="bar"></span> 今日焦点</h2>
-      <a class="link-more" href="/system/cyber/overview/">查看全部 <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <section class="focus-line">
-      <a class="focus-it" href="/system/discussion/forum/">
-        <span class="k"><span class="pip"></span> 讨论区</span>
-        <h3>论坛有 3 条新回复</h3>
-        <p>关于原型交互的最新讨论等你加入。</p>
-      </a>
-      <a class="focus-it" href="/system/cyber/overview/">
-        <span class="k"><span class="pip"></span> 网络</span>
-        <h3>系统健康度 92%</h3>
-        <p>24 个节点在线，吞吐量稳定在 1.2 Gbps。</p>
-      </a>
-      <a class="focus-it" href="/system/server/manuscripts/">
-        <span class="k"><span class="pip"></span> 服务器</span>
-        <h3>本周手账已归档</h3>
-        <p>团队周记与运维日志同步完成。</p>
-      </a>
-      <a class="focus-it" href="/system/feedback/aboutus/">
-        <span class="k"><span class="pip"></span> 成员</span>
-        <h3>新成员加入</h3>
-        <p>欢迎交互设计师加入我们的创意团队。</p>
-      </a>
-    </section>
-
-    <!-- 核心模块 -->
-    <div class="sec-head">
-      <h2><span class="bar"></span> 核心模块</h2>
-    </div>
-    <div class="grid">
-      <a class="card" href="/system/discussion/forum/">
-        <span class="ic i1"><i class="fas fa-comments"></i></span>
-        <h3>论坛讨论</h3>
-        <p>交流想法、分享经验，与团队保持同步。</p>
-      </a>
-      <a class="card" href="/system/discussion/game/">
-        <span class="ic i2"><i class="fas fa-gamepad"></i></span>
-        <h3>游戏娱乐</h3>
-        <p>趣味小游戏与转盘抽奖，放松一下再出发。</p>
-      </a>
-      <a class="card" href="/system/cyber/overview/">
-        <span class="ic i3"><i class="fas fa-chart-line"></i></span>
-        <h3>成果展示</h3>
-        <p>查看项目里程碑、数据概览与最新进展。</p>
-      </a>
-      <a class="card" href="/system/server/manuscripts/">
-        <span class="ic i4"><i class="fas fa-pen-fancy"></i></span>
-        <h3>手账记录</h3>
-        <p>记录日常点滴、运维日志与团队手账。</p>
-      </a>
-      <a class="card" href="/system/user_profile/lawyersystem/">
-        <span class="ic i5"><i class="fas fa-user-tie"></i></span>
-        <h3>律师画像</h3>
-        <p>多维数据分析，刻画专业能力模型。</p>
-      </a>
-      <a class="card" href="/system/feedback/aboutus/">
-        <span class="ic i6"><i class="fas fa-users"></i></span>
-        <h3>成员介绍</h3>
-        <p>认识团队成员，了解每个人的专长。</p>
-      </a>
-    </div>
-
-    <!-- 数据概览 -->
-    <div class="sec-head">
-      <h2><span class="bar"></span> 数据概览</h2>
-      <span class="link-more" style="cursor:default"><i class="fas fa-circle" style="font-size:.4rem;color:#2bb3a3;"></i> 实时</span>
-    </div>
-    <div class="stats">
-      <div class="stat">
-        <div class="lbl"><i class="fas fa-wifi"></i> 在线节点</div>
-        <div class="n">24</div>
-        <div class="d"><i class="fas fa-arrow-up"></i> 今日 +3</div>
-      </div>
-      <div class="stat">
-        <div class="lbl"><i class="fas fa-tachometer-alt"></i> 吞吐量</div>
-        <div class="n">1.2<small>Gbps</small></div>
-        <div class="d"><i class="fas fa-equals"></i> 稳定</div>
-      </div>
-      <div class="stat">
-        <div class="lbl"><i class="fas fa-shield-halved"></i> 服务可用率</div>
-        <div class="n">92<small>%</small></div>
-        <div class="d"><i class="fas fa-arrow-up"></i> 优良</div>
-      </div>
-      <div class="stat">
-        <div class="lbl"><i class="fas fa-user-group"></i> 活跃成员</div>
-        <div class="n">15</div>
-        <div class="d"><i class="fas fa-arrow-up"></i> 本周 +2</div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- 灵感罗盘 -->
-  <button class="fab" id="fab" aria-label="灵感罗盘"><i class="fas fa-plus"></i></button>
-  <div class="radial" id="radial">
-    <a class="rit" href="/system/discussion/forum/"          title="论坛讨论"><i class="fas fa-comments"></i></a>
-    <a class="rit" href="/system/discussion/game/"           title="游戏娱乐"><i class="fas fa-gamepad"></i></a>
-    <a class="rit" href="/system/cyber/overview/"            title="成果展示"><i class="fas fa-chart-line"></i></a>
-    <a class="rit" href="/system/server/manuscripts/"        title="手账记录"><i class="fas fa-pen-fancy"></i></a>
-    <a class="rit" href="/system/user_profile/lawyersystem/" title="律师画像"><i class="fas fa-user-tie"></i></a>
-    <a class="rit" href="/system/feedback/aboutus/"          title="成员介绍"><i class="fas fa-users"></i></a>
+  <!-- 右下角罗盘与径向菜单 -->
+  <div class="fab-container">
+    <div class="fab-hint">打开罗盘</div>
+    <button class="fab-btn" id="fab" aria-label="灵感罗盘"><i class="fas fa-compass"></i></button>
+  </div>
+  <div class="radial-menu" id="radial">
+    <a class="rit" href="/system/discussion/forum/"          title="论坛"><i class="fas fa-comments"></i></a>
+    <a class="rit" href="/system/discussion/game/"           title="游戏"><i class="fas fa-gamepad"></i></a>
+    <a class="rit" href="/system/cyber/overview/"            title="概览"><i class="fas fa-chart-line"></i></a>
+    <a class="rit" href="/system/server/manuscripts/"        title="手账"><i class="fas fa-book"></i></a>
+    <a class="rit" href="/system/user_profile/lawyersystem/" title="画像"><i class="fas fa-user"></i></a>
+    <a class="rit" href="/system/feedback/aboutus/"          title="团队"><i class="fas fa-users"></i></a>
   </div>
 
   <script>
-  (function(){
-    'use strict';
+    // 实时时钟更新
+    function updateTime() {
+      const now = new Date();
+      const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
 
-    /* 时钟 + 右上角日期 */
-    const clockEl = document.getElementById('clock');
-    const dateEl = document.getElementById('clockDate');
-    const chipDate = document.getElementById('dayChipDate');
-    const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
-    function tick(){
-      const d = new Date();
-      clockEl.innerHTML = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}<span class="s">:${String(d.getSeconds()).padStart(2,'0')}</span>`;
-      const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
-      dateEl.innerHTML = `<i class="fas fa-calendar-day"></i> ${dateStr} ${weekdays[d.getDay()]}`;
-      chipDate.textContent = dateStr;
-    }
-    tick(); setInterval(tick, 1000);
+      const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+      document.getElementById('dateText').textContent = dateStr;
 
-    /* 下拉菜单 */
-    const nav = document.getElementById('nav');
-    const items = [...nav.querySelectorAll('.nav-it')];
-    function closeAll(except){
-      items.forEach(it => {
-        if(it !== except){
-          it.classList.remove('open');
-          const b = it.querySelector('[data-toggle]');
-          if(b) b.setAttribute('aria-expanded','false');
-        }
-      });
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('timeText').textContent = `${hh}:${mm}:${ss}`;
+
+      // 更新右侧小更新时间
+      const timeStr = `${hh}:${mm}`;
+      document.getElementById('netTime').textContent = `更新于 ${timeStr}`;
+      document.getElementById('srvTime').textContent = `更新于 ${timeStr}`;
     }
-    items.forEach(it => {
-      const btn = it.querySelector('[data-toggle]');
-      if(!btn) return;
-      btn.setAttribute('aria-expanded','false');
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const open = !it.classList.contains('open');
-        closeAll(it);
-        it.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-      btn.addEventListener('keydown', e => {
-        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); btn.click(); }
-        if(e.key === 'Escape'){ it.classList.remove('open'); btn.setAttribute('aria-expanded','false'); btn.blur(); }
-      });
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // 移动端侧边栏控制
+    const menuBtn = document.getElementById('menuBtn');
+    if(window.innerWidth <= 768) menuBtn.style.display = 'block';
+    window.addEventListener('resize', () => {
+      if(window.innerWidth <= 768) menuBtn.style.display = 'block';
+      else menuBtn.style.display = 'none';
     });
-    document.addEventListener('click', e => { if(!nav.contains(e.target)) closeAll(); });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAll(); });
-    document.getElementById('menuBtn').addEventListener('click', () => nav.classList.toggle('show'));
 
-    /* 灵感罗盘：180°(正左) → 90°(正上)，6 点均分 */
+    // ================= 罗盘交互逻辑 (修复版) =================
     const fab = document.getElementById('fab');
     const radial = document.getElementById('radial');
     const rits = [...radial.querySelectorAll('.rit')];
+    // 180°(正左) -> 90°(正上) 的左上扇区
     const ANGLES = [180, 162, 144, 126, 108, 90];
 
-    function layout(){
-      const r = fab.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
+    function layoutRadial() {
+      const rect = fab.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
       const bw = rits[0]?.offsetWidth || 46;
       const bh = rits[0]?.offsetHeight || 46;
       const hw = bw / 2, hh = bh / 2;
 
-      let R = window.innerWidth <= 780 ? 135 : 165;
-      const minR = (bw + 10) * 5 / 1.5708;
-      if(R < minR) R = minR;
-
+      // 半径设置，桌面端稍大，移动端稍小
+      let R = window.innerWidth <= 780 ? 120 : 150;
       const margin = 10;
-      function build(radius){
+
+      function build(radius) {
         return ANGLES.map(deg => {
           const rad = deg * Math.PI / 180;
-          return { x: cx + Math.cos(rad) * radius, y: cy - Math.sin(rad) * radius };
+          return {
+            x: cx + Math.cos(rad) * radius,
+            y: cy - Math.sin(rad) * radius  // 取负值，让按钮落在左上方
+          };
         });
       }
+
       let pts = build(R);
-      function ok(points){
-        return points.every(p => p.x - hw >= margin && p.x + hw <= innerWidth - margin && p.y - hh >= margin && p.y + hh <= innerHeight - margin);
+      function ok(points) {
+        return points.every(p =>
+          p.x - hw >= margin && p.x + hw <= window.innerWidth - margin &&
+          p.y - hh >= margin && p.y + hh <= window.innerHeight - margin
+        );
       }
+
+      // 如果超出边界，不断缩小半径
       let guard = 0;
-      while(!ok(pts) && R > 60 && guard < 30){ R *= 0.94; pts = build(R); guard++; }
+      while (!ok(pts) && R > 60 && guard < 30) {
+        R *= 0.94;
+        pts = build(R);
+        guard++;
+      }
 
       rits.forEach((el, i) => {
         el.style.left = (pts[i].x - hw) + 'px';
@@ -426,26 +709,47 @@
       });
     }
 
-    function openR(){ layout(); radial.classList.add('open'); fab.classList.add('open'); }
-    function closeR(){ radial.classList.remove('open'); fab.classList.remove('open'); }
+    function openRadial() {
+      layoutRadial();
+      radial.classList.add('open');
+      fab.classList.add('open');
+    }
+    function closeRadial() {
+      radial.classList.remove('open');
+      fab.classList.remove('open');
+    }
 
-    fab.addEventListener('click', e => {
+    fab.addEventListener('click', (e) => {
       e.stopPropagation();
-      radial.classList.contains('open') ? closeR() : openR();
+      if (radial.classList.contains('open')) {
+        closeRadial();
+      } else {
+        openRadial();
+      }
     });
-    document.addEventListener('click', e => {
-      if(!radial.contains(e.target) && !fab.contains(e.target)) closeR();
-    });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeR(); });
-    rits.forEach(a => a.addEventListener('click', closeR));
 
+    // 点击空白处关闭
+    document.addEventListener('click', (e) => {
+      if (!radial.contains(e.target) && !fab.contains(e.target)) {
+        closeRadial();
+      }
+    });
+    // 按 Esc 关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeRadial();
+    });
+    // 点击菜单项后自动关闭
+    rits.forEach(a => a.addEventListener('click', closeRadial));
+
+    // 窗口变化重绘
     let rzT = null;
     window.addEventListener('resize', () => {
-      if(rzT) cancelAnimationFrame(rzT);
-      rzT = requestAnimationFrame(() => { rzT = null; if(radial.classList.contains('open')) layout(); });
+      if (rzT) cancelAnimationFrame(rzT);
+      rzT = requestAnimationFrame(() => {
+        rzT = null;
+        if (radial.classList.contains('open')) layoutRadial();
+      });
     }, { passive: true });
-
-  })();
   </script>
 </body>
 </html>
