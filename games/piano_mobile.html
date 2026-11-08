@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0e1119">
-  <title>手机钢琴 · 双排键 · 延音踏板</title>
+  <title>88键手机钢琴 · 双排键 · 延音踏板</title>
   <style>
     /* ========== 基础重置 ========== */
     * {
@@ -23,6 +23,7 @@
       overflow: hidden;
       overscroll-behavior: none;
       touch-action: manipulation;
+      background: #07090f;
     }
 
     body {
@@ -31,7 +32,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     /* ========== 横屏提示 ========== */
@@ -72,14 +72,10 @@
       50% { transform: rotate(90deg); }
     }
 
-    /* 竖屏且窄屏时显示提示 */
+    /* 竖屏窄屏时显示提示 */
     @media (max-width: 700px) and (orientation: portrait) {
-      .rotate-hint {
-        display: flex;
-      }
-      .piano-wrapper {
-        display: none !important;
-      }
+      .rotate-hint { display: flex; }
+      .piano-wrapper { display: none !important; }
     }
 
     /* ========== 整体框架 ========== */
@@ -87,12 +83,12 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      max-width: 1600px;
+      max-width: 1800px;
       background: linear-gradient(180deg, #1a1e2b 0%, #0e1119 100%);
       display: flex;
       flex-direction: column;
-      padding: 0.5rem 0.6rem 0.5rem;
-      gap: 0.5rem;
+      padding: 0.4rem 0.5rem 0.4rem;
+      gap: 0.35rem;
       overflow: hidden;
     }
 
@@ -103,51 +99,52 @@
       align-items: center;
       gap: 0.5rem;
       flex-shrink: 0;
-      min-height: 2.2rem;
+      min-height: 1.8rem;
+      padding: 0 0.2rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       color: #e8ecf8;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       letter-spacing: 0.3px;
     }
 
     .brand .logo {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
       background: linear-gradient(135deg, #5b6c9e, #2e3a5c);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      font-size: 0.75rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .hint-pill {
       color: #a8b2d1;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       letter-spacing: 0.2px;
       background: rgba(30, 36, 56, 0.8);
-      padding: 0.3rem 0.7rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 20px;
       box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.3);
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.2rem;
       white-space: nowrap;
     }
 
     .hint-pill kbd {
       background: #3a4260;
       color: #f0e7d3;
-      padding: 0.05rem 0.3rem;
-      border-radius: 4px;
-      font-size: 0.6rem;
+      padding: 0.03rem 0.25rem;
+      border-radius: 3px;
+      font-size: 0.55rem;
       font-weight: 600;
       border-bottom: 1px solid #1a1e2b;
       font-family: inherit;
@@ -156,24 +153,24 @@
     .pedal-status {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       background: rgba(30, 36, 56, 0.8);
-      padding: 0.3rem 0.7rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 20px;
       box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.3);
     }
 
     .pedal-status .label {
       color: #a8b2d1;
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       font-weight: 500;
       letter-spacing: 0.3px;
       text-transform: uppercase;
     }
 
     .led {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #2e3448;
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
@@ -190,7 +187,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       min-height: 0;
       overflow: hidden;
     }
@@ -199,16 +196,16 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      padding-left: 0.2rem;
-      height: 0.9rem;
+      padding-left: 0.15rem;
+      height: 0.7rem;
       flex-shrink: 0;
     }
 
     .row-label span {
       color: #6b7490;
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       font-weight: 600;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
     }
 
@@ -218,20 +215,18 @@
       background: linear-gradient(90deg, rgba(107, 116, 144, 0.3), transparent);
     }
 
-    /* 单排键盘 */
+    /* 单排键盘 - 可横向滚动 */
     .keyboard-row {
       flex: 1;
       position: relative;
       background: linear-gradient(180deg, #0a0c12 0%, #12151f 100%);
-      border-radius: 0.4rem;
+      border-radius: 0.35rem;
       padding: 0 2px 2px;
       box-shadow:
         inset 0 -4px 0 #05070b,
         inset 0 3px 8px rgba(0, 0, 0, 0.6),
         0 4px 12px rgba(0, 0, 0, 0.5);
       min-height: 0;
-      overflow: hidden;
-      /* 关键：横向滚动 */
       overflow-x: auto;
       overflow-y: hidden;
       scrollbar-width: none;
@@ -243,14 +238,13 @@
       display: none;
     }
 
-    /* 键盘内容（绝对定位） */
     .keys-inner {
       position: relative;
       height: 100%;
-      min-height: 80px;
+      min-height: 70px;
     }
 
-    /* ========== 白键（加大） ========== */
+    /* ========== 白键 ========== */
     .white-key {
       position: absolute;
       top: 0;
@@ -271,7 +265,7 @@
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
-      padding-bottom: 4px;
+      padding-bottom: 3px;
     }
 
     .white-key.active {
@@ -285,14 +279,14 @@
     }
 
     .white-key .note-label {
-      font-size: 8px;
+      font-size: 7px;
       color: #7a7466;
       font-weight: 700;
       letter-spacing: 0.1px;
       background: rgba(200, 190, 170, 0.25);
-      padding: 1px 3px;
-      border-radius: 4px;
-      opacity: 0.7;
+      padding: 1px 2px;
+      border-radius: 3px;
+      opacity: 0.6;
       transition: 0.1s;
       pointer-events: none;
       line-height: 1.1;
@@ -304,7 +298,7 @@
       opacity: 1;
     }
 
-    /* ========== 黑键（加宽） ========== */
+    /* ========== 黑键 ========== */
     .black-key {
       position: absolute;
       top: 0;
@@ -324,7 +318,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: 3px;
+      padding-bottom: 2px;
     }
 
     .black-key.active {
@@ -338,7 +332,7 @@
     }
 
     .black-key .note-label {
-      font-size: 7px;
+      font-size: 6px;
       color: #b0b0b8;
       font-weight: 600;
       background: rgba(255, 255, 255, 0.08);
@@ -358,16 +352,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1rem;
+      gap: 0.8rem;
       flex-shrink: 0;
-      padding: 0.3rem 0 0.1rem;
+      padding: 0.15rem 0 0;
     }
 
     .pedal-button {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       cursor: pointer;
       transition: transform 0.06s ease;
     }
@@ -377,14 +371,14 @@
     }
 
     .pedal-pad {
-      width: 120px;
-      height: 40px;
+      width: 110px;
+      height: 36px;
       background: linear-gradient(160deg, #2a3045, #1a1e2e);
-      border-radius: 40px;
+      border-radius: 36px;
       box-shadow:
         inset 0 -5px 0 #0b0e16,
-        0 6px 0 #080a10,
-        0 10px 16px rgba(0, 0, 0, 0.7),
+        0 5px 0 #080a10,
+        0 9px 14px rgba(0, 0, 0, 0.7),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
       display: flex;
       justify-content: center;
@@ -403,12 +397,12 @@
       right: 0;
       height: 50%;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
-      border-radius: 40px 40px 0 0;
+      border-radius: 36px 36px 0 0;
       pointer-events: none;
     }
 
     .pedal-button.active .pedal-pad {
-      transform: translateY(5px);
+      transform: translateY(4px);
       box-shadow:
         inset 0 -2px 0 #0b0e16,
         0 1px 0 #080a10,
@@ -420,7 +414,7 @@
     .pedal-pad span {
       color: #d0d8f0;
       font-weight: 700;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       letter-spacing: 2.5px;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
       z-index: 1;
@@ -434,12 +428,12 @@
 
     .pedal-label {
       color: #7e88a8;
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       font-weight: 600;
       background: rgba(20, 24, 36, 0.6);
-      padding: 0.15rem 0.8rem;
+      padding: 0.1rem 0.7rem;
       border-radius: 16px;
       transition: 0.1s;
     }
@@ -448,25 +442,25 @@
       color: #ffcd7e;
     }
 
-    /* ========== 横屏适配（手机横屏） ========== */
+    /* ========== 横屏适配 ========== */
     @media (orientation: landscape) and (max-height: 500px) {
       .piano-wrapper {
-        padding: 0.3rem 0.4rem;
-        gap: 0.3rem;
+        padding: 0.25rem 0.35rem;
+        gap: 0.25rem;
       }
 
       .top-bar {
-        min-height: 1.6rem;
+        min-height: 1.5rem;
       }
 
       .brand {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
       }
 
       .brand .logo {
-        width: 20px;
-        height: 20px;
-        font-size: 0.65rem;
+        width: 18px;
+        height: 18px;
+        font-size: 0.6rem;
       }
 
       .hint-pill {
@@ -474,71 +468,79 @@
       }
 
       .pedal-status {
-        padding: 0.2rem 0.5rem;
+        padding: 0.2rem 0.45rem;
       }
 
       .pedal-status .label {
-        font-size: 0.55rem;
-      }
-
-      .led {
-        width: 7px;
-        height: 7px;
-      }
-
-      .row-label {
-        height: 0.7rem;
-      }
-
-      .row-label span {
         font-size: 0.5rem;
       }
 
+      .led {
+        width: 6px;
+        height: 6px;
+      }
+
+      .row-label {
+        height: 0.6rem;
+      }
+
+      .row-label span {
+        font-size: 0.45rem;
+      }
+
       .keyboard-container {
-        gap: 3px;
+        gap: 2px;
       }
 
       .bottom-bar {
-        padding: 0.2rem 0 0;
+        padding: 0.1rem 0 0;
       }
 
       .pedal-pad {
-        width: 100px;
-        height: 32px;
+        width: 90px;
+        height: 30px;
       }
 
       .pedal-pad span {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         letter-spacing: 2px;
       }
 
       .pedal-label {
-        font-size: 0.5rem;
-        padding: 0.1rem 0.6rem;
+        font-size: 0.45rem;
+        padding: 0.05rem 0.5rem;
+      }
+
+      .white-key .note-label {
+        font-size: 6px;
+      }
+
+      .black-key .note-label {
+        font-size: 5px;
       }
     }
 
-    /* 横屏且屏幕较高时，双排键各占更多空间 */
+    /* 横屏且屏幕较高 */
     @media (orientation: landscape) and (min-height: 500px) {
       .piano-wrapper {
-        padding: 0.6rem 0.8rem;
+        padding: 0.5rem 0.7rem;
       }
 
       .keyboard-container {
-        gap: 6px;
+        gap: 5px;
       }
     }
 
     /* 超宽屏（平板横屏） */
     @media (orientation: landscape) and (min-width: 900px) {
       .piano-wrapper {
-        max-width: 1400px;
+        max-width: 1600px;
         margin: 0 auto;
-        padding: 0.8rem 1rem;
+        padding: 0.7rem 0.9rem;
       }
 
       .keyboard-container {
-        gap: 8px;
+        gap: 7px;
       }
     }
 
@@ -567,11 +569,11 @@
     <div class="top-bar">
       <div class="brand">
         <span class="logo">🎹</span>
-        <span>Mobile Piano</span>
+        <span>88 Key Piano</span>
       </div>
       <div class="hint-pill">
         <kbd>A</kbd><kbd>W</kbd><kbd>S</kbd><kbd>E</kbd><kbd>D</kbd><kbd>F</kbd>
-        <span style="opacity:0.6;margin-left:0.2rem;">中音区</span>
+        <span style="opacity:0.6;margin-left:0.15rem;">中音区</span>
       </div>
       <div class="pedal-status">
         <span class="label">Sustain</span>
@@ -581,7 +583,7 @@
 
     <!-- 双排键盘 -->
     <div class="keyboard-container">
-      <!-- 上排：高音区 C5-B5 -->
+      <!-- 上排：高音区 C5-B6（自动滚动到常用区域） -->
       <div class="row-label">
         <span>高音区</span>
         <div class="line"></div>
@@ -590,7 +592,7 @@
         <div class="keys-inner" id="keysUpper"></div>
       </div>
 
-      <!-- 下排：中音区 C4-B4 -->
+      <!-- 下排：中音区 C3-B4（自动滚动到C4） -->
       <div class="row-label">
         <span>中音区</span>
         <div class="line"></div>
@@ -649,7 +651,7 @@
       }
 
       // ============================================================
-      // 2. 音色合成
+      // 2. 音色合成（延长音符衰减时间）
       // ============================================================
       function playNote(midi) {
         if (!audioCtx) initAudio();
@@ -662,17 +664,20 @@
         const noteGain = audioCtx.createGain();
         noteGain.gain.setValueAtTime(0, now);
 
+        // 更长的音符衰减时间
         const attack = 0.005;
-        const decay = pedalDown ? 3.5 : 1.2;
-        const sustainLevel = 0.1;
+        const decay = pedalDown ? 6.0 : 2.8;   // 无踏板2.8秒，有踏板6秒
+        const sustainLevel = 0.15;
         const peak = 0.85;
 
+        // 包络：快速起音 → 指数衰减 → 持续衰减到静音
         noteGain.gain.linearRampToValueAtTime(peak, now + attack);
-        noteGain.gain.exponentialRampToValueAtTime(sustainLevel, now + attack + decay * 0.5);
+        noteGain.gain.exponentialRampToValueAtTime(sustainLevel, now + attack + decay * 0.35);
         noteGain.gain.exponentialRampToValueAtTime(0.001, now + attack + decay);
 
         const oscillators = [];
 
+        // 基频（主音）
         const osc1 = audioCtx.createOscillator();
         osc1.type = 'triangle';
         osc1.frequency.value = freq;
@@ -680,27 +685,40 @@
         osc1.start(now);
         oscillators.push(osc1);
 
+        // 第二泛音（八度）— 增加厚度
         const osc2 = audioCtx.createOscillator();
         osc2.type = 'sine';
         osc2.frequency.value = freq * 2;
         osc2.detune.value = 2;
         const gain2 = audioCtx.createGain();
-        gain2.gain.value = 0.25;
+        gain2.gain.value = 0.28;
         osc2.connect(gain2);
         gain2.connect(noteGain);
         osc2.start(now);
         oscillators.push(osc2);
 
+        // 第三泛音（五度）— 增加色彩
         const osc3 = audioCtx.createOscillator();
         osc3.type = 'sine';
         osc3.frequency.value = freq * 3;
         osc3.detune.value = -1;
         const gain3 = audioCtx.createGain();
-        gain3.gain.value = 0.1;
+        gain3.gain.value = 0.12;
         osc3.connect(gain3);
         gain3.connect(noteGain);
         osc3.start(now);
         oscillators.push(osc3);
+
+        // 第四泛音（高频）— 增加亮度
+        const osc4 = audioCtx.createOscillator();
+        osc4.type = 'sine';
+        osc4.frequency.value = freq * 4.01;
+        const gain4 = audioCtx.createGain();
+        gain4.gain.value = 0.06;
+        osc4.connect(gain4);
+        gain4.connect(noteGain);
+        osc4.start(now);
+        oscillators.push(osc4);
 
         noteGain.connect(masterGain);
 
@@ -715,10 +733,11 @@
 
         activeVoices.push(voice);
 
+        // 自动停止（无踏板时）
         const autoStopDelay = (attack + decay + 0.3) * 1000;
         voice.stopTimeout = setTimeout(() => {
           if (!pedalDown && !voice.released) {
-            releaseVoice(voice, 0.08);
+            releaseVoice(voice, 0.1);
           }
         }, autoStopDelay);
 
@@ -766,10 +785,10 @@
             try {
               voice.noteGain.gain.cancelScheduledValues(now);
               voice.noteGain.gain.setValueAtTime(voice.noteGain.gain.value, now);
-              voice.noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+              voice.noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
             } catch (e) {}
             voice.oscillators.forEach(osc => {
-              try { osc.stop(now + 0.18); } catch (e) {}
+              try { osc.stop(now + 0.2); } catch (e) {}
             });
             voice.released = true;
           }
@@ -777,98 +796,146 @@
       }
 
       // ============================================================
-      // 3. 构建双排键盘
+      // 3. 构建88键双排键盘（全部琴键）
       // ============================================================
 
-      // 手机适配：每排显示一个八度 + 一个额外音符（共13个半音），但为了完整感，我们建两排完整八度
-      // 上排：C5 (72) 到 B5 (83) —— 高音区
-      // 下排：C4 (60) 到 B4 (71) —— 中音区
-      // 每个八度12个半音，7白5黑
+      // 白键宽度：手机横屏时加宽
+      // 使用 CSS 变量根据屏幕宽度动态调整
+      function getKeyWidths() {
+        const vw = window.innerWidth;
+        if (vw < 500) {
+          return { white: 38, black: 24 };
+        } else if (vw < 800) {
+          return { white: 42, black: 26 };
+        } else if (vw < 1100) {
+          return { white: 46, black: 28 };
+        } else {
+          return { white: 50, black: 32 };
+        }
+      }
 
-      const WHITE_KEY_WIDTH_MOBILE = 44;  // 手机加宽白键
-      const BLACK_KEY_WIDTH_MOBILE = 28;  // 黑键加宽
+      let WHITE_KEY_WIDTH = getKeyWidths().white;
+      let BLACK_KEY_WIDTH = getKeyWidths().black;
+
+      // 88键：A0 (21) 到 C8 (108)
+      const START_MIDI = 21;
+      const END_MIDI = 108;
       const BLACK_MIDI_SET = new Set([1, 3, 6, 8, 10]);
 
-      // 上排 MIDI 范围：C5 (72) 到 B5 (83)
-      // 下排 MIDI 范围：C4 (60) 到 B4 (71)
+      // 上下两排的音域划分
+      // 下排：A0 (21) 到 B3 (59) —— 低音区
+      // 上排：C4 (60) 到 C8 (108) —— 中高音区
+      // 这样下排偏左，上排偏右，演奏时常用中音区在上下排交界处附近
 
       const rowConfigs = [
-        { id: 'keysUpper', startMidi: 72, endMidi: 83, label: '高音区' },
-        { id: 'keysLower', startMidi: 60, endMidi: 71, label: '中音区' }
+        { id: 'keysUpper', startMidi: 60, endMidi: 108, label: '中高音区' },   // C4 - C8
+        { id: 'keysLower', startMidi: 21, endMidi: 59, label: '低音区' }       // A0 - B3
       ];
 
       const allKeyElementsByMidi = new Map();
+      const allWhiteKeyMaps = []; // 存储每排的白键信息，用于滚动定位
 
-      rowConfigs.forEach(config => {
-        const container = document.getElementById(config.id);
-        if (!container) return;
+      // 构建键盘
+      function buildKeyboard() {
+        // 清空现有内容
+        document.getElementById('keysUpper').innerHTML = '';
+        document.getElementById('keysLower').innerHTML = '';
+        allKeyElementsByMidi.clear();
+        allWhiteKeyMaps.length = 0;
 
-        const startMidi = config.startMidi;
-        const endMidi = config.endMidi;
+        rowConfigs.forEach(config => {
+          const container = document.getElementById(config.id);
+          if (!container) return;
 
-        // 统计白键数量
-        let whiteCount = 0;
-        for (let midi = startMidi; midi <= endMidi; midi++) {
-          if (!BLACK_MIDI_SET.has(midi % 12)) whiteCount++;
-        }
+          const startMidi = config.startMidi;
+          const endMidi = config.endMidi;
 
-        const totalWidth = whiteCount * WHITE_KEY_WIDTH_MOBILE;
-        container.style.width = totalWidth + 'px';
-        container.style.height = '100%';
-
-        // 创建键
-        let whiteIndex = 0;
-        const whiteKeyMap = new Map();
-
-        for (let midi = startMidi; midi <= endMidi; midi++) {
-          const isBlack = BLACK_MIDI_SET.has(midi % 12);
-          const noteName = midiToName(midi);
-
-          const keyEl = document.createElement('div');
-          keyEl.dataset.midi = midi;
-          keyEl.dataset.note = noteName;
-
-          const label = document.createElement('span');
-          label.className = 'note-label';
-          label.textContent = noteName;
-          keyEl.appendChild(label);
-
-          if (!isBlack) {
-            keyEl.className = 'white-key';
-            const left = whiteIndex * WHITE_KEY_WIDTH_MOBILE;
-            keyEl.style.left = left + 'px';
-            keyEl.style.width = WHITE_KEY_WIDTH_MOBILE + 'px';
-            keyEl.style.height = '100%';
-            whiteKeyMap.set(midi, { left, width: WHITE_KEY_WIDTH_MOBILE });
-            whiteIndex++;
-          } else {
-            keyEl.className = 'black-key';
-            keyEl.style.width = BLACK_KEY_WIDTH_MOBILE + 'px';
-            keyEl.style.height = '62%';
-            keyEl.dataset.pendingBlack = 'true';
+          // 统计白键数量
+          let whiteCount = 0;
+          for (let midi = startMidi; midi <= endMidi; midi++) {
+            if (!BLACK_MIDI_SET.has(midi % 12)) whiteCount++;
           }
 
-          container.appendChild(keyEl);
-          allKeyElementsByMidi.set(midi, keyEl);
-        }
+          const totalWidth = whiteCount * WHITE_KEY_WIDTH;
+          container.style.width = totalWidth + 'px';
+          container.style.height = '100%';
 
-        // 计算黑键位置
-        for (let midi = startMidi; midi <= endMidi; midi++) {
-          if (!BLACK_MIDI_SET.has(midi % 12)) continue;
-          const keyEl = allKeyElementsByMidi.get(midi);
-          if (!keyEl) continue;
+          let whiteIndex = 0;
+          const whiteKeyMap = new Map();
 
-          const leftWhiteMidi = midi - 1;
-          const leftWhiteInfo = whiteKeyMap.get(leftWhiteMidi);
-          if (leftWhiteInfo) {
-            const left = leftWhiteInfo.left + leftWhiteInfo.width - BLACK_KEY_WIDTH_MOBILE / 2;
-            keyEl.style.left = left + 'px';
-          } else {
-            keyEl.style.left = '0px';
+          for (let midi = startMidi; midi <= endMidi; midi++) {
+            const isBlack = BLACK_MIDI_SET.has(midi % 12);
+            const noteName = midiToName(midi);
+
+            const keyEl = document.createElement('div');
+            keyEl.dataset.midi = midi;
+            keyEl.dataset.note = noteName;
+
+            const label = document.createElement('span');
+            label.className = 'note-label';
+            label.textContent = noteName;
+            keyEl.appendChild(label);
+
+            if (!isBlack) {
+              keyEl.className = 'white-key';
+              const left = whiteIndex * WHITE_KEY_WIDTH;
+              keyEl.style.left = left + 'px';
+              keyEl.style.width = WHITE_KEY_WIDTH + 'px';
+              keyEl.style.height = '100%';
+              whiteKeyMap.set(midi, { left, width: WHITE_KEY_WIDTH });
+              whiteIndex++;
+            } else {
+              keyEl.className = 'black-key';
+              keyEl.style.width = BLACK_KEY_WIDTH + 'px';
+              keyEl.style.height = '62%';
+              keyEl.dataset.pendingBlack = 'true';
+            }
+
+            container.appendChild(keyEl);
+            allKeyElementsByMidi.set(midi, keyEl);
           }
-          delete keyEl.dataset.pendingBlack;
-        }
-      });
+
+          // 计算黑键位置
+          for (let midi = startMidi; midi <= endMidi; midi++) {
+            if (!BLACK_MIDI_SET.has(midi % 12)) continue;
+            const keyEl = allKeyElementsByMidi.get(midi);
+            if (!keyEl) continue;
+
+            const leftWhiteMidi = midi - 1;
+            const leftWhiteInfo = whiteKeyMap.get(leftWhiteMidi);
+            if (leftWhiteInfo) {
+              const left = leftWhiteInfo.left + leftWhiteInfo.width - BLACK_KEY_WIDTH / 2;
+              keyEl.style.left = left + 'px';
+            } else {
+              keyEl.style.left = '0px';
+            }
+            delete keyEl.dataset.pendingBlack;
+          }
+
+          // 保存白键信息
+          allWhiteKeyMaps.push({
+            rowId: config.id,
+            startMidi,
+            endMidi,
+            whiteKeyMap,
+            whiteCount,
+            totalWidth
+          });
+        });
+
+        // 绑定事件
+        bindKeyEvents();
+      }
+
+      // 绑定所有琴键事件
+      function bindKeyEvents() {
+        allKeyElementsByMidi.forEach((el, midi) => {
+          el.addEventListener('pointerdown', (e) => handlePointerDown(midi, el, e));
+          el.addEventListener('pointerup', (e) => handlePointerUp(midi, el, e));
+          el.addEventListener('pointercancel', (e) => handlePointerUp(midi, el, e));
+          el.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        });
+      }
 
       // ============================================================
       // 4. 交互逻辑
@@ -898,7 +965,7 @@
             for (let i = activeVoices.length - 1; i >= 0; i--) {
               const voice = activeVoices[i];
               if (voice.midi === midi && !voice.released) {
-                releaseVoice(voice, 0.08);
+                releaseVoice(voice, 0.12);
               }
             }
           }
@@ -907,16 +974,8 @@
         try { element.releasePointerCapture(e.pointerId); } catch (err) {}
       }
 
-      // 绑定所有琴键
-      allKeyElementsByMidi.forEach((el, midi) => {
-        el.addEventListener('pointerdown', (e) => handlePointerDown(midi, el, e));
-        el.addEventListener('pointerup', (e) => handlePointerUp(midi, el, e));
-        el.addEventListener('pointercancel', (e) => handlePointerUp(midi, el, e));
-        el.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-      });
-
       // ============================================================
-      // 5. 电脑键盘映射（手机外接键盘也可用）
+      // 5. 电脑键盘映射（C4-B4）
       // ============================================================
       const KEY_MAP = {
         'a': 60, 'w': 61, 's': 62, 'e': 63, 'd': 64, 'f': 65,
@@ -925,52 +984,54 @@
 
       const keyboardPressed = new Set();
 
-      window.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
-        if (!(key in KEY_MAP)) return;
-        e.preventDefault();
+      function bindKeyboardEvents() {
+        window.addEventListener('keydown', (e) => {
+          const key = e.key.toLowerCase();
+          if (!(key in KEY_MAP)) return;
+          e.preventDefault();
 
-        if (keyboardPressed.has(key)) return;
-        keyboardPressed.add(key);
+          if (keyboardPressed.has(key)) return;
+          keyboardPressed.add(key);
 
-        const midi = KEY_MAP[key];
-        const el = allKeyElementsByMidi.get(midi);
-        if (!el) return;
-        if (pressedMidiSet.has(midi)) return;
+          const midi = KEY_MAP[key];
+          const el = allKeyElementsByMidi.get(midi);
+          if (!el) return;
+          if (pressedMidiSet.has(midi)) return;
 
-        initAudio();
-        resumeAudio();
-        pressedMidiSet.add(midi);
-        el.classList.add('active');
-        playNote(midi);
-      });
+          initAudio();
+          resumeAudio();
+          pressedMidiSet.add(midi);
+          el.classList.add('active');
+          playNote(midi);
+        });
 
-      window.addEventListener('keyup', (e) => {
-        const key = e.key.toLowerCase();
-        if (!(key in KEY_MAP)) return;
-        e.preventDefault();
+        window.addEventListener('keyup', (e) => {
+          const key = e.key.toLowerCase();
+          if (!(key in KEY_MAP)) return;
+          e.preventDefault();
 
-        if (!keyboardPressed.has(key)) return;
-        keyboardPressed.delete(key);
+          if (!keyboardPressed.has(key)) return;
+          keyboardPressed.delete(key);
 
-        const midi = KEY_MAP[key];
-        const el = allKeyElementsByMidi.get(midi);
-        if (!el) return;
+          const midi = KEY_MAP[key];
+          const el = allKeyElementsByMidi.get(midi);
+          if (!el) return;
 
-        if (pressedMidiSet.has(midi)) {
-          pressedMidiSet.delete(midi);
-          el.classList.remove('active');
+          if (pressedMidiSet.has(midi)) {
+            pressedMidiSet.delete(midi);
+            el.classList.remove('active');
 
-          if (!pedalDown) {
-            for (let i = activeVoices.length - 1; i >= 0; i--) {
-              const voice = activeVoices[i];
-              if (voice.midi === midi && !voice.released) {
-                releaseVoice(voice, 0.08);
+            if (!pedalDown) {
+              for (let i = activeVoices.length - 1; i >= 0; i--) {
+                const voice = activeVoices[i];
+                if (voice.midi === midi && !voice.released) {
+                  releaseVoice(voice, 0.12);
+                }
               }
             }
           }
-        }
-      });
+        });
+      }
 
       // ============================================================
       // 6. 延音踏板
@@ -994,7 +1055,7 @@
                   const gain = voice.noteGain.gain;
                   gain.cancelScheduledValues(now);
                   gain.setValueAtTime(gain.value, now);
-                  gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+                  gain.exponentialRampToValueAtTime(0.001, now + 6.0);
                 } catch (e) {}
               }
             });
@@ -1006,69 +1067,138 @@
         }
       }
 
-      pedalButton.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        initAudio();
-        resumeAudio();
-        setPedal(true);
-        try { pedalButton.setPointerCapture(e.pointerId); } catch (err) {}
-      });
+      function bindPedalEvents() {
+        pedalButton.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          initAudio();
+          resumeAudio();
+          setPedal(true);
+          try { pedalButton.setPointerCapture(e.pointerId); } catch (err) {}
+        });
 
-      pedalButton.addEventListener('pointerup', (e) => {
-        e.preventDefault();
-        setPedal(false);
-        try { pedalButton.releasePointerCapture(e.pointerId); } catch (err) {}
-      });
+        pedalButton.addEventListener('pointerup', (e) => {
+          e.preventDefault();
+          setPedal(false);
+          try { pedalButton.releasePointerCapture(e.pointerId); } catch (err) {}
+        });
 
-      pedalButton.addEventListener('pointercancel', () => setPedal(false));
-      pedalButton.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-
-      // ============================================================
-      // 7. 失焦释放
-      // ============================================================
-      window.addEventListener('blur', () => {
-        allKeyElementsByMidi.forEach(el => el.classList.remove('active'));
-        pressedMidiSet.clear();
-        keyboardPressed.clear();
-
-        if (audioCtx) {
-          activeVoices.slice().forEach(voice => {
-            if (!voice.released) releaseVoice(voice, 0.1);
-          });
-        }
-        setPedal(false);
-      });
+        pedalButton.addEventListener('pointercancel', () => setPedal(false));
+        pedalButton.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+      }
 
       // ============================================================
-      // 8. 自动滚动到中间位置
+      // 7. 窗口失焦释放
       // ============================================================
-      setTimeout(() => {
-        ['rowUpper', 'rowLower'].forEach(rowId => {
+      function bindBlurEvent() {
+        window.addEventListener('blur', () => {
+          allKeyElementsByMidi.forEach(el => el.classList.remove('active'));
+          pressedMidiSet.clear();
+          keyboardPressed.clear();
+
+          if (audioCtx) {
+            activeVoices.slice().forEach(voice => {
+              if (!voice.released) releaseVoice(voice, 0.1);
+            });
+          }
+          setPedal(false);
+        });
+      }
+
+      // ============================================================
+      // 8. 自动滚动到常用音区
+      // ============================================================
+      function scrollToCommonArea() {
+        // 上排：滚动到 C5 (72) 附近
+        // 下排：滚动到 C3 (48) 附近
+        const scrollTargets = [
+          { rowId: 'rowUpper', midi: 72 },  // C5
+          { rowId: 'rowLower', midi: 48 }   // C3
+        ];
+
+        scrollTargets.forEach(({ rowId, midi }) => {
           const row = document.getElementById(rowId);
           if (!row) return;
-          const inner = row.querySelector('.keys-inner');
-          if (!inner) return;
+
+          // 找到对应的琴键元素
+          const keyEl = allKeyElementsByMidi.get(midi);
+          if (!keyEl) return;
+
+          // 获取元素相对容器的左偏移
+          const container = row.querySelector('.keys-inner');
+          if (!container) return;
+
+          const keyLeft = keyEl.offsetLeft;
           const containerWidth = row.clientWidth;
-          const scrollWidth = inner.scrollWidth;
-          if (scrollWidth > containerWidth) {
-            row.scrollLeft = (scrollWidth - containerWidth) / 2;
-          }
+          // 滚动到使目标键位于容器中央偏左
+          const scrollLeft = Math.max(0, keyLeft - containerWidth / 2 + 40);
+          row.scrollLeft = scrollLeft;
         });
-      }, 200);
+      }
 
       // ============================================================
-      // 9. 防止页面滚动
+      // 9. 窗口尺寸变化时重建键盘
       // ============================================================
-      document.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.keyboard-row')) return;
-        e.preventDefault();
-      }, { passive: false });
+      let resizeTimeout = null;
 
-      window.addEventListener('keydown', (e) => {
-        if (e.key in KEY_MAP || e.key === ' ') {
+      function handleResize() {
+        if (resizeTimeout) clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          const newWidths = getKeyWidths();
+          // 检查宽度是否变化，如果变化则重建
+          if (newWidths.white !== WHITE_KEY_WIDTH || newWidths.black !== BLACK_KEY_WIDTH) {
+            WHITE_KEY_WIDTH = newWidths.white;
+            BLACK_KEY_WIDTH = newWidths.black;
+            // 保存当前滚动位置
+            const upperScroll = document.getElementById('rowUpper')?.scrollLeft || 0;
+            const lowerScroll = document.getElementById('rowLower')?.scrollLeft || 0;
+
+            buildKeyboard();
+            bindKeyboardEvents();
+            bindBlurEvent();
+
+            // 恢复滚动位置（近似）
+            setTimeout(() => {
+              const upperRow = document.getElementById('rowUpper');
+              const lowerRow = document.getElementById('rowLower');
+              if (upperRow) upperRow.scrollLeft = upperScroll;
+              if (lowerRow) lowerRow.scrollLeft = lowerScroll;
+            }, 50);
+          }
+        }, 250);
+      }
+
+      // ============================================================
+      // 10. 初始化
+      // ============================================================
+      function init() {
+        buildKeyboard();
+        bindKeyboardEvents();
+        bindPedalEvents();
+        bindBlurEvent();
+
+        // 延迟滚动到常用音区
+        setTimeout(() => {
+          scrollToCommonArea();
+        }, 150);
+
+        // 窗口尺寸变化
+        window.addEventListener('resize', handleResize);
+
+        // 防止页面滚动
+        document.addEventListener('touchmove', (e) => {
+          if (e.target.closest('.keyboard-row')) return;
           e.preventDefault();
-        }
-      }, { passive: false });
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key in KEY_MAP || e.key === ' ') {
+            e.preventDefault();
+          }
+        }, { passive: false });
+      }
+
+      // 启动
+      init();
 
     })();
   </script>
