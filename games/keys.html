@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎹 摩尔斯钢琴 · 机关按键</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a1e2c 0%, #0e111b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 16px;
+        }
+
+        .machine {
+            background: #2b2f3f;
+            background-image: radial-gradient(circle at 20% 30%, #3e4458, #1e212d);
+            padding: 30px 30px 40px;
+            border-radius: 70px 70px 40px 40px;
+            box-shadow: 
+                0 25px 35px rgba(0, 0, 0, 0.8),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1),
+                inset 0 -8px 8px rgba(0, 0, 0, 0.6);
+            border-bottom: 8px solid #0f111a;
+        }
+
+        .display-panel {
+            background: #0a0c12;
+            border-radius: 40px;
+            padding: 12px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 
+                inset 0 8px 12px rgba(0, 0, 0, 0.9),
+                0 2px 2px rgba(255, 255, 255, 0.05);
+            border: 1px solid #3f455b;
+            color: #cfd9f0;
+            text-shadow: 0 0 6px #6e8cff;
+        }
+
+        .morse-display {
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: #b6cbff;
+            text-shadow: 0 0 10px #4e7aff, 0 0 20px #2a4fc0;
+            transition: all 0.1s;
+            min-height: 3.6rem;
+            word-break: break-all;
+        }
+
+        .decoded-display {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #a5b9e6;
+            background: #151b28;
+            padding: 6px 18px;
+            border-radius: 30px;
+            box-shadow: inset 0 2px 8px #000000, 0 1px 2px #2f3850;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #3d496b;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .piano-frame {
+            background: #1e212e;
+            border-radius: 28px;
+            padding: 24px 20px 16px;
+            box-shadow: 
+                inset 0 -4px 0 #0b0d13,
+                0 12px 18px #000000;
+            border-top: 2px solid #4a516b;
+        }
+
+        .keys {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .key {
+            width: 76px;
+            height: 130px;
+            background: linear-gradient(145deg, #f0f3fa, #cfd7e8);
+            border-radius: 0 0 16px 16px;
+            box-shadow: 
+                0 8px 0 #6b7280,
+                0 10px 18px rgba(0, 0, 0, 0.6),
+                inset 0 2px 4px #ffffffd0,
+                inset 0 -4px 6px #8b93a8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0 20px;
+            cursor: pointer;
+            transition: all 0.06s ease;
+            border: 1px solid #b3bdd6;
+            transform: translateY(-2px);
+            position: relative;
+        }
+
+        .key:active, .key.pressed {
+            transform: translateY(6px);
+            box-shadow: 
+                0 2px 0 #5a6278,
+                0 5px 12px black,
+                inset 0 2px 8px #ffffffb0;
+            background: linear-gradient(145deg, #d3dcf0, #b2bfd9);
+        }
+
+        .key .note {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e263a;
+            text-shadow: 0 1px 2px #bcc7e0;
+            background: #eef3ff;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 6px #99a3be, 0 2px 4px #262e42;
+            margin-top: 8px;
+        }
+
+        .key .morse-hint {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2f3b58;
+            background: #d4def5;
+            padding: 4px 10px;
+            border-radius: 40px;
+            letter-spacing: 2px;
+            box-shadow: inset 0 1px 6px #8f9db9, 0 1px 2px #323b52;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .key .char-label {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0a0f1c;
+            background: #ffffffdd;
+            padding: 4px 12px;
+            border-radius: 30px;
+            box-shadow: 0 1px 3px #424b62;
+            margin-bottom: 6px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+            padding: 0 12px;
+        }
+
+        .control-btn {
+            background: #30364a;
+            border: none;
+            color: #d2defa;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 14px 30px;
+            border-radius: 60px;
+            box-shadow: 
+                0 6px 0 #0f111a,
+                0 8px 16px black,
+                inset 0 2px 4px #7b89b0;
+            cursor: pointer;
+            transition: 0.06s linear;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #5e6a8a;
+        }
+
+        .control-btn:active {
+            transform: translateY(6px);
+            box-shadow: 
+                0 1px 0 #0f111a,
+                0 4px 10px black,
+                inset 0 2px 8px #ffffff30;
+        }
+
+        .control-btn.clear {
+            background: #3e2d42;
+            box-shadow: 
+                0 6px 0 #1b121f,
+                0 8px 16px black,
+                inset 0 2px 4px #b18bbd;
+            color: #f0d9ff;
+            border-color: #9a7aa8;
+        }
+
+        .status-led {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2fbb4b;
+            box-shadow: 0 0 12px #16e63e, inset 0 2px 4px #ffffffd0;
+            transition: 0.1s;
+        }
+
+        .status-led.sounding {
+            background: #ffbb33;
+            box-shadow: 0 0 20px #ffaa00, 0 0 35px #ff8800;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #6a7490;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="machine">
+        <!-- 显示屏 -->
+        <div class="display-panel">
+            <div class="morse-display" id="morseDisplay">···</div>
+            <div class="decoded-display" id="decodedDisplay">S</div>
+        </div>
+
+        <!-- 钢琴键盘 -->
+        <div class="piano-frame">
+            <div class="keys" id="keysContainer"></div>
+        </div>
+
+        <!-- 底部控制栏 -->
+        <div class="controls">
+            <button class="control-btn clear" id="clearBtn">🧹 清除</button>
+            <div class="status-led" id="led"></div>
+            <button class="control-btn" id="playBtn">▶ 重播摩尔斯</button>
+        </div>
+        <div class="footer-note">按琴键 · 发信号 · 听摩尔斯</div>
+    </div>
+
+    <script>
+        (function(){
+            // ---------- 摩尔斯码映射 ----------
+            const morseMap = {
+                'A': '.-',   'B': '-...', 'C': '-.-.', 'D': '-..',
+                'E': '.',    'F': '..-.', 'G': '--.',  'H': '....',
+                'I': '..',   'J': '.---', 'K': '-.-',  'L': '.-..',
+                'M': '--',   'N': '-.',   'O': '---',  'P': '.--.',
+                'Q': '--.-', 'R': '.-.',  'S': '...',  'T': '-',
+                'U': '..-',  'V': '...-', 'W': '.--',  'X': '-..-',
+                'Y': '-.--', 'Z': '--..',
+                '0': '-----','1': '.----','2': '..---','3': '...--',
+                '4': '....-','5': '.....','6': '-....','7': '--...',
+                '8': '---..','9': '----.'
+            };
+
+            // 反向映射: 摩尔斯字符串 → 字符 (取第一个匹配，用于显示，但正常不冲突)
+            const reverseMorse = {};
+            for (let [char, code] of Object.entries(morseMap)) {
+                reverseMorse[code] = char;
+            }
+
+            // 我们需要显示的琴键顺序 (钢琴风格 从低到高，字母和数字混合，但无妨)
+            // 根据映射字典的键顺序稍微设计一个好看的组合，包含字母和数字
+            const keyOrder = [
+                'C', 'D', 'E', 'F', 'G', 'A', 'B',  // 七声音阶字母 (但摩尔斯与音名无关，仅趣味)
+                '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
+            ];
+            // 但是字母C..B对应的是摩尔斯码 A..G 等，为了更直观，我们让按键显示字母，但摩尔斯码使用标准映射。
+            // 上面keyOrder里包含字母，但字母C的摩尔斯是-.-.，不错，就用这些。
+
+            // 不过有些字母(如C,D...)均在映射里，没问题。
+
+            // 为了更好玩，可以加几个额外字母? 用这17个键刚好。也可以加S,O,S等，但保持简洁。
+            // 实际上'C','D'...等都在映射里，每个字母都有自己的摩尔斯。
+
+            // 我们也可以稍微增加几个按键，但17个已经挺多，且宽度合适。
+            // 最终决定使用的按键列表 (显示顺序)
+            const displayKeys = [
+                { char: 'C', label: 'C' },
+                { char: 'D', label: 'D' },
+                { char: 'E', label: 'E' },
+                { char: 'F', label: 'F' },
+                { char: 'G', label: 'G' },
+                { char: 'A', label: 'A' },
+                { char: 'B', label: 'B' },
+                { char: '1', label: '1' },
+                { char: '2', label: '2' },
+                { char: '3', label: '3' },
+                { char: '4', label: '4' },
+                { char: '5', label: '5' },
+                { char: '6', label: '6' },
+                { char: '7', label: '7' },
+                { char: '8', label: '8' },
+                { char: '9', label: '9' },
+                { char: '0', label: '0' }
+            ];
+
+            // ---------- 音频上下文 ----------
+            let audioCtx = null;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
+            // 播放一个摩尔斯符号 (点或划)
+            function playMorseSymbol(symbol, startTime, duration, frequency = 620) {
+                // 返回音频结束时间
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = frequency;
+                gain.gain.value = 0.2; // 避免太响
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = startTime;
+                // 快速淡入防止咔哒声
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.25, now + 0.006);
+                gain.gain.setValueAtTime(0.25, now + duration - 0.006);
+                gain.gain.linearRampToValueAtTime(0, now + duration);
+
+                osc.start(now);
+                osc.stop(now + duration);
+                return now + duration;
+            }
+
+            // 播放整个摩尔斯序列 (用于按键或重播)
+            async function playMorseSequence(morseStr, baseFreq = 620) {
+                if (!audioCtx) initAudio();
+                if (!morseStr || morseStr.length === 0) return;
+
+                const dotDuration = 0.12;      // 点 120ms
+                const dashDuration = 0.28;     // 划 280ms
+                const gapSymbol = 0.08;        // 符号间间隔 80ms
+                const gapLetter = 0.24;        // 字母间间隔 240ms (在摩尔斯串内符号间隔)
+
+                let time = audioCtx.currentTime + 0.02; // 轻微延迟
+
+                // 摩尔斯字符串可能包含空格？但我们只传纯符号 .-
+                // 但为了安全，只处理 '.' 和 '-'
+                const symbols = morseStr.split('');
+                for (let i = 0; i < symbols.length; i++) {
+                    const sym = symbols[i];
+                    let duration = (sym === '.') ? dotDuration : dashDuration;
+                    if (sym !== '.' && sym !== '-') continue; // 跳过意外字符
+
+                    time = playMorseSymbol(sym, time, duration, baseFreq);
+                    // 如果不是最后一个符号，加上符号间隔
+                    if (i < symbols.length - 1) {
+                        time += gapSymbol;
+                    }
+                }
+                // 可选，最后不加额外间隔
+                // 更新LED状态 (大概)
+                setLedActive(true);
+                // 计算总时长来关闭LED
+                const totalDuration = (time - audioCtx.currentTime) * 1000 + 200;
+                setTimeout(() => setLedActive(false), totalDuration);
+                return totalDuration;
+            }
+
+            // ---------- 全局状态 ----------
+            let currentMorseString = '...';    // 初始显示S
+            let currentDecodedChar = 'S';
+            const morseDisplayEl = document.getElementById('morseDisplay');
+            const decodedDisplayEl = document.getElementById('decodedDisplay');
+            const keysContainer = document.getElementById('keysContainer');
+            const ledElement = document.getElementById('led');
+
+            // 更新显示
+            function updateDisplay(morseStr) {
+                if (!morseStr) {
+                    morseDisplayEl.textContent = '···';
+                    decodedDisplayEl.textContent = 'S';
+                    currentMorseString = '...';
+                    currentDecodedChar = 'S';
+                    return;
+                }
+                // 在摩尔斯字符串中，用空格分隔可能更好，但我们不分隔，因为每个字母独立显示。
+                // 但如果是多字母，我们可以用空格分隔？ 但为了纯粹，我们只显示最后输入的字母的摩尔斯码和对应的字符。
+                // 实际上我们每次按键会替换当前摩尔斯码为当前字符的摩尔斯码，我们使用全局记录。
+                // 这里修改：只显示一个字符的摩尔斯码。所以每次按键都设置成该字符的摩尔斯码。
+                // 而解码显示也显示该字符。
+                morseDisplayEl.textContent = morseStr;
+                const char = reverseMorse[morseStr] || '?';
+                decodedDisplayEl.textContent = char;
+                currentMorseString = morseStr;
+                currentDecodedChar = char;
+            }
+
+            // 设置LED状态
+            function setLedActive(active) {
+                if (active) {
+                    ledElement.classList.add('sounding');
+                } else {
+                    ledElement.classList.remove('sounding');
+                }
+            }
+
+            // 播放一个按键的摩尔斯码 (同时更新显示)
+            async function triggerKey(char) {
+                initAudio();
+                const morse = morseMap[char];
+                if (!morse) return;
+
+                // 更新显示
+                updateDisplay(morse);
+
+                // 播放摩尔斯
+                await playMorseSequence(morse, 620 + Math.random() * 80); // 频率轻微变化增加趣味
+                // 播放完毕后LED自动关闭(已由playMorseSequence处理)
+            }
+
+            // 构建键盘按钮
+            function buildKeyboard() {
+                keysContainer.innerHTML = '';
+                displayKeys.forEach(item => {
+                    const char = item.char;
+                    const morseCode = morseMap[char] || '?';
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    keyDiv.dataset.char = char;
+                    keyDiv.dataset.morse = morseCode;
+
+                    // 内容
+                    keyDiv.innerHTML = `
+                        <div class="char-label">${item.label}</div>
+                        <div class="morse-hint">${morseCode}</div>
+                        <div class="note">♪</div>
+                    `;
+
+                    // 点击事件 (鼠标/触摸)
+                    keyDiv.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        triggerKey(char);
+                        // 添加按压动画类
+                        keyDiv.classList.add('pressed');
+                        setTimeout(() => keyDiv.classList.remove('pressed'), 120);
+                    });
+
+                    // 防止触摸时页面缩放或滚动
+                    keyDiv.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        triggerKey(char);
+                        keyDiv.classList.add('pressed');
+                        setTimeout(() => keyDiv.classList.remove('pressed'), 120);
+                    }, { passive: false });
+
+                    keysContainer.appendChild(keyDiv);
+                });
+            }
+
+            // 重播当前的摩尔斯 (如果currentMorseString有效)
+            async function replayMorse() {
+                if (!currentMorseString) return;
+                initAudio();
+                await playMorseSequence(currentMorseString, 640);
+                // LED 已经由函数处理
+            }
+
+            // 清除显示为初始S
+            function clearDisplay() {
+                updateDisplay('...');
+                setLedActive(false);
+            }
+
+            // 初始化
+            function init() {
+                buildKeyboard();
+                updateDisplay('...'); // 初始显示S
+
+                // 全局点击任意位置初始化音频(因为安全策略)
+                document.body.addEventListener('click', () => {
+                    initAudio();
+                }, { once: true });
+
+                // 绑定控制按钮
+                document.getElementById('clearBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    initAudio();
+                    clearDisplay();
+                });
+
+                document.getElementById('playBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    initAudio();
+                    replayMorse();
+                });
+
+                // 为所有按键添加键盘支持 (可用数字/字母键触发，但非必须，这里不做)
+                // 可选: 按键盘字母触发对应按键，但为了简洁不做了
+            }
+
+            // 启动
+            init();
+
+        })();
+    </script>
+</body>
+</html>
