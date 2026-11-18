@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>佩恩 · 九尾追击</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #0a0a1a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            touch-action: pan-y; /* 保留垂直滚动，但防止水平干扰 */
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px; /* 手机舒适宽度 */
+            aspect-ratio: 9 / 16;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 2px #3a2c1e inset;
+            margin: 12px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #0f0f1f;
+            touch-action: none; /* 禁止canvas上的默认手势 */
+        }
+        .hud {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: #f0e6d2;
+            text-shadow: 0 2px 6px #000000aa;
+            font-weight: bold;
+            letter-spacing: 1px;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .hud span {
+            background: #1e1e2faa;
+            padding: 6px 14px;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #b8860b55;
+            box-shadow: 0 4px 10px #00000033;
+        }
+        .game-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a1acc;
+            backdrop-filter: blur(8px);
+            color: #f0e6d2;
+            z-index: 30;
+            transition: opacity 0.3s;
+            text-align: center;
+            padding: 24px;
+        }
+        .game-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .game-overlay h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            color: #e63946;
+            text-shadow: 0 0 20px #ff4d4d, 0 0 8px #000;
+            letter-spacing: 4px;
+            font-weight: 900;
+        }
+        .game-overlay .sub {
+            font-size: 1.1rem;
+            color: #c9b18c;
+            margin-bottom: 36px;
+            border-bottom: 2px solid #b8860b88;
+            padding-bottom: 12px;
+            width: 80%;
+        }
+        .game-overlay button {
+            background: #2a1e0e;
+            border: 2px solid #b8860b;
+            color: #ffd966;
+            font-size: 1.6rem;
+            font-weight: bold;
+            padding: 14px 42px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px #b8860b66, 0 10px 20px #00000066;
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        .game-overlay button:active {
+            transform: scale(0.96);
+            background: #4a361e;
+        }
+        .game-overlay .small {
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: #7a6a5a;
+        }
+        .restart-hint {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #a8977a;
+        }
+        .restart-hint i {
+            font-style: normal;
+            background: #2a2a3a;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div class="hud">
+            <span>🌀 佩恩</span>
+            <span id="distanceDisplay">0 m</span>
+        </div>
+        <div class="game-overlay" id="overlay">
+            <h1>九尾追击</h1>
+            <div class="sub">佩恩 · 逃亡</div>
+            <button id="startBtn">开始逃亡</button>
+            <div class="restart-hint">
+                <i>👆 点击 / 滑动</i> 跳跃躲避
+            </div>
+            <div class="small">查克拉手越追越近！</div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.getElementById('overlay');
+            const startBtn = document.getElementById('startBtn');
+            const distanceDisplay = document.getElementById('distanceDisplay');
+
+            // 尺寸适配: 根据容器大小设置画布分辨率 (保持宽高比9:16)
+            const container = document.getElementById('gameContainer');
+            let canvasWidth = 0, canvasHeight = 0;
+
+            function resizeCanvas() {
+                const rect = container.getBoundingClientRect();
+                // 用设备像素比保证清晰度
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+                canvasWidth = rect.width;
+                canvasHeight = rect.height;
+                // 重新计算地面等
+                initGroundY();
+            }
+
+            // 游戏状态
+            let gameActive = false;
+            let gameOver = false;
+            let distance = 0;          // 已跑距离（米）
+            let speed = 4.2;           // 基础移动速度（像素/帧，60fps基准）
+            let targetSpeed = 4.2;
+            let player = {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                vy: 0,
+                grounded: true,
+                jumpPower: -11,
+                gravity: 0.55,
+            };
+            let groundY = 0;            // 地面Y坐标
+            let groundBaseY = 0;        // 基础地面位置(基于高度)
+            let platforms = [];         // 障碍物/平台（实为可站立的石块）
+            let chakraHands = [];       // 九尾查克拉手 (尾巴/手掌)
+            let frameCount = 0;
+            let spawnTimer = 0;
+            let handSpawnTimer = 0;
+
+            // 佩恩参数
+            const PLAYER_WIDTH_BASE = 32;   // 基准像素(基于canvasWidth比例)
+            const PLAYER_HEIGHT_BASE = 52;
+            const MIN_PLAYER_WIDTH = 28;
+            const MIN_PLAYER_HEIGHT = 44;
+
+            // 九尾查克拉手参数
+            const HAND_BASE_SIZE = 38;
+            const HAND_SPEED_Y = 1.6;      // 手向下/斜向速度
+
+            // 跳跃相关
+            let jumpBuffer = false;          // 跳跃缓冲
+            let coyoteTime = 0;              // 土狼时间
+
+            // 地面高度(随屏幕)
+            function initGroundY() {
+                groundBaseY = canvasHeight * 0.78;   // 地面线在78%高度
+                groundY = groundBaseY;
+                // 如果player存在重新设定位置
+                if (player.width === 0) {
+                    // 初始化玩家尺寸（根据canvas宽度动态）
+                    const baseW = Math.min(canvasWidth * 0.09, 34);
+                    player.width = Math.max(baseW, 24);
+                    player.height = player.width * 1.6;
+                    player.x = canvasWidth * 0.2;
+                    player.y = groundY - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                } else {
+                    // 重新调整尺寸和地面位置
+                    const baseW = Math.min(canvasWidth * 0.09, 34);
+                    player.width = Math.max(baseW, 24);
+                    player.height = player.width * 1.6;
+                    player.x = Math.min(player.x, canvasWidth * 0.3);
+                    player.y = groundY - player.height;
+                }
+            }
+
+            // 重置游戏
+            function resetGame() {
+                gameActive = true;
+                gameOver = false;
+                distance = 0;
+                speed = 4.2;
+                targetSpeed = 4.2;
+                frameCount = 0;
+                spawnTimer = 0;
+                handSpawnTimer = 0;
+                platforms = [];
+                chakraHands = [];
+                jumpBuffer = false;
+                coyoteTime = 0;
+
+                // 重置玩家位置
+                const baseW = Math.min(canvasWidth * 0.09, 34);
+                player.width = Math.max(baseW, 24);
+                player.height = player.width * 1.6;
+                player.x = canvasWidth * 0.2;
+                player.y = groundY - player.height;
+                player.vy = 0;
+                player.grounded = true;
+
+                // 距离显示更新
+                distanceDisplay.textContent = '0 m';
+                overlay.classList.add('hidden');
+            }
+
+            // 生成地面石块/障碍 (实为可跳上的平台)
+            function spawnPlatform() {
+                const minW = canvasWidth * 0.08;
+                const maxW = canvasWidth * 0.18;
+                const w = Math.random() * (maxW - minW) + minW;
+                const h = Math.min(canvasHeight * 0.055, 22);
+                // 从右侧生成
+                const x = canvasWidth + 10;
+                // 地面上的障碍：略高于地面 (可跳跃)
+                const y = groundY - h * 0.9;   // 看起来贴地
+                // 有些石块可能漂浮？但为了跑酷逻辑，我们做成地面上凸起，必须跳跃
+                platforms.push({
+                    x, y,
+                    w, h,
+                    type: 'rock',
+                    speed: speed * 1.05,
+                });
+            }
+
+            // 生成九尾查克拉手 (从后方/上方追击)
+            function spawnChakraHand() {
+                const size = Math.min(canvasWidth * 0.11, 42);
+                // 从右侧偏后或者左后方？按照设计：手从后方(左侧)追来，但我们控制佩恩向右跑，所以手从左侧出现
+                // 为了视觉丰富，从左侧随机高度出现
+                const x = -size * 0.5 - Math.random() * 20;  // 左边缘外
+                const y = groundY - size * 0.8 - Math.random() * canvasHeight * 0.15;
+                chakraHands.push({
+                    x, y,
+                    size,
+                    speedX: speed * 1.2 + 1.5, // 比玩家速度快，紧迫感
+                    phase: Math.random() * Math.PI * 2,
+                    alpha: 0.75,
+                });
+            }
+
+            // 更新逻辑
+            function updateGame() {
+                if (!gameActive || gameOver) return;
+
+                frameCount++;
+
+                // 速度随着距离缓慢增加
+                targetSpeed = 4.2 + Math.min(distance / 300, 3.2);
+                speed += (targetSpeed - speed) * 0.02;
+
+                // 距离累积
+                distance += speed * 0.6;   // 映射为米
+                distanceDisplay.textContent = Math.floor(distance) + ' m';
+
+                // 1. 玩家物理
+                // 重力
+                player.vy += player.gravity;
+                player.y += player.vy;
+
+                // 地面碰撞
+                if (player.y + player.height >= groundY) {
+                    player.y = groundY - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                    coyoteTime = 8; // 土狼时间重置
+                } else {
+                    player.grounded = false;
+                    if (coyoteTime > 0) coyoteTime--;
+                }
+
+                // 跳跃缓冲处理
+                if (jumpBuffer && (player.grounded || coyoteTime > 0)) {
+                    player.vy = player.jumpPower;
+                    player.grounded = false;
+                    jumpBuffer = false;
+                    coyoteTime = 0;
+                }
+
+                // 2. 移动平台/障碍物 (向左移动)
+                for (let i = platforms.length - 1; i >= 0; i--) {
+                    const p = platforms[i];
+                    p.x -= speed * 1.05;
+                    // 移除屏幕外
+                    if (p.x + p.w < -20) {
+                        platforms.splice(i, 1);
+                        continue;
+                    }
+                    // 碰撞检测(与玩家) — 玩家可以站在上面或撞到
+                    // 简单的矩形碰撞
+                    if (rectCollide(player, {x: p.x, y: p.y, w: p.w, h: p.h})) {
+                        // 如果从上方落下并且玩家底部接近顶部，视为踩踏
+                        const playerBottom = player.y + player.height;
+                        const platformTop = p.y;
+                        // 下落且穿透不深
+                        if (player.vy > 0 && playerBottom - player.vy <= platformTop + 8 && playerBottom >= platformTop) {
+                            // 站上去
+                            player.y = platformTop - player.height;
+                            player.vy = 0;
+                            player.grounded = true;
+                            coyoteTime = 8;
+                        } else {
+                            // 侧面撞击 -> 游戏结束(被石块绊倒)
+                            gameOver = true;
+                            gameActive = false;
+                            overlay.classList.remove('hidden');
+                            overlay.querySelector('h1').textContent = '被绊倒了';
+                            overlay.querySelector('.sub').textContent = '九尾抓住了佩恩';
+                            startBtn.textContent = '重新逃亡';
+                        }
+                    }
+                }
+
+                // 3. 九尾查克拉手更新
+                for (let i = chakraHands.length - 1; i >= 0; i--) {
+                    const hand = chakraHands[i];
+                    // 手向右侧(玩家方向)移动，并飘动
+                    hand.x += hand.speedX;
+                    // 轻微上下浮动
+                    hand.y += Math.sin(frameCount * 0.1 + hand.phase) * 0.6;
+                    // 移除屏幕外
+                    if (hand.x > canvasWidth + 100) {
+                        chakraHands.splice(i, 1);
+                        continue;
+                    }
+                    // 碰撞检测：如果手碰到玩家 → 游戏结束
+                    if (rectCollide(player, {x: hand.x, y: hand.y, w: hand.size, h: hand.size})) {
+                        gameOver = true;
+                        gameActive = false;
+                        overlay.classList.remove('hidden');
+                        overlay.querySelector('h1').textContent = '九尾吞噬';
+                        overlay.querySelector('.sub').textContent = '查克拉手抓住了佩恩';
+                        startBtn.textContent = '重新逃亡';
+                    }
+                }
+
+                // 4. 生成平台/障碍
+                spawnTimer--;
+                if (spawnTimer <= 0) {
+                    spawnPlatform();
+                    // 动态间隔：越跑越密集
+                    const interval = Math.max(35, 70 - Math.floor(distance / 40));
+                    spawnTimer = interval + Math.floor(Math.random() * 25);
+                }
+
+                // 5. 生成九尾查克拉手（追击感）
+                handSpawnTimer--;
+                if (handSpawnTimer <= 0) {
+                    spawnChakraHand();
+                    // 手的生成速度也随距离增加
+                    const handInterval = Math.max(15, 40 - Math.floor(distance / 30));
+                    handSpawnTimer = handInterval + Math.floor(Math.random() * 20);
+                }
+
+                // 额外：如果玩家掉到地面下方(理论上不会)，重置
+                if (player.y > canvasHeight + 100) {
+                    player.y = groundY - player.height;
+                    player.vy = 0;
+                }
+            }
+
+            // 矩形碰撞检测
+            function rectCollide(r1, r2) {
+                return r1.x < r2.x + r2.w &&
+                       r1.x + r1.width > r2.x &&
+                       r1.y < r2.y + r2.h &&
+                       r1.y + r1.height > r2.y;
+            }
+
+            // 绘制
+            function draw() {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                // 1. 绘制背景 —— 神庙遗迹风格 / 暗红九尾查克拉氛围
+                // 渐变天空
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+                skyGrad.addColorStop(0, '#1a122a');
+                skyGrad.addColorStop(0.6, '#2d1b2e');
+                skyGrad.addColorStop(1, '#1f1420');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                // 远处神庙轮廓
+                ctx.fillStyle = '#2e1e2e';
+                ctx.globalAlpha = 0.35;
+                for (let i = 0; i < 6; i++) {
+                    const offset = (frameCount * 0.5 + i * 80) % (canvasWidth + 120) - 60;
+                    ctx.beginPath();
+                    ctx.moveTo(offset, canvasHeight * 0.7);
+                    ctx.lineTo(offset + 30, canvasHeight * 0.5);
+                    ctx.lineTo(offset + 60, canvasHeight * 0.7);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+
+                // 地面 (石板路)
+                ctx.fillStyle = '#3a2e1e';
+                ctx.fillRect(0, groundY, canvasWidth, canvasHeight - groundY);
+                // 地面纹理
+                ctx.fillStyle = '#5a4a32';
+                for (let i = 0; i < canvasWidth; i += 30) {
+                    ctx.fillRect((i + frameCount * 0.5) % canvasWidth, groundY + 6, 18, 4);
+                }
+                // 地面阴影
+                ctx.fillStyle = '#1e1610';
+                ctx.fillRect(0, groundY - 4, canvasWidth, 6);
+
+                // 2. 绘制平台/障碍 (岩石)
+                platforms.forEach(p => {
+                    ctx.fillStyle = '#6b5a44';
+                    ctx.shadowColor = '#000000aa';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+                    ctx.fill();
+                    // 高光
+                    ctx.fillStyle = '#8e7a60';
+                    ctx.shadowBlur = 5;
+                    ctx.beginPath();
+                    ctx.roundRect(p.x + 3, p.y + 2, p.w - 6, p.h - 6, 4);
+                    ctx.fill();
+                });
+                ctx.shadowBlur = 0;
+
+                // 3. 绘制九尾查克拉手 (半透明，红色/橙色)
+                chakraHands.forEach(hand => {
+                    const x = hand.x, y = hand.y, s = hand.size;
+                    ctx.save();
+                    ctx.shadowColor = '#ff5500';
+                    ctx.shadowBlur = 18;
+                    ctx.globalAlpha = 0.85;
+                    // 查克拉手形状：手掌 + 手指
+                    const grad = ctx.createRadialGradient(x + s*0.5, y + s*0.5, 2, x + s*0.5, y + s*0.5, s*0.8);
+                    grad.addColorStop(0, '#ff8800');
+                    grad.addColorStop(0.6, '#cc3300');
+                    grad.addColorStop(1, '#550000');
+                    ctx.fillStyle = grad;
+                    // 手掌主体
+                    ctx.beginPath();
+                    ctx.ellipse(x + s*0.5, y + s*0.5, s*0.5, s*0.4, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    // 手指 (三个利爪)
+                    ctx.fillStyle = '#bb4400';
+                    for (let f = 0; f < 3; f++) {
+                        const angle = -0.6 + f * 0.5;
+                        const fx = x + s*0.7 + Math.cos(angle) * s*0.5;
+                        const fy = y + s*0.2 + Math.sin(angle) * s*0.4;
+                        ctx.beginPath();
+                        ctx.moveTo(x + s*0.6, y + s*0.4);
+                        ctx.lineTo(fx, fy);
+                        ctx.lineTo(fx + 5, fy - 5);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                });
+
+                // 4. 绘制佩恩 (主角) —— 轮回眼 + 黑棒
+                const px = player.x, py = player.y, pw = player.width, ph = player.height;
+                // 身体 (黑色长袍)
+                ctx.shadowColor = '#000000cc';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                ctx.roundRect(px, py + ph*0.3, pw, ph*0.7, 8);
+                ctx.fill();
+                // 头部 (苍白肤色)
+                ctx.fillStyle = '#c9b8a0';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.ellipse(px + pw*0.5, py + ph*0.25, pw*0.4, ph*0.25, 0, 0, Math.PI*2);
+                ctx.fill();
+                // 轮回眼 (波纹)
+                ctx.fillStyle = '#b88a4b';
+                ctx.beginPath();
+                ctx.arc(px + pw*0.35, py + ph*0.2, pw*0.12, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                ctx.arc(px + pw*0.35, py + ph*0.2, pw*0.06, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(px + pw*0.35, py + ph*0.2, pw*0.03, 0, Math.PI*2);
+                ctx.fill();
+                // 第二只眼(略)
+                ctx.fillStyle = '#b88a4b';
+                ctx.beginPath();
+                ctx.arc(px + pw*0.65, py + ph*0.2, pw*0.1, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                ctx.arc(px + pw*0.65, py + ph*0.2, pw*0.05, 0, Math.PI*2);
+                ctx.fill();
+
+                // 黑棒 (头上的金属棒)
+                ctx.fillStyle = '#3a3a4a';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.roundRect(px + pw*0.45, py - ph*0.05, pw*0.1, ph*0.15, 4);
+                ctx.fill();
+
+                // 飘带/袍子下摆
+                ctx.fillStyle = '#2a1e2e';
+                ctx.beginPath();
+                ctx.roundRect(px + pw*0.1, py + ph*0.8, pw*0.8, ph*0.15, 6);
+                ctx.fill();
+
+                // 眼睛高光
+                ctx.shadowBlur = 0;
+
+                // 5. 绘制动态UI提示：查克拉手逼近程度 (可选)
+                // 绘制前景速度线
+                ctx.globalAlpha = 0.15;
+                ctx.strokeStyle = '#ffaa33';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 6; i++) {
+                    const lx = (frameCount * 6 + i * 70) % canvasWidth;
+                    ctx.beginPath();
+                    ctx.moveTo(lx, groundY + 10);
+                    ctx.lineTo(lx - 30, groundY + 30);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // 动画循环
+            function gameLoop() {
+                if (gameActive && !gameOver) {
+                    updateGame();
+                }
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+
+            // 跳跃触发
+            function jump() {
+                if (!gameActive || gameOver) return;
+                jumpBuffer = true;
+                // 立即尝试跳跃（防止缓冲延迟）
+                if (player.grounded || coyoteTime > 0) {
+                    player.vy = player.jumpPower;
+                    player.grounded = false;
+                    jumpBuffer = false;
+                    coyoteTime = 0;
+                }
+            }
+
+            // 输入处理
+            function handleTap(e) {
+                e.preventDefault();
+                jump();
+            }
+
+            function handleKeyDown(e) {
+                if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                    e.preventDefault();
+                    jump();
+                }
+            }
+
+            // 初始化事件监听
+            function initEvents() {
+                // 触摸
+                canvas.addEventListener('touchstart', handleTap, { passive: false });
+                // 鼠标点击 (pc调试)
+                canvas.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    jump();
+                });
+                // 键盘
+                window.addEventListener('keydown', handleKeyDown);
+                // 开始按钮
+                startBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    resetGame();
+                });
+                // 阻止页面滚动
+                canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+                // 窗口大小变化重新适配
+                window.addEventListener('resize', () => {
+                    resizeCanvas();
+                    // 重新定位玩家和地面相关
+                    if (player.width > 0) {
+                        player.y = Math.min(player.y, groundY - player.height);
+                        if (!gameActive) {
+                            // 如果还没开始，也确保位置正常
+                        }
+                    }
+                    // 重新初始化地面相关值
+                });
+            }
+
+            // 首次启动
+            function init() {
+                resizeCanvas();
+                initGroundY();
+
+                // 玩家初始位置
+                const baseW = Math.min(canvasWidth * 0.09, 34);
+                player.width = Math.max(baseW, 24);
+                player.height = player.width * 1.6;
+                player.x = canvasWidth * 0.2;
+                player.y = groundY - player.height;
+                player.vy = 0;
+                player.grounded = true;
+
+                // 添加一些初始障碍/手？不，开始为空
+                platforms = [];
+                chakraHands = [];
+
+                // 绘制静态画面
+                draw();
+
+                // 启动游戏循环
+                gameLoop();
+
+                // 事件
+                initEvents();
+
+                // 默认显示开始界面，gameActive = false
+                gameActive = false;
+                gameOver = false;
+            }
+
+            // 在window加载后初始化
+            window.addEventListener('load', init);
+
+            // 如果已经加载完成，直接执行
+            if (document.readyState === 'complete') {
+                init();
+            }
+        })();
+    </script>
+    <!-- 兼容性roundRect -->
+    <script>
+        (function() {
+            if (!CanvasRenderingContext2D.prototype.roundRect) {
+                CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                    if (w < 2 * r) r = w / 2;
+                    if (h < 2 * r) r = h / 2;
+                    this.moveTo(x + r, y);
+                    this.lineTo(x + w - r, y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + r);
+                    this.lineTo(x + w, y + h - r);
+                    this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                    this.lineTo(x + r, y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - r);
+                    this.lineTo(x, y + r);
+                    this.quadraticCurveTo(x, y, x + r, y);
+                    this.closePath();
+                    return this;
+                };
+            }
+        })();
+    </script>
+</body>
+</html>
